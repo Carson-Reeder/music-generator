@@ -1,7 +1,9 @@
 "use client";
 
+import React from "react";
 import { useState } from "react";
 import { getChords } from "./utils/fetchChords";
+import { useChordPlaybackStore } from "./stores/chordPlaybackStore";
 import { get } from "http";
 
 export default function MyPage() {
@@ -12,8 +14,10 @@ export default function MyPage() {
   const [chordNotes, setChordNotes] = useState<string[][]>([]);
   const [soundPlayer, setSoundPlayer] = useState<any>(null);
   const [startup, setStartup] = useState(true);
-  const [bpm, setBpm] = useState(120);
-  const [chordLength, setChordLength] = useState<any>([8,8,8,8,8,8]);
+  
+  const { bpm, setBpm, chordStartPosition, 
+    setChordStartPosition, chordLength, setChordLength, chordTimingMeasure, 
+    setChordTimingMeasure } = useChordPlaybackStore();
   
 
   const setChords = async () => {  
@@ -31,15 +35,6 @@ export default function MyPage() {
       setLoading(false);
       setSoundPlayer(await import("./utils/soundPlayer"));
     }
-  };
-
-  const handleChordLengthChange = (index: number, value: number) => {
-    // Update the chord length at the specified index
-    setChordLength((prev: any) => {
-      const updated = [...prev];
-      updated[index] = value;
-      return updated;
-    });
   };
 
   return (
@@ -87,19 +82,31 @@ export default function MyPage() {
                 <input
                   type="number"
                   value={chordLength[index] || 0} // Default to 0 if undefined
-                  onChange={(e) => handleChordLengthChange(index, parseInt(e.target.value))}
+                  onChange={(e) => setChordLength(index, parseInt(e.target.value))}
                   placeholder={`Length for Chord ${index + 1}`}
                   min="0"
                 />
+
+                {/* Input box for chord timing measure */}
+                <input
+                  type="number"
+                  value={chordTimingMeasure[index] || 0} // Default to 0 if undefined
+                  onChange={(e) => setChordTimingMeasure(index, parseInt(e.target.value))}
+                  placeholder={`Timing for Chord ${index + 1}`}
+                  min="0"
+                /> 
               </div>
             ))}
-            <button onClick={() => soundPlayer.playChordProgression(chordNotes, bpm, chordLength)}>
+            <button onClick={() => soundPlayer.playChordProgression(chordNotes, bpm, chordLength, chordTimingMeasure, chordTimingBeat)}>
               Play Chord Progression
             </button>
           </>
         ) : (
           <p>No chords to play yet.</p>
         )}
+      </div>
+      <div>
+        <h2>Drag and Drop</h2>
       </div>
     </div>
   );

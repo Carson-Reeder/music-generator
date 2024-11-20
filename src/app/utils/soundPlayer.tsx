@@ -11,7 +11,7 @@ export const playChord = async (notes: string[]) => {
   synth.triggerAttackRelease(notes, "4n");
 };
 
-export const playChordProgression = async (chordNotes: string[][], bpm: number, chordLength: number[]) => {
+export const playChordProgression = async (chordNotes: string[][], bpm: number, chordLength: number[], chordTimingMeasure: number[]) => {
   if (typeof window === "undefined") {
     console.log("test");
   }
@@ -21,7 +21,7 @@ export const playChordProgression = async (chordNotes: string[][], bpm: number, 
   Tone.Transport.cancel(); // Clear all scheduled events
   Tone.Transport.position = "0:0"; // Reset the position to the start
 
-  const progression = await createProgression(chordNotes, chordLength);
+  const progression = await createProgression(chordNotes, chordLength, chordTimingMeasure);  
 
   const part = new Tone.Part((time, chord) => {
     synth.triggerAttackRelease(chord.notes, chord.duration, time);
@@ -32,12 +32,12 @@ export const playChordProgression = async (chordNotes: string[][], bpm: number, 
 };
 
 
-const createProgression = async (chordNotes: string[][], chordLength: number[]) => {
+const createProgression = async (chordNotes: string[][], chordLength: number[], chordTimingMeasure: number[]) => {
   if (typeof window === "undefined") {
     console.log("test");
   }
   return chordNotes.map((chord: any, index: any) => ({
-    time: `${index}:0`,
+    time: `${chordTimingMeasure[index]}:0}`,
     notes: chord,
     duration: `${chordLength[index]}n`,
   }))
