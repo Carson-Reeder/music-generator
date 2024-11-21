@@ -1,12 +1,16 @@
 "use client";
 import * as Tone from "tone";
 
-const synth = new Tone.PolySynth().toDestination();
+const makeSynth = async () => {
+  const synth = new Tone.PolySynth().toDestination(); 
+  return synth;
+};
 
 export const playChord = async (notes: string[]) => {
   if (typeof window === "undefined") {
     console.log("test");
   }
+  const synth = await makeSynth();
   await Tone.start();
   synth.triggerAttackRelease(notes, "4n");
 };
@@ -15,6 +19,7 @@ export const playChordProgression = async (chordNotes: string[][], bpm: number, 
   if (typeof window === "undefined") {
     console.log("test");
   }
+  const synth = await makeSynth();
   await Tone.start(); // Ensure the audio context is running
 
   Tone.Transport.stop(); // Stop the transport if it's already running
@@ -37,7 +42,7 @@ const createProgression = async (chordNotes: string[][], chordLength: number[], 
     console.log("test");
   }
   return chordNotes.map((chord: any, index: any) => ({
-    time: `${chordTimingMeasure[index]}:0}`,
+    time: `${chordTimingMeasure[index]}:0`,
     notes: chord,
     duration: `${chordLength[index]}n`,
   }))

@@ -13,14 +13,17 @@ type ChordPlaybackStore = {
 
     chordLength: number[];
     setChordLength: (index: number, value: number) => void;
+    resetChordLength: () => void;
 
     chordTimingMeasure: number[];
     setChordTimingMeasure: (index: number, value: number) => void;
+    resetChordTimingMeasure: () => void;
+
 };
 
 export const useChordPlaybackStore = create<ChordPlaybackStore>((set) => ({
 
-    chords: [],
+    chords: [['C4','E4','G4'],['D4','F4','A4'],['G3','B3','D4','F4'],['F4','A4','C5']],
     setChords: (chords: string[][]) => set({ chords }),
 
     bpm: 120,
@@ -36,7 +39,7 @@ export const useChordPlaybackStore = create<ChordPlaybackStore>((set) => ({
 
     ),   
 
-    chordLength: [1,1,1,1,1,1],
+    chordLength: [1,1,1,1,1,1,1],
     setChordLength: (index, value) =>
         set((state) => {
             const updated = [...state.chordLength];
@@ -44,13 +47,17 @@ export const useChordPlaybackStore = create<ChordPlaybackStore>((set) => ({
             return { chordLength: updated };
         }
     ),
+    resetChordLength: () =>
+        set({ chordLength: [1,1,1,1,1,1,1]}),
 
-    chordTimingMeasure: [0,1,2,3,4,5],
+    chordTimingMeasure: [0,1,2,3,4,5,6],
     setChordTimingMeasure: (index, value) =>
         set((state) => {
-            const updated = [...state.chordLength];
+            const updated = [...state.chordTimingMeasure];
             updated[index] = value;
-            return { chordLength: updated };
+            return { chordTimingMeasure: updated };
         }
-    ),    
+    ), 
+    resetChordTimingMeasure: () => 
+        set({ chordTimingMeasure: [0,1,2,3,4,5,6]}),
 }));
