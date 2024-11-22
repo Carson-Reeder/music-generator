@@ -15,7 +15,17 @@ export const getChords = async (scale: string, threadId: any) => {
         const parsedId = data.threadId
         const parsedMessage = data.message
 
-        return {parsedChords, parsedId, parsedMessage };
+        // create Chords object
+        const transformedChords = parsedChords.map((notes: string[], index: number) => ({
+          id: `chord${index + 1}`, // Assign a unique ID
+          notes, // Assign notes directly
+          startPosition: 0, // Default start position
+          length: 1, // Default length
+          timingMeasure: index, // Default timing measure
+        }));
+        
+
+        return {transformedChords, parsedId, parsedMessage };
 
     } catch (error) {
         console.error("Error fetching response:", error);

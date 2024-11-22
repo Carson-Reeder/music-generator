@@ -19,6 +19,10 @@ export const playChordProgression = async (chordNotes: string[][], bpm: number, 
   if (typeof window === "undefined") {
     console.log("test");
   }
+  console.log('test');
+  console.log(chordNotes);
+  console.log(chordLength);
+  console.log(chordTimingMeasure);
   const synth = await makeSynth();
   await Tone.start(); // Ensure the audio context is running
 
@@ -27,7 +31,7 @@ export const playChordProgression = async (chordNotes: string[][], bpm: number, 
   Tone.Transport.position = "0:0"; // Reset the position to the start
 
   const progression = await createProgression(chordNotes, chordLength, chordTimingMeasure);  
-
+  console.log(progression);
   const part = new Tone.Part((time, chord) => {
     synth.triggerAttackRelease(chord.notes, chord.duration, time);
   }, progression).start(0);
@@ -45,5 +49,5 @@ const createProgression = async (chordNotes: string[][], chordLength: number[], 
     time: `${chordTimingMeasure[index]}:0`,
     notes: chord,
     duration: `${chordLength[index]}n`,
-  }))
+  }));
 };
