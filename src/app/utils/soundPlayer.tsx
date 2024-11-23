@@ -7,47 +7,42 @@ const makeSynth = async () => {
 };
 
 export const playChord = async (notes: string[]) => {
-  if (typeof window === "undefined") {
-    console.log("test");
-  }
+  
   const synth = await makeSynth();
   await Tone.start();
   synth.triggerAttackRelease(notes, "4n");
 };
 
-export const playChordProgression = async (chordNotes: string[][], bpm: number, chordLength: number[], chordTimingMeasure: number[]) => {
-  if (typeof window === "undefined") {
-    console.log("test");
-  }
-  console.log('test');
-  console.log(chordNotes);
-  console.log(chordLength);
-  console.log(chordTimingMeasure);
+export const playChordProgression = async (chordNotes: string[][], bpm: number, chordLength: number[], chordStartPosition: number[], chordTimingBeat: number[]) => {
+
   const synth = await makeSynth();
   await Tone.start(); // Ensure the audio context is running
 
-  Tone.Transport.stop(); // Stop the transport if it's already running
-  Tone.Transport.cancel(); // Clear all scheduled events
-  Tone.Transport.position = "0:0"; // Reset the position to the start
+  Tone.getTransport().stop(); // Stop the transport if it's already running
+  Tone.getTransport().cancel(); // Clear all scheduled events
+  Tone.getTransport().position = "0:0"; // Reset the position to the start
 
-  const progression = await createProgression(chordNotes, chordLength, chordTimingMeasure);  
+  const progression = await createProgression(chordNotes, chordLength, chordTimingBeat, chordStartPosition);  
   console.log(progression);
   const part = new Tone.Part((time, chord) => {
     synth.triggerAttackRelease(chord.notes, chord.duration, time);
   }, progression).start(0);
 
-  Tone.Transport.bpm.value = bpm; // Set tempo
-  Tone.Transport.start(); // Start the transport
+  Tone.getTransport().bpm.value = bpm; // Set tempo
+  Tone.getTransport().start(); // Start the transport
+  console.log('bpm', bpm);
+  console.log('chordNotes', chordNotes);
+  console.log('chordLength', chordLength);
+  console.log('chordStartPosition', chordStartPosition);
+  console.log('chordTimingBeat', chordTimingBeat);
 };
 
 
-const createProgression = async (chordNotes: string[][], chordLength: number[], chordTimingMeasure: number[]) => {
-  if (typeof window === "undefined") {
-    console.log("test");
-  }
+const createProgression = async (chordNotes: string[][], chordLength: number[], chordTimingBeat: number[], chordStartPosition: number[]) => {
+  
   return chordNotes.map((chord: any, index: any) => ({
-    time: `${chordTimingMeasure[index]}:0`,
+    time: `${chordStartPosition[index]}:${chordTimingBeat[index]}`,
     notes: chord,
-    duration: `${chordLength[index]}n`,
+    duration: `${chordLength[index]}m`,
   }));
 };

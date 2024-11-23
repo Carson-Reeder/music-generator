@@ -1,0 +1,8 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+/fix this ^^^^
+:root {
+    --background: black; /* Light background */
+    --foreground: #111827; /* Dark text */
+  }

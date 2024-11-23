@@ -6,7 +6,10 @@ type Chord = {
     notes: string[];
     startPosition: number;
     length: number;
-    timingMeasure: number
+    chordTimingBeat: number;
+    boxStartPosition: number;
+    boxTimingBeat: number;
+    boxLength: number;
 
 }
 
@@ -22,7 +25,7 @@ type ChordPlaybackStore = {
     setBpm: (bpm: number) => void;
 
     setChordNotes: (id: string, notes: string[]) => void;
-    setChordTiming: (id: string, timingMeasure: number) => void;
+    setChordTiming: (id: string, chordTimingBeat: number) => void;
     setChordLength: (id: string, length: number) => void;
     setChordStartPosition: (id: string, startPosition: number) => void;
 
@@ -30,10 +33,10 @@ type ChordPlaybackStore = {
 
 // define chords that appear upon page load
 const initialChords: Chord[] = [
-    { id: '1', notes: ['C4', 'E4', 'G4'], startPosition: 0, length: 1, timingMeasure: 0 },
-    { id: '2', notes: ['D4', 'F4', 'A4'], startPosition: 1, length: 1, timingMeasure: 1 },
-    { id: '3', notes: ['G3', 'B3', 'D4', 'F4'], startPosition: 2, length: 1, timingMeasure: 2 },
-    { id: '4', notes: ['F4', 'A4', 'C5'], startPosition: 3, length: 1, timingMeasure: 3 },
+    { id: '1', notes: ['C4', 'E4', 'G4'], startPosition: 0, length: 1, chordTimingBeat: 0, boxStartPosition: 0, boxTimingBeat: 0, boxLength: .25 },
+    { id: '2', notes: ['D4', 'F4', 'A4'], startPosition: 1, length: 1, chordTimingBeat: 0, boxStartPosition: 0.25, boxTimingBeat: 0, boxLength: .25 },
+    { id: '3', notes: ['G3', 'B3', 'D4', 'F4'], startPosition: 2, length: 1, chordTimingBeat: 0, boxStartPosition: 0.5, boxTimingBeat: 0, boxLength: .25 },
+    { id: '4', notes: ['F4', 'A4', 'C5'], startPosition: 3, length: 1, chordTimingBeat: 0, boxStartPosition: 0.75, boxTimingBeat: 0, boxLength: .25 },
   ];
 
 // create store
@@ -43,7 +46,7 @@ export const useChordPlaybackStore = create<ChordPlaybackStore>((set) => ({
     preprocessed: {
         notes: initialChords.map((chord) => chord.notes),
         lengths: initialChords.map((chord) => chord.length),
-        timings: initialChords.map((chord) => chord.timingMeasure),
+        beat: initialChords.map((chord) => chord.chordTimingBeat),
         position: initialChords.map((chord) => chord.startPosition),
       },
     setChords: (chords) =>
@@ -52,7 +55,7 @@ export const useChordPlaybackStore = create<ChordPlaybackStore>((set) => ({
         preprocessed: {
         notes: chords.map((chord) => chord.notes),
         lengths: chords.map((chord) => chord.length),
-        timings: chords.map((chord) => chord.timingMeasure),
+        beat: chords.map((chord) => chord.chordTimingBeat),
         position: chords.map((chord) => chord.startPosition),
         },
     }),
@@ -69,16 +72,16 @@ export const useChordPlaybackStore = create<ChordPlaybackStore>((set) => ({
             preprocessed: {
                 notes: updatedChords.map((chord) => chord.notes),
                 lengths: updatedChords.map((chord) => chord.length),
-                timings: updatedChords.map((chord) => chord.timingMeasure),
+                beat: updatedChords.map((chord) => chord.chordTimingBeat),
                 position: updatedChords.map((chord) => chord.startPosition),
             },
         };
         }),
 
-    setChordTiming: (id: string, timingMeasure: number) =>
+    setChordTiming: (id: string, chordTimingBeat: number) =>
         set((state) => {
             const updatedChords = state.chords.map((chord) =>
-                chord.id === id ? { ...chord, timingMeasure } : chord
+                chord.id === id ? { ...chord, chordTimingBeat } : chord
             );
         
             return {
@@ -86,7 +89,7 @@ export const useChordPlaybackStore = create<ChordPlaybackStore>((set) => ({
                 preprocessed: {
                     notes: updatedChords.map((chord) => chord.notes),
                     lengths: updatedChords.map((chord) => chord.length),
-                    timings: updatedChords.map((chord) => chord.timingMeasure),
+                    beat: updatedChords.map((chord) => chord.chordTimingBeat),
                     position: updatedChords.map((chord) => chord.startPosition),
                 },
             }; 
@@ -94,6 +97,9 @@ export const useChordPlaybackStore = create<ChordPlaybackStore>((set) => ({
 
     setChordLength: (id: string, length: number) =>
         set((state) => {
+            console.log('setChordLength')
+            console.log('id', id);
+            console.log('length', length);
             const updatedChords = state.chords.map((chord) =>
                 chord.id === id ? { ...chord, length } : chord
             );
@@ -103,7 +109,7 @@ export const useChordPlaybackStore = create<ChordPlaybackStore>((set) => ({
                 preprocessed: {
                     notes: updatedChords.map((chord) => chord.notes),
                     lengths: updatedChords.map((chord) => chord.length),
-                    timings: updatedChords.map((chord) => chord.timingMeasure),
+                    beat: updatedChords.map((chord) => chord.chordTimingBeat),
                     position: updatedChords.map((chord) => chord.startPosition),
                 },
             }; 
@@ -111,6 +117,8 @@ export const useChordPlaybackStore = create<ChordPlaybackStore>((set) => ({
 
         setChordStartPosition: (id: string, startPosition: number) =>
             set((state) => {
+                console.log('id', id);
+                console.log('startPosition', startPosition);
                 const updatedChords = state.chords.map((chord) =>
                     chord.id === id ? { ...chord, startPosition } : chord
                 );
@@ -120,7 +128,7 @@ export const useChordPlaybackStore = create<ChordPlaybackStore>((set) => ({
                     preprocessed: {
                         notes: updatedChords.map((chord) => chord.notes),
                         lengths: updatedChords.map((chord) => chord.length),
-                        timings: updatedChords.map((chord) => chord.timingMeasure),
+                        beat: updatedChords.map((chord) => chord.chordTimingBeat),
                         position: updatedChords.map((chord) => chord.startPosition),
                     },
                 };

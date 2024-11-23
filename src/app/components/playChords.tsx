@@ -27,44 +27,37 @@ export default function PlayChords() {
                 {chords.map((chord, index) => (
                   <div key={index}>
                     {/* Button to play the chord */}
-                    <button onClick={() => playChord(chord.notes)}>
+                    <button 
+                      className="border border-black rounded-md w-32 pl-1"
+                      onClick={() => playChord(chord.notes)}>
                       Play Chord {index + 1}
                     </button>
-    
-                    {/* Input box for chord length */}
-                    <input
-                      type="number"
-                      value={chord.length || 0} // Default to 0 if undefined
-                      onChange={(e) => handleChordLengthChange(chord.id,e.target.value)}
-                      placeholder={`Length for Chord ${index + 1}`}
-                      min="1"
-                    />
-    
-                    {/* Input box for chord timing measure */}
-                    <input
-                      type="number"
-                      value={chord.timingMeasure || 0} // Default to 0 if undefined
-                      onChange={(e) => handleChordTiming(chord.id,e.target.value)}
-                      placeholder={`Timing for Chord ${index + 1}`}
-                      min="0"
-                    /> 
                   </div>
                 ))}
-    
-                <button onClick={() => {
-                  playChordProgression(preprocessed.notes,bpm,preprocessed.lengths, preprocessed.timings)
+                <div className="flex">
+                <button 
+                  className="border border-black rounded-md max-w-32 pl-1"
+                  onClick={() => {
+                  playChordProgression(preprocessed.notes,bpm,preprocessed.lengths, preprocessed.position, preprocessed.beat);
                 }
                 }>
     
                   Play Chord Progression
                 </button>
+                <div className="pr-0 flex flex-wrap rounded-md border border-black max-w-16 bg-red-400">
+                <label className="pl-3.5">
+                  BPM
+                </label>
                 <input
+                  className="border border-black rounded-md max-w-16 p-0 pl-3.5 bg-red-340"
                   type="number"
                   value={bpm}
                   onChange={(e) => setBpm(parseInt(e.target.value))}
                   min="50"
                   max="300"
                 />
+                </div>
+                </div>
               </>
             ) : (
               <p>No chords to play yet.</p>

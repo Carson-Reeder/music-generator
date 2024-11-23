@@ -19,9 +19,12 @@ export const getChords = async (scale: string, threadId: any) => {
         const transformedChords = parsedChords.map((notes: string[], index: number) => ({
           id: `chord${index + 1}`, // Assign a unique ID
           notes, // Assign notes directly
-          startPosition: 0, // Default start position
+          startPosition: index, // Default start position
           length: 1, // Default length
-          timingMeasure: index, // Default timing measure
+          chordTimingBeat: 0, // Default timing measure
+          boxStartPosition: 1, // Default box start position
+          boxTimingBeat: 0, // Default box timing measure
+          boxLength: 0.25, // Default box length
         }));
         
 
