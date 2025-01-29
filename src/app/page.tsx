@@ -18,6 +18,7 @@ export default function MyPage() {
   
   // Zustand state
   const setChords = useChordPlaybackStore((state) => state.setChords);
+  const chords = useChordPlaybackStore((state) => state.chords);
 
   const handleChords = async () => {  
     setLoading(true);
@@ -25,7 +26,7 @@ export default function MyPage() {
     const temp = responseText;
     setResponseText(`Chords are being generated...\n\n${temp}`);
     
-    const result = await getChords(scale, threadId);
+    const result = await getChords(scale, threadId, chords);
     if (result) {
       const {transformedChords, parsedId, parsedMessage} = result;
       setChords(transformedChords);

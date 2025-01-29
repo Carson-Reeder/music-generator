@@ -3,9 +3,9 @@ import interact from "interactjs";
 import { useChordPlaybackStore } from "../stores/chordPlaybackStore";
 
 export default function Composition () {
-    const { chords, setChords, preprocessed, 
+    const { chords, setChords, 
         bpm, setBpm, setChordNotes, setChordTiming, 
-        setChordLength, setChordStartPosition, 
+        setChordLength, setChordStartPosition, setBoxStartPosition
     } = useChordPlaybackStore()
 
     /*interface Chord {
@@ -23,7 +23,7 @@ export default function Composition () {
         { id: '3', name: 'Chord 3', start: 0.75, duration: 0.25 },
     ]);*/
 
-    const measureWidth = 800; // Total measure width in pixels
+    const measureWidth = 1000; // Total measure width in pixels
     const barWidth = measureWidth / bars; // Width of each bar in pixels
 
     const updateChordPosition = (id: string, newStart: number, newDuration: number) => {
@@ -34,17 +34,24 @@ export default function Composition () {
         );
         setChords(updatedChords);
     };
+    function roundToPrecision(value: number, precision = 8) {
+        return Math.round(value * 10 ** precision) / 10 ** precision;
+    }
 
     const relativeXtoChordPosition = (id: string,relativeX: number) => {
         const barIndex = Math.floor((relativeX * bars) / measureWidth);
         const beatIndex = 4*((relativeX / (measureWidth / bars)) % 1);
         const duration = 1 / bars;
+        const boxpos = relativeX / measureWidth;
+        console.log('relativeX', relativeX);
+        console.log('realtivex/width', relativeX / measureWidth);
+        setBoxStartPosition(id, boxpos);
         setChordStartPosition(id, barIndex);
         setChordTiming(id, beatIndex);
         console.log('id',id);
         console.log('barIndex', barIndex);
         console.log('beatIndex', beatIndex);
-        console.log('preprocessed.position', preprocessed.position);
+        
         //return { start, duration };
     }
 
@@ -53,7 +60,6 @@ export default function Composition () {
         console.log('adjustedDuration', adjustedDuration);
         console.log('id', id);
         setChordLength(id, adjustedDuration);
-        console.log('preprocessed.lengths', preprocessed.lengths);
     }
 
     useEffect(() => {
@@ -66,10 +72,22 @@ export default function Composition () {
                 }),
                 interact.modifiers.snap({
                     targets: [
-                        interact.createSnapGrid({ x: barWidth/8, y: 1 }),
+                        (x, y) => {
+                            const parent = document.querySelector('.measure-container');
+                            if (!parent) {
+                                console.warn('Parent element not found');
+                                return; // Exit early if the parent is not found
+                            }
+                            const parentRect = parent.getBoundingClientRect();
+                
+                            return {
+                                x: Math.round((x - parentRect.left) / (barWidth / 8)) * (barWidth / 8) + parentRect.left,
+                                y,
+                            };
+                        },
                     ],
                     range: Infinity,
-                    relativePoints: [{ x: 0, y: 0 }],
+                    relativePoints: [{ x: 0, y: 0 }], // Ensure relative snapping within container
                 }),
             ],
             
@@ -82,8 +100,6 @@ export default function Composition () {
                     const parentRect = event.target.parentNode.getBoundingClientRect();
                     const targetRect = event.target.getBoundingClientRect();
                     const relativeX = targetRect.left - parentRect.left;
-                    console.log('relativeX', relativeX);
-                    console.log('')
                     relativeXtoChordPosition(id,relativeX);
                     //updateChordPosition(id, relativeX , event.target.offsetWidth / measureWidth);
                 }
@@ -97,9 +113,12 @@ export default function Composition () {
                     const id = target.getAttribute('data-id')!;
                     const chord = chords.find((c) => c.id === id);
                     if (!chord) return;
-
-                    const deltaX = event.deltaRect.width / measureWidth; // Fractional change
-                    const newDuration = Math.max(0.03125, chord.boxLength + deltaX);
+            
+                    // Snap the change in width to the grid
+                    const snapToGrid = barWidth / 8;
+                    const deltaX = Math.round(event.deltaRect.width / snapToGrid) * snapToGrid / measureWidth;
+            
+                    const newDuration = roundToPrecision(Math.max(0.03125, chord.boxLength + deltaX));
                     boxLengthtoChordLength(id, newDuration);
                     updateChordPosition(id, chord.boxStartPosition, newDuration);
                 },
@@ -109,10 +128,13 @@ export default function Composition () {
                     const chord = chords.find((c) => c.id === id);
                     if (!chord) return;
 
-                    const deltaX = event.deltaRect.width / measureWidth; // Fractional change
-                    const newDuration = Math.max(0.03125, chord.boxLength + deltaX);
+                    // Snap the change in width to the grid
+                    const snapToGrid = barWidth / 8;
+                    const deltaX = Math.round(event.deltaRect.width / snapToGrid) * snapToGrid / measureWidth;
+            
+                    const newDuration = roundToPrecision(Math.max(0.03125, chord.boxLength + deltaX));
                     boxLengthtoChordLength(id, newDuration);
-                }
+                },
             },
             modifiers: [
                 interact.modifiers.restrictEdges({outer: 'parent'}),
@@ -158,42 +180,52 @@ export default function Composition () {
 
             {/* Measure container */}
             <div
-                className="measure-container rounded-md"
+                className="measure-container rounded-md bg-gray-300 ml-4 mr-4 mb-6"
                 style={{
                     width: `${measureWidth}px`,
-                    height: '100px',
+                    height: '7rem',
                     position: 'relative',
-                    border: '0px solid black',
+                    outline: '0.3rem solid black',
                     display: 'flex',
-                    background: 'green',
+                    overflow: 'hidden',
+                    zIndex: 4,
                 }}
-            >
+            >   
                 {/* Render bar lines */}
-                {Array.from({ length: bars }, (_, i) => (
-                    <div
-                        key={i}
-                        style={{
-                            position: 'absolute',
-                            left: `${(i * 100) / bars}%`,
-                            top: 0,
-                            bottom: 0,
-                            width: '1px',
-                            background: '#ccc',
-                        }}
-                    />
-                ))}
+                {Array.from({ length: bars * 8 }, (_, i) => {
+                    if (i === 0) return null;
+                    const isEndOfMeasure = i % 8 === 0; // 8th line
+                    const isMiddleOfMeasure = i % 8 === 4; // 4th line
+                    const lineWidth = isEndOfMeasure ? 6 : isMiddleOfMeasure ? 2 : 1; // Set line width
+
+                    return (
+                        <div
+                            key={i}
+                            style={{
+                                position: 'absolute',
+                                left: `${(i * 100) / (bars * 8)}%`,
+                                top: 0,
+                                bottom: 0,
+                                width: `${lineWidth}px`,
+                                background: isEndOfMeasure ? '#000' : isMiddleOfMeasure ? '#4a4a4a' : '#787878',
+                                transform: 'translateX(-50%)', // Center the line
+                                zIndex: 2,
+                            }}
+                        />
+                    );
+                })}
 
                 {/* Render chords */}
                 {chords.map((chord) => (
                     <div
                         key={chord.id}
-                        className="draggable border-4 border-black rounded-md"
+                        className="draggable border-4 border-black rounded-md bg-purple-blue-gradient"
                         data-id={chord.id}
                         style={{
                             position: 'absolute',
                             left: `${chord.boxStartPosition * 100}%`,
                             width: `${chord.boxLength * 100}%`,
-                            height: '100px',
+                            height: '7rem',
                             backgroundColor: '#87ceeb',
                             border: '0px solid #000',
                             boxSizing: 'border-box',
@@ -201,16 +233,81 @@ export default function Composition () {
                             lineHeight: '100px',
                             userSelect: 'none',
                             cursor: 'move',
+                            zIndex: 3,
+                            outline: '0.1rem solid black',
                         }}
-                    >   <div>
-                        {chord.id}
-                        <p>chord position</p>
-                        {chord.boxStartPosition}
-                        <p>chord length</p>
-                        {chord.boxLength}
+                    >   
+                        <div>
+                            {chord.id}
                         </div>
                     </div>
                 ))}
+            </div>
+
+
+            {/* Measure container */}
+            <div
+                className="measure-container rounded-lg bg-gray-300 ml-4"
+                style={{
+                    width: `${measureWidth}px`,
+                    height: '7rem',
+                    position: 'relative',
+                    outline: '0.25rem solid black',
+                    display: 'flex',
+                    overflow: 'hidden',
+                    zIndex: 4,
+                }}
+            >   
+                {/* Render bar lines */}
+                {Array.from({ length: bars * 8 }, (_, i) => {
+                    if (i === 0) return null;
+                    const isEndOfMeasure = i % 8 === 0; // 8th line
+                    const isMiddleOfMeasure = i % 8 === 4; // 4th line
+                    const lineWidth = isEndOfMeasure ? 3 : isMiddleOfMeasure ? 2 : 1; // Set line width
+
+                    return (
+                        <div
+                            key={i}
+                            style={{
+                                position: 'absolute',
+                                left: `${(i * 100) / (bars * 8)}%`,
+                                top: 0,
+                                bottom: 0,
+                                width: `${lineWidth}px`,
+                                background: isEndOfMeasure ? '#000' : isMiddleOfMeasure ? '#4a4a4a' : '#787878',
+                                transform: 'translateX(-50%)', // Center the line
+                                zIndex: 2,
+                            }}
+                        />
+                    );
+                })}
+
+                {/*}
+                {chords.map((chord) => (
+                    <div
+                        key={chord.id}
+                        className="draggable border-4 border-black rounded-md bg-purple-blue-gradient"
+                        data-id={chord.id}
+                        style={{
+                            position: 'absolute',
+                            left: `${chord.boxStartPosition * 100}%`,
+                            width: `${chord.boxLength * 100}%`,
+                            height: '7rem',
+                            backgroundColor: '#87ceeb',
+                            border: '0px solid #000',
+                            boxSizing: 'border-box',
+                            textAlign: 'center',
+                            lineHeight: '100px',
+                            userSelect: 'none',
+                            cursor: 'move',
+                            zIndex: 3,
+                        }}
+                    >   
+                        <div>
+                            Chord {chord.id}
+                        </div>
+                    </div>
+                ))}*/}
             </div>
         </div>
     );

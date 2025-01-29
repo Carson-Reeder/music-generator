@@ -2,7 +2,10 @@
 import * as Tone from "tone";
 
 const makeSynth = async () => {
-  const synth = new Tone.PolySynth().toDestination(); 
+  const synth = new Tone.PolySynth(Tone.Synth, {
+    oscillator: { type: "sine" },
+    
+  }).toDestination(); 
   return synth;
 };
 
@@ -26,17 +29,11 @@ export const playChordProgression = async (chordNotes: string[][], bpm: number, 
   console.log(progression);
   const part = new Tone.Part((time, chord) => {
     synth.triggerAttackRelease(chord.notes, chord.duration, time);
-  }, progression).start(0);
+  }, progression).start(0); 
 
   Tone.getTransport().bpm.value = bpm; // Set tempo
-  Tone.getTransport().start(); // Start the transport
-  console.log('bpm', bpm);
-  console.log('chordNotes', chordNotes);
-  console.log('chordLength', chordLength);
-  console.log('chordStartPosition', chordStartPosition);
-  console.log('chordTimingBeat', chordTimingBeat);
-};
-
+  Tone.getTransport().start('+0.5'); // Start the transport
+}
 
 const createProgression = async (chordNotes: string[][], chordLength: number[], chordTimingBeat: number[], chordStartPosition: number[]) => {
   

@@ -12,6 +12,9 @@ export default {
         background: "var(--background)",
         foreground: "var(--foreground)",
       },
+      backgroundImage: {
+        'purple-blue-gradient': 'linear-gradient(to right, #6a0dad, #1e90ff)',
+      },
     },
   },
   plugins: [],

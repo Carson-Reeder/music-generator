@@ -4,20 +4,11 @@ import { playChord, playChordProgression } from '../utils/soundPlayer'
 
 export default function PlayChords() {
 
-    const { chords, setChords, preprocessed, 
+    const { chords, setChords,
         bpm, setBpm, setChordNotes, setChordTiming, 
         setChordLength, setChordStartPosition
     } = useChordPlaybackStore()
 
-    const handleChordLengthChange = (id: string, value: string) => {
-        const newValue = parseInt(value)
-        setChordLength(id,newValue);
-    }
-
-    const handleChordTiming = (id: string, value: string) => {
-        const newValue = parseInt(value)
-        setChordTiming(id,newValue)
-    }
     return (
         <div>
           <div>
@@ -28,7 +19,7 @@ export default function PlayChords() {
                   <div key={index}>
                     {/* Button to play the chord */}
                     <button 
-                      className="border border-black rounded-md w-32 pl-1"
+                      className="border-2 border-black rounded-md w-32 pl-1 bg-red-400 ml-4 mb-1"
                       onClick={() => playChord(chord.notes)}>
                       Play Chord {index + 1}
                     </button>
@@ -36,20 +27,20 @@ export default function PlayChords() {
                 ))}
                 <div className="flex">
                 <button 
-                  className="border border-black rounded-md max-w-32 pl-1"
+                  className="border-2 border-black rounded-md max-w-32 pl-1 bg-red-400 ml-4 mb-1 mr-1"
                   onClick={() => {
-                  playChordProgression(preprocessed.notes,bpm,preprocessed.lengths, preprocessed.position, preprocessed.beat);
+                  playChordProgression(chords.map((c) => c.notes),bpm,chords.map((c) => c.length), chords.map((c) => c.startPosition), chords.map((c) => c.chordTimingBeat));
                 }
                 }>
     
                   Play Chord Progression
                 </button>
-                <div className="pr-0 flex flex-wrap rounded-md border border-black max-w-16 bg-red-400">
+                <div className="pr-0 flex flex-wrap rounded-md border-2 border-black max-w-16 bg-red-400">
                 <label className="pl-3.5">
                   BPM
                 </label>
                 <input
-                  className="border border-black rounded-md max-w-16 p-0 pl-3.5 bg-red-340"
+                  className="border border-black rounded-md max-w-16 p-0 pl-3.5 bg-gray-400"
                   type="number"
                   value={bpm}
                   onChange={(e) => setBpm(parseInt(e.target.value))}
