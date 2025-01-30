@@ -75,6 +75,7 @@ export default function MyPage() {
       <h2>Drag and Drop</h2>
       <Composition />
       <FixedComposition />
+      <FixedComposition />
     </div>
     </div>
   );

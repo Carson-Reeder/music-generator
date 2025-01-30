@@ -11,38 +11,38 @@ export default function fixedComposition () {
     const [numMeasures, setNumMeasures] = useState(5);
     const [widthComposition, setWidthComposition] = useState(70);
     const [widthMeasure, setWidthMeasure] = useState(widthComposition / numMeasures);
+    const [selectedChordId, setSelectedChordId] = useState<string | null>(null); // Track last clicked chord
+    const [activeChordId, setActiveChordId] = useState<string | null>(null); // Track chord being dragged
 
-    
-    
+    const handleChordClick = (id: string) => {
+        setSelectedChordId(id); // Update selected chord
+        setActiveChordId(id);
+    };
+    const handleChordMouseUp = () => {
+        setActiveChordId(null); // Reset active chord (border returns to normal)
+    };
+
     useEffect(() => {
         setWidthMeasure(widthComposition / numMeasures);
     }, [numMeasures, widthComposition])
 
-    useEffect(() => {
-        setChords([...chords]); // Creates a new array to trigger a re-render
-    }, [numMeasures]);
-
     const pxToRem = (px: number) => px / parseFloat(getComputedStyle(document.documentElement).fontSize);
     const remToPx = (rem: number) => rem * parseFloat(getComputedStyle(document.documentElement).fontSize);
+
     const relativeXtoChordPosition = (id: string, relativeX: number) => {
         const relativeXRem = pxToRem(relativeX); // Convert px to rem
     
-        let indexMeasure = Math.floor(relativeXRem / widthMeasure);
-        let indexBeat = Math.round((4 * ((relativeXRem % widthMeasure) / widthMeasure)) * 2) / 2;
+        let indexMeasureRaw = relativeXRem / widthMeasure;
+        let indexMeasure = Math.floor(indexMeasureRaw);
+        let indexBeatRaw = (4 * ((relativeXRem % widthMeasure) / widthMeasure));
+        let indexBeat = Math.round((indexBeatRaw) * 2) / 2;
     
-        // ✅ Ensure `indexBeat` stays within range
         if (indexBeat >= 4) {
             indexBeat = 0;
-            indexMeasure += 1; // Move to next measure
         }
     
-        console.log('startpos:', indexMeasure, 'timingbeat:', indexBeat);
-    
-        flushSync(() => { 
-            setChordStartPosition(id, indexMeasure);
-            setChordTiming(id, indexBeat);
-        }); 
-        console.log(chords);
+        setChordStartPosition(id, indexMeasure);
+        setChordTiming(id, indexBeat);
     }
  
     useEffect(() => {
@@ -53,7 +53,7 @@ export default function fixedComposition () {
                         restriction: 'parent',
                         endOnly: true,
                     }),
-                    /*interact.modifiers.snap({
+                    interact.modifiers.snap({
                         targets: [
                             (x,y) => {
                                 const parent = document.querySelector('.measure-container');
@@ -68,10 +68,8 @@ export default function fixedComposition () {
                         ],
                         range: Infinity,
                         relativePoints: [{ x: 0, y: 0 }], // Ensure relative snapping within container
-                    
-                    }), */
-                ],
-                    
+                    }), 
+                ],   
                 listeners: {
                     move: dragMoveListener,
 
@@ -80,22 +78,17 @@ export default function fixedComposition () {
                         const parentRect = event.target.parentNode.getBoundingClientRect();
                         const targetRect = event.target.getBoundingClientRect();
                         const relativeX = targetRect.left - parentRect.left;
-                        console.log(relativeX);
+                        
                         relativeXtoChordPosition(id,relativeX);
 
                         event.target.style.transform = "none";
                         event.target.setAttribute("data-x", "0");
                         event.target.setAttribute("data-y", "0");
-
                     }
-
-
                 },
             })
-
     }, [chords, widthMeasure])
     
-
     function dragMoveListener (event: any) {
     var target = event.target;
     // keep the dragged position in the data-x/data-y attributes
@@ -109,6 +102,7 @@ export default function fixedComposition () {
     target.setAttribute('data-x', x);
     target.setAttribute('data-y', y);
     }
+    
     return (
         <div>
             <div style={{ marginBottom: '20px' }}>
@@ -173,21 +167,27 @@ export default function fixedComposition () {
                 {chords.map((chord) => (
                     <div
                         key={chord.id}
-                        className="draggable border-4 border-black rounded-md bg-purple-blue-gradient"
+                        className="draggable rounded-md bg-purple-blue-gradient"
                         data-id={chord.id}
+                        onMouseDown={() => handleChordClick(chord.id)}
+                        onMouseUp={handleChordMouseUp}
                         style={{
                             position: 'absolute',
                             left: `${((chord.startPosition * widthMeasure) + ((chord.chordTimingBeat/4)*widthMeasure))}rem`,
                             width: `${(chord.length * widthMeasure)}rem`,
                             height: '7rem',
-                            backgroundColor: '#87ceeb',
-                            border: '0px solid #000',
+                            //border: activeChordId === chord.id ? '.2rem solid black' : '.1rem solid black', // ✅ Thicker border only while dragging
+                            border: '.125rem solid black',
+                            boxShadow: activeChordId === chord.id 
+                                ? '0rem 0rem .6rem .2rem black' // ✅ Nice elevated shadow when active
+                                : 'none', // ✅ No shadow when not active
                             boxSizing: 'border-box',
                             textAlign: 'center',
                             lineHeight: '100px',
                             userSelect: 'none',
                             cursor: 'move',
-                            zIndex: 3,
+                            opacity: activeChordId ? (activeChordId === chord.id ? 0.94 : 0.9) : 1, // ✅ Dim inactive chords only when one is selected
+                            zIndex: selectedChordId === chord.id ? 4 : 3,
                             outline: '0.1rem solid black',
                         }}
                     >   
