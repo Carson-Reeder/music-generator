@@ -61,7 +61,7 @@ export default function Composition () {
         console.log('id', id);
         setChordLength(id, adjustedDuration);
     }
-
+/*
     useEffect(() => {
     interact('.draggable')
         .draggable({
@@ -148,6 +148,7 @@ export default function Composition () {
             ],
         });
     }, [chords] [bars]);
+    */
 
     function dragMoveListener (event: any) {
     var target = event.target;

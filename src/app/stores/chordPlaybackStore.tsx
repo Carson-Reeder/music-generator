@@ -11,7 +11,6 @@ type Chord = {
     boxTimingBeat: number;
     boxLength: number;
     newBoxStartPosition: number;
-
 }
 
 // define variables and functions of store
@@ -20,7 +19,6 @@ type ChordPlaybackStore = {
     // chords contains array of Chord objects
     chords: Chord[];
     setChords: (chords: Chord[]) => void;
-    preprocessed: any;
 
     bpm: number;
     setBpm: (bpm: number) => void;
@@ -45,12 +43,11 @@ const initialChords: Chord[] = [
 export const useChordPlaybackStore = create<ChordPlaybackStore>((set) => ({
 
     chords: initialChords,
-    preprocessed: null,
     setChords: (chords) =>
     set({
-        chords,
-        
+        chords,   
     }),
+
     bpm: 120,
     setBpm: (bpm: number) => set({ bpm }),
 
@@ -61,67 +58,49 @@ export const useChordPlaybackStore = create<ChordPlaybackStore>((set) => ({
                 ? { ...chord, notes } 
                 : chord
             );
-
-        return {
-            chords: updatedChords,
-            
-        };
+            return {
+                chords: updatedChords,
+            };
         }),
 
     setChordTiming: (id: string, chordTimingBeat: number) =>
         set((state) => {
             const updatedChords = state.chords.map((chord) =>
-                chord.id === id ? { ...chord, chordTimingBeat } : chord,
-                console.log('setChordTiming', chordTimingBeat)
+                chord.id === id ? { ...chord, chordTimingBeat } : chord
             );
-            
-        
             return {
                 chords: updatedChords,
-                
             }; 
         }),
 
     setChordLength: (id: string, length: number) =>
         set((state) => {
-            console.log('setChordLength')
-            console.log('id', id);
-            console.log('length', length);
             const updatedChords = state.chords.map((chord) =>
                 chord.id === id ? { ...chord, length } : chord
             );
-        
             return {
-                chords: updatedChords,
-                
+                chords: updatedChords, 
             }; 
         }),
 
-        setChordStartPosition: (id: string, startPosition: number) =>
-            set((state) => {
-                console.log('id', id);
-                console.log('startPosition', startPosition);
-                const updatedChords = state.chords.map((chord) =>
-                    chord.id === id ? { ...chord, startPosition } : chord
-                );
+    setChordStartPosition: (id: string, startPosition: number) =>
+        set((state) => {
+            const updatedChords = state.chords.map((chord) =>
+                chord.id === id ? { ...chord, startPosition } : chord
+            );
+            return {
+                chords: updatedChords,     
+            };
+        }),
+    
+    setBoxStartPosition: (id: string, newBoxStartPosition: number) =>
+        set((state) => {
+            const updatedChords = state.chords.map((chord) =>
+                chord.id === id ? { ...chord, newBoxStartPosition } : chord
+            );
+            return {
+                chords: updatedChords,  
+            };
+        }),
         
-                return {
-                    chords: updatedChords,
-                    
-                };
-            }),
-
-        setBoxStartPosition: (id: string, newBoxStartPosition: number) =>
-            set((state) => {
-                console.log('id', id);
-                console.log('boxStartPosition', newBoxStartPosition);
-                const updatedChords = state.chords.map((chord) =>
-                    chord.id === id ? { ...chord, newBoxStartPosition } : chord
-                );
-        
-                return {
-                    chords: updatedChords,
-                    
-                };
-            }),
 }));
