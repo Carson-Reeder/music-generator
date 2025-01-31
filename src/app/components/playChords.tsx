@@ -1,3 +1,4 @@
+"use client";
 import React from 'react'
 import { useChordPlaybackStore } from '../stores/chordPlaybackStore'
 import { playChord, playChordProgression } from '../utils/soundPlayer'

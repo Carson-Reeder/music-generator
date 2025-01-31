@@ -3,7 +3,6 @@
 import React from "react";
 import { useState } from "react";
 import '../../globals.css';
-import Composition from "./components/composition";
 import FixedComposition from "./components/fixedcomposition";
 import PlayChord from "./components/playChords";
 import { getChords } from "./utils/fetchChords";
@@ -73,7 +72,6 @@ export default function MyPage() {
     </div>
     <div>
       <h2>Drag and Drop</h2>
-      <Composition />
       <FixedComposition />
       <FixedComposition />
     </div>

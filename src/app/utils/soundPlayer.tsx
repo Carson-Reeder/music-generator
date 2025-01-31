@@ -23,16 +23,18 @@ export const playChordProgression = async (chordNotes: string[][], bpm: number, 
 
   Tone.getTransport().stop(); // Stop the transport if it's already running
   Tone.getTransport().cancel(); // Clear all scheduled events
-  Tone.getTransport().position = "0:0"; // Reset the position to the start
+  //Tone.getTransport().position = "0:0"; // Reset the position to the start
 
   const progression = await createProgression(chordNotes, chordLength, chordTimingBeat, chordStartPosition);  
   console.log(progression);
   const part = new Tone.Part((time, chord) => {
     synth.triggerAttackRelease(chord.notes, chord.duration, time);
-  }, progression).start(0); 
-
+  }, progression).start(); 
+  console.log(chordStartPosition);
+  console.log(chordLength);
+  console.log(chordTimingBeat);
   Tone.getTransport().bpm.value = bpm; // Set tempo
-  Tone.getTransport().start('+0.5'); // Start the transport
+  Tone.getTransport().toggle(); // Start the transport
 }
 
 const createProgression = async (chordNotes: string[][], chordLength: number[], chordTimingBeat: number[], chordStartPosition: number[]) => {

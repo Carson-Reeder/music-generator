@@ -1,3 +1,4 @@
+"use client";
 import React, { useState, useEffect, use } from 'react';
 import interact from "interactjs";
 import { useChordPlaybackStore } from "../stores/chordPlaybackStore";
@@ -5,7 +6,7 @@ import { flushSync } from 'react-dom';
 export default function fixedComposition () {
     const { chords, setChords, 
             bpm, setBpm, setChordNotes, setChordTiming, 
-            setChordLength, setChordStartPosition, setBoxStartPosition
+            setChordLength, setChordStartPosition
         } = useChordPlaybackStore()
 
     const [numMeasures, setNumMeasures] = useState(5);
@@ -21,6 +22,9 @@ export default function fixedComposition () {
     const handleChordMouseUp = () => {
         setActiveChordId(null); // Reset active chord (border returns to normal)
     };
+    function roundToPrecision(value: number, precision = 8) {
+        return Math.round(value * 10 ** precision) / 10 ** precision;
+    }
 
     useEffect(() => {
         setWidthMeasure(widthComposition / numMeasures);
@@ -37,10 +41,11 @@ export default function fixedComposition () {
         let indexBeatRaw = (4 * ((relativeXRem % widthMeasure) / widthMeasure));
         let indexBeat = Math.round((indexBeatRaw) * 2) / 2;
     
-        if (indexBeat >= 4) {
-            indexBeat = 0;
-        }
-    
+        //if (indexBeat >= 4) {
+        //    indexBeat = 0;
+        //}
+        console.log('indexMeasure', indexMeasure);
+        console.log('indexBeat', indexBeat);
         setChordStartPosition(id, indexMeasure);
         setChordTiming(id, indexBeat);
     }
@@ -87,6 +92,34 @@ export default function fixedComposition () {
                     }
                 },
             })
+            .resizable({
+                edges: { right: true },
+                listeners: {
+                    move(event) {
+                        const target = event.target;
+                        const id = target.getAttribute('data-id');
+                        const chord = chords.find((chord) => chord.id === id);
+                        if(!chord) return;
+
+                        const remWidth = pxToRem(event.rect.width);
+                        const newLength = Math.round(remWidth / widthMeasure * 8) /8
+                        console.log('newLength', newLength);
+                        setChordLength(id, newLength);
+                        
+                    },
+                    end(event) {
+                        const target = event.target;
+                        const id = target.getAttribute('data-id');
+                        const chord = chords.find((chord) => chord.id === id);
+                        if (!chord) return;
+
+                        const remWidth = pxToRem(event.rect.width);
+                        const newLength = Math.round(remWidth / widthMeasure *8) / 8
+                        console.log('width', event.rect.width);
+                        setChordLength(id, newLength);
+                    }
+                },
+            });
     }, [chords, widthMeasure])
     
     function dragMoveListener (event: any) {
@@ -176,17 +209,16 @@ export default function fixedComposition () {
                             left: `${((chord.startPosition * widthMeasure) + ((chord.chordTimingBeat/4)*widthMeasure))}rem`,
                             width: `${(chord.length * widthMeasure)}rem`,
                             height: '7rem',
-                            //border: activeChordId === chord.id ? '.2rem solid black' : '.1rem solid black', // ✅ Thicker border only while dragging
                             border: '.125rem solid black',
                             boxShadow: activeChordId === chord.id 
-                                ? '0rem 0rem .6rem .2rem black' // ✅ Nice elevated shadow when active
-                                : 'none', // ✅ No shadow when not active
+                                ? '0rem 0rem .6rem .2rem black' 
+                                : 'none', 
                             boxSizing: 'border-box',
                             textAlign: 'center',
                             lineHeight: '100px',
                             userSelect: 'none',
                             cursor: 'move',
-                            opacity: activeChordId ? (activeChordId === chord.id ? 0.94 : 0.9) : 1, // ✅ Dim inactive chords only when one is selected
+                            opacity: activeChordId ? (activeChordId === chord.id ? 0.94 : 0.9) : 1, 
                             zIndex: selectedChordId === chord.id ? 4 : 3,
                             outline: '0.1rem solid black',
                         }}
