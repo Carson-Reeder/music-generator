@@ -1,13 +1,20 @@
 "use client";
 import React, { useState, useEffect, use } from 'react';
 import interact from "interactjs";
-import { useChordPlaybackStore } from "../stores/chordPlaybackStore";
+import { UseBoundStore, StoreApi } from 'zustand';
+import { ChordPlaybackStore } from "../stores/chordPlaybackStore";
 import { flushSync } from 'react-dom';
-export default function fixedComposition () {
+
+type FixedCompositionProps = {
+    useStore: UseBoundStore<StoreApi<ChordPlaybackStore>>; // Store instance
+    compositionId: number; // Composition ID
+  };
+
+export default function fixedComposition ({useStore, compositionId}: FixedCompositionProps) {
     const { chords, setChords, 
             bpm, setBpm, setChordNotes, setChordTiming, 
             setChordLength, setChordStartPosition
-        } = useChordPlaybackStore()
+        } = useStore();
 
     const [numMeasures, setNumMeasures] = useState(5);
     const [widthComposition, setWidthComposition] = useState(70);
@@ -35,6 +42,7 @@ export default function fixedComposition () {
 
     const relativeXtoChordPosition = (id: string, relativeX: number) => {
         const relativeXRem = pxToRem(relativeX); // Convert px to rem
+        const store = useStore.getState();
     
         let indexMeasureRaw = relativeXRem / widthMeasure;
         let indexMeasure = Math.floor(indexMeasureRaw);
@@ -46,81 +54,76 @@ export default function fixedComposition () {
         //}
         console.log('indexMeasure', indexMeasure);
         console.log('indexBeat', indexBeat);
-        setChordStartPosition(id, indexMeasure);
-        setChordTiming(id, indexBeat);
+        //setChordStartPosition(id, indexMeasure);
+        //setChordTiming(id, indexBeat);
+        store.setChordStartPosition(id, indexMeasure);
+        store.setChordTiming(id, indexBeat);
     }
  
     useEffect(() => {
-        interact('.draggable')
-            .draggable({
-                modifiers: [
-                    interact.modifiers.restrictRect({
-                        restriction: 'parent',
-                        endOnly: true,
-                    }),
-                    interact.modifiers.snap({
-                        targets: [
-                            (x,y) => {
-                                const parent = document.querySelector('.measure-container');
-                                if (!parent) return { x: 0, y: 0 };
-                                const parentRect = parent.getBoundingClientRect();
-
-                                return {
-                                    x: Math.round((x - parentRect.left) / (remToPx(widthMeasure) / 8)) * (remToPx(widthMeasure) / 8) + parentRect.left,
-                                    y,
-                                };
-                            },
-                        ],
-                        range: Infinity,
-                        relativePoints: [{ x: 0, y: 0 }], // Ensure relative snapping within container
-                    }), 
-                ],   
-                listeners: {
-                    move: dragMoveListener,
-
-                    end(event) {
-                        const id = event.target.getAttribute('data-id');
-                        const parentRect = event.target.parentNode.getBoundingClientRect();
-                        const targetRect = event.target.getBoundingClientRect();
-                        const relativeX = targetRect.left - parentRect.left;
-                        
-                        relativeXtoChordPosition(id,relativeX);
-
-                        event.target.style.transform = "none";
-                        event.target.setAttribute("data-x", "0");
-                        event.target.setAttribute("data-y", "0");
-                    }
-                },
-            })
-            .resizable({
-                edges: { right: true },
-                listeners: {
-                    move(event) {
-                        const target = event.target;
-                        const id = target.getAttribute('data-id');
-                        const chord = chords.find((chord) => chord.id === id);
-                        if(!chord) return;
-
-                        const remWidth = pxToRem(event.rect.width);
-                        const newLength = Math.round(remWidth / widthMeasure * 8) /8
-                        console.log('newLength', newLength);
-                        setChordLength(id, newLength);
-                        
-                    },
-                    end(event) {
-                        const target = event.target;
-                        const id = target.getAttribute('data-id');
-                        const chord = chords.find((chord) => chord.id === id);
-                        if (!chord) return;
-
-                        const remWidth = pxToRem(event.rect.width);
-                        const newLength = Math.round(remWidth / widthMeasure *8) / 8
-                        console.log('width', event.rect.width);
-                        setChordLength(id, newLength);
-                    }
-                },
-            });
-    }, [chords, widthMeasure])
+        // Use a unique selector for this composition by including the compositionId
+        interact(`.draggable-${compositionId}`)
+          .draggable({
+            modifiers: [
+              interact.modifiers.restrictRect({
+                restriction: 'parent',
+                endOnly: true,
+              }),
+              interact.modifiers.snap({
+                targets: [
+                  (x, y) => {
+                    const parent = document.querySelector('.measure-container');
+                    if (!parent) return { x: 0, y: 0 };
+                    const parentRect = parent.getBoundingClientRect();
+                    return {
+                      x: Math.round((x - parentRect.left) / (remToPx(widthMeasure) / 8)) * (remToPx(widthMeasure) / 8) + parentRect.left,
+                      y,
+                    };
+                  },
+                ],
+                range: Infinity,
+                relativePoints: [{ x: 0, y: 0 }],
+              }),
+            ],
+            listeners: {
+              move: dragMoveListener,
+              end(event) {
+                const id = event.target.getAttribute('data-id');
+                const parentRect = event.target.parentNode.getBoundingClientRect();
+                const targetRect = event.target.getBoundingClientRect();
+                const relativeX = targetRect.left - parentRect.left;
+                relativeXtoChordPosition(id, relativeX);
+      
+                event.target.style.transform = "none";
+                event.target.setAttribute("data-x", "0");
+                event.target.setAttribute("data-y", "0");
+              }
+            },
+          })
+          .resizable({
+            edges: { right: true },
+            listeners: {
+              move(event) {
+                const id = event.target.getAttribute('data-id');
+                const chord = chords.find((chord) => chord.id === id);
+                if (!chord) return;
+      
+                const remWidth = pxToRem(event.rect.width);
+                const newLength = Math.round(remWidth / widthMeasure * 8) / 8;
+                setChordLength(id, newLength);
+              },
+              end(event) {
+                const id = event.target.getAttribute('data-id');
+                const chord = chords.find((chord) => chord.id === id);
+                if (!chord) return;
+      
+                const remWidth = pxToRem(event.rect.width);
+                const newLength = Math.round(remWidth / widthMeasure * 8) / 8;
+                setChordLength(id, newLength);
+              }
+            },
+          });
+      }, [chords, widthMeasure, compositionId]);
     
     function dragMoveListener (event: any) {
     var target = event.target;
@@ -170,7 +173,7 @@ export default function fixedComposition () {
                 position: 'relative',
                 outline: '0.3rem solid black',
                 display: 'flex',
-                overflow: 'hidden',
+                //overflow: 'hidden',
                 zIndex: 4,
             }}
         >
@@ -200,7 +203,7 @@ export default function fixedComposition () {
                 {chords.map((chord) => (
                     <div
                         key={chord.id}
-                        className="draggable rounded-md bg-purple-blue-gradient"
+                        className={`draggable draggable-${compositionId} rounded-md bg-purple-blue-gradient`}
                         data-id={chord.id}
                         onMouseDown={() => handleChordClick(chord.id)}
                         onMouseUp={handleChordMouseUp}

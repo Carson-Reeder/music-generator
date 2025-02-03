@@ -10,7 +10,7 @@ type Chord = {
 }
 
 // define variables and functions of store
-type ChordPlaybackStore = {
+export type ChordPlaybackStore = {
 
     // chords contains array of Chord objects
     chords: Chord[];
@@ -29,12 +29,11 @@ type ChordPlaybackStore = {
 const initialChords: Chord[] = [
     { id: '1', notes: ['C4', 'E4', 'G4'], startPosition: 0, length: 1, chordTimingBeat: 0},
     { id: '2', notes: ['D4', 'F4', 'A4'], startPosition: 1, length: 1, chordTimingBeat: 0},
-    { id: '3', notes: ['G3', 'B3', 'D4', 'F4'], startPosition: 2, length: 1, chordTimingBeat: 0},
-    { id: '4', notes: ['F4', 'A4', 'C5'], startPosition: 3, length: 1, chordTimingBeat: 0},
+    { id: '3', notes: ['G3', 'B3', 'D4'], startPosition: 2, length: .75, chordTimingBeat: 0},
+    { id: '4', notes: ['F4', 'A4', 'C5'], startPosition: 2, length: 1, chordTimingBeat: 3},
   ];
 // create store
-export const useChordPlaybackStore = create<ChordPlaybackStore>((set) => ({
-
+export const createChordPlaybackStore = () => {return create<ChordPlaybackStore>((set) => ({
     chords: initialChords,
     setChords: (chords) =>
     set({
@@ -86,4 +85,4 @@ export const useChordPlaybackStore = create<ChordPlaybackStore>((set) => ({
             };
         }),
         
-}));
+}));};
