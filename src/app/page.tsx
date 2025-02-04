@@ -1,20 +1,20 @@
 "use client";
-
 import React, { useState } from "react";
 import '../../globals.css';
 import FixedComposition from "./components/fixedcomposition";
+import Arrangement from "./components/arrangement";
 import PlayChord from "./components/playChords";
 import { getChords } from "./utils/fetchChords";
 import { createChordPlaybackStore } from "./stores/chordPlaybackStore";
 import { playChord, playChordProgression } from "./utils/soundPlayer";
+import { createArrangementStore } from "./stores/ArrangementStore";
 
 export default function MyPage() {
   const [scale, setScale] = useState("C major 4");
   const [responseText, setResponseText] = useState("Chord 1: C4, E4, G4 (C major)\nChord 2: D4, F4, A4 (D minor)\nChord 3: G3, B3, D4, F4 (G7)\nChord 4: F4, A4, C5 (F major)");
   const [loading, setLoading] = useState(false);
   const [threadId, setThreadId] = useState<string | null>(null);
-
-  // Stores multiple independent compositions
+  const [chordSelected, setChordSelected] = useState<number>(1);
   const [stores, setStores] = useState<{ id: number; store: ReturnType<typeof createChordPlaybackStore> }[]>([
     { id: 1, store: createChordPlaybackStore() }
   ]);
@@ -22,16 +22,15 @@ export default function MyPage() {
   // Handles updating chords in the first store
   const handleChords = async () => {  
     setLoading(true);
-    
-    const temp = responseText;
-    setResponseText(`Chords are being generated...\n\n${temp}`);
+    setResponseText(`Chords are being generated...\n\n${responseText}`);
 
-    const result = await getChords(scale, threadId, stores[0].store.getState().chords); // Use first store
+    // call api, passing in scale, threadId, and chords derived from current store
+    const result = await getChords(scale, threadId, stores[(chordSelected)-1].store.getState().chords); 
     if (result) {
       const { transformedChords, parsedId, parsedMessage } = result;
 
       // Update chords in the first composition
-      stores[0].store.setState({ chords: transformedChords });
+      stores[(chordSelected)-1].store.setState({ chords: transformedChords });
 
       setThreadId(parsedId);
       setResponseText(parsedMessage);
@@ -70,6 +69,16 @@ export default function MyPage() {
             {loading ? "Generating Chords..." : "Generate Chords"}
           </button>
         </div>
+        <div style={{ marginBottom: '20px' }}>
+                <label>Composition to generate: </label>
+                <input
+                    type="number"
+                    value={chordSelected}
+                    onChange={(e) => {
+                        setChordSelected(e.target.valueAsNumber);
+                    }}
+                />
+            </div>
       </div>
 
       {/* Chords Display */}
@@ -83,16 +92,16 @@ export default function MyPage() {
       </div>
 
       {/* Play Chords */}
-      <div>
+      {/*<div>
         <h2>Play Chords</h2>
         
         {stores.map(({ id, store }) => (
           <PlayChord key={id} useStore={store} compositionId={id} />
         ))} 
-      </div>
+      </div> /*}
 
       {/* Fixed Composition Drag & Drop */}
-      <div>
+      {/*<div>
         <h2>Drag and Drop</h2>
         <div>
           <h1>Multiple Compositions</h1>
@@ -103,8 +112,9 @@ export default function MyPage() {
             </div>
           ))}
           <button onClick={addComposition}>Add New Composition</button>
-        </div>
-      </div>
+        </div> 
+      </div> */}
+      <Arrangement useStore={createArrangementStore()} arrangementId={1} />
     </div>
   );
 }

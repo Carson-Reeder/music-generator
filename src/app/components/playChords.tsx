@@ -15,15 +15,17 @@ export default function PlayChords({ useStore, compositionId }: PlayChordsProps)
   const { chords, bpm, setBpm } = useStore();
 
   return (
-    <div>
+    <div className='ml-6'>
       <h2>Play Chords (Composition {compositionId}):</h2>
+      <div className="flex">
       {chords.length > 0 ? (
         <>
           {chords.map((chord, index) => (
             <div key={index}>
               {/* Button to play the chord */}
               <button
-                className="play-button border-2 border-black rounded-md w-32 pl-1 bg-red-400 ml-4 mb-1"
+                className="play-button border-2 border-black rounded-md w-32 pl-1 ml-4"
+                style={{ backgroundColor: "rgba(4, 150, 94, 0.4)" }}
                 onClick={() => playChord(chord.notes)}
               >
                 Play Chord {index + 1}
@@ -32,9 +34,10 @@ export default function PlayChords({ useStore, compositionId }: PlayChordsProps)
           ))}
 
           {/* Play Chord Progression */}
-          <div className="flex">
+          <div>
             <button
-              className="play-button border-2 border-black rounded-md max-w-32 pl-1 bg-red-400 ml-4 mb-1 mr-1"
+              className="play-button border-2 border-black rounded-md max-w-32 pl-1 ml-4"
+              style={{ backgroundColor: "rgba(4, 150, 94, 0.4)" }}
               onClick={() =>
                 playChordProgression(
                   chords.map((c) => c.notes),
@@ -47,9 +50,11 @@ export default function PlayChords({ useStore, compositionId }: PlayChordsProps)
             >
               Play Chord Progression
             </button>
+            </div>
 
             {/* BPM Control */}
-            <div className="pr-0 flex flex-wrap rounded-md border-2 border-black max-w-16 bg-red-400">
+            <div className="ml-4 pl-1">
+            <div className="pr-0 flex flex-wrap rounded-md border-2 border-black max-w-16" style={{ backgroundColor: "rgba(4, 150, 94, 0.4)" }}>
               <label className="pl-3.5">BPM</label>
               <input
                 className="border border-black rounded-md max-w-16 p-0 pl-3.5 bg-gray-400"
@@ -60,11 +65,13 @@ export default function PlayChords({ useStore, compositionId }: PlayChordsProps)
                 max="300"
               />
             </div>
-          </div>
+            </div>
+          
         </>
       ) : (
         <p>No chords to play yet.</p>
       )}
+      </div>
     </div>
   );
 }

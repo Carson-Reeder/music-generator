@@ -1,9 +1,11 @@
 "use client";
 import * as Tone from "tone";
+let activeSynths: { synth: Tone.PolySynth, notes: string[] }[] = [];
 
 const makeSynth = async () => {
   const synth = new Tone.PolySynth(Tone.Synth, {
     oscillator: { type: "sine" },
+    envelope: { release: 0.5 },
     
     
   }).toDestination(); 
@@ -11,14 +13,23 @@ const makeSynth = async () => {
 };
 
 export const playChord = async (notes: string[]) => {
-  
-  const synth = await makeSynth();
-  await Tone.start();
+  // Stop any currently playing notes
+  activeSynths.forEach(({ synth, notes }) => synth.triggerRelease(notes));  // Stop all active synths
+  activeSynths = [];  // Reset the array of active synths
+
+  const synth = await makeSynth(); // Create a new synth
+  await Tone.start(); // Start the Tone.js context if not already started
+
+  // Trigger the new chord
   synth.triggerAttackRelease(notes, "4n");
+
+  // Store the new synth in the activeSynths array
+  activeSynths.push({ synth, notes });
 };
 
 export const playChordProgression = async (chordNotes: string[][], bpm: number, chordLength: number[], chordStartPosition: number[], chordTimingBeat: number[]) => {
-
+  activeSynths.forEach(({ synth, notes }) => synth.triggerRelease(notes));  // Stop all active synths
+  activeSynths = [];  // Reset the array of active synths
   const synth = await makeSynth();
   //await Tone.start(); // Ensure the audio context is running
 

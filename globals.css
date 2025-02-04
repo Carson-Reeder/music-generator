@@ -1,8 +1,20 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-/fix this ^^^^
+
 :root {
     --background: black; /* Light background */
     --foreground: #111827; /* Dark text */
   }
+
+/* Remove spinner controls in Chrome, Safari, Edge, Opera */
+input::-webkit-inner-spin-button,
+input::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* Remove spinner controls in Firefox */
+input[type="number"] {
+  -moz-appearance: textfield;
+}
