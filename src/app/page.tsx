@@ -1,9 +1,9 @@
 "use client";
 import React, { useState } from "react";
 import '../../globals.css';
-import FixedComposition from "./components/fixedcomposition";
-import Arrangement from "./components/arrangement";
-import PlayChord from "./components/playChords";
+import FixedComposition from "./components/Composition";
+import Arrangement from "./components/Arrangement";
+import PlayChord from "./components/PlayChords";
 import { getChords } from "./utils/fetchChords";
 import { createChordPlaybackStore } from "./stores/chordPlaybackStore";
 import { playChord, playChordProgression } from "./utils/soundPlayer";
@@ -38,21 +38,17 @@ export default function MyPage() {
     }
   };
 
-  // Adds a new independent composition with its own Zustand store
-  const addComposition = () => {
-    setStores([...stores, { id: stores.length + 1, store: createChordPlaybackStore() }]);
-  };
-
-  // Removes a composition
-  const removeComposition = (id: number) => {
-    setStores(stores.filter((comp) => comp.id !== id));
-  };
-
   return (
     <div>
       {/* Header */}
-      <div id="header" className="bg-blue-500 text-red border border-red h-32 flex flex-col sm:flex-row">
-        <h1>OpenAI Chord Generator</h1>
+      <div id="header" className="border items-center border-black rounded-lg h-32 flex flex-col sm:flex-row" 
+      style={{ backgroundColor: "rgba(78, 155, 122, 0.98)" }}>
+        <h1 className='m-4 p-2 border border-black rounded-md'
+        style={{
+          backgroundColor: "rgba(191, 232, 217, 0.4)"
+        }}>
+        OpenAI Chord Generator</h1>
+        {/* Chord Input */}
         <div id="chord-input">
           <textarea
             className="m-3 pl-2 pt-1.5 h-10 rounded-md block w-full sm:w-1/2 bg-white-500 p-4"
@@ -61,59 +57,39 @@ export default function MyPage() {
             placeholder="Enter the scale here"
             rows={2}
             cols={50}
+            style={{
+              backgroundColor: "rgba(191, 232, 217, 0.4)"
+             }}
           />
         </div>
+        {/* Generate Chords */}
         <div>
           <button className="border border-black rounded-md m-3 mt-0 max-w-md sm:w-1/2 bg-green-500 p-4"
             onClick={handleChords} disabled={loading}>
             {loading ? "Generating Chords..." : "Generate Chords"}
           </button>
         </div>
-        <div style={{ marginBottom: '20px' }}>
-                <label>Composition to generate: </label>
-                <input
-                    type="number"
-                    value={chordSelected}
-                    onChange={(e) => {
-                        setChordSelected(e.target.valueAsNumber);
-                    }}
-                />
-            </div>
-      </div>
-
-      {/* Chords Display */}
-      <div>
-        <h2>View Chords:</h2>
+        {/* Chord Selection (chord to generate) */}
         <div>
+          <label>Composition to generate: </label>
+            <input
+              type="number"
+              value={chordSelected}
+              onChange={(e) => {
+              setChordSelected(e.target.valueAsNumber);
+              }}
+              />
+        </div>
+      </div>
+      {/* Chords Display */}
+      <div className='ml-6'>
+        <h2>View Chords:</h2>
+        <div className='ml-4'>
           {responseText && (
             <pre>{typeof responseText === "string" ? responseText : JSON.stringify(responseText, null, 2)}</pre>
           )}
         </div>
       </div>
-
-      {/* Play Chords */}
-      {/*<div>
-        <h2>Play Chords</h2>
-        
-        {stores.map(({ id, store }) => (
-          <PlayChord key={id} useStore={store} compositionId={id} />
-        ))} 
-      </div> /*}
-
-      {/* Fixed Composition Drag & Drop */}
-      {/*<div>
-        <h2>Drag and Drop</h2>
-        <div>
-          <h1>Multiple Compositions</h1>
-          {stores.map(({ id, store }) => (
-            <div key={id} style={{ border: "1px solid black", margin: "10px", padding: "10px" }}>
-              <FixedComposition useStore={store} compositionId={id} />
-              <button onClick={() => removeComposition(id)}>Delete</button>
-            </div>
-          ))}
-          <button onClick={addComposition}>Add New Composition</button>
-        </div> 
-      </div> */}
       <Arrangement useStore={createArrangementStore()} arrangementId={1} />
     </div>
   );

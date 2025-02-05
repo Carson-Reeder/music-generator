@@ -3,8 +3,8 @@ import React, { useState, useEffect } from "react";
 import { UseBoundStore, StoreApi } from "zustand";
 import { ArrangementStoreType, createArrangementStore } from "../stores/ArrangementStore";
 import { createChordPlaybackStore } from "../stores/chordPlaybackStore";
-import FixedComposition from "./fixedcomposition";
-import PlayChord from "./playChords";
+import FixedComposition from "./Composition";
+import PlayChord from "./PlayChords";
 
 type arrangementProps = {
     useStore: UseBoundStore<StoreApi<ArrangementStoreType>>;
@@ -20,15 +20,22 @@ export default function Arrangement({ useStore, arrangementId }: arrangementProp
     const addComposition = () => {
         setStores([...stores, { id: stores.length + 1, store: createChordPlaybackStore() }]);
     };
-    const removeComposition = (id: number) => {
-        setStores(stores.filter((comp) => comp.id !== id));
-    };
+    const removeComposition = (targetId: number) => {
+        const removeComp = stores.filter(({ id }) => id !== targetId);
+        const updated = removeComp.map((comp) =>
+          comp.id > targetId
+            ? { ...comp, id: comp.id - 1 }
+            : comp
+        );
+        setStores(updated);
+      };
+    
 
     return (
         <div>
-            <h1>Arrangement</h1>
+            <h1 className='ml-6 pb-1'>Arrangement:</h1>
             {/* Set number of measures */}
-            <div className='h-8 w-44' style={{ backgroundColor: 'rgba(1, 255, 158, 0.12)',
+            <div className='h-8 w-44 ml-10' style={{ backgroundColor: 'rgba(1, 255, 158, 0.12)',
                     outline: '0.1rem solid #1E291E', borderRadius: '0.5rem'
                 }}
             >
@@ -45,7 +52,7 @@ export default function Arrangement({ useStore, arrangementId }: arrangementProp
                 />
             </div>
             {/* Set width of measures */}
-            <div className='h-8 w-44' style={{ backgroundColor: 'rgba(1, 255, 158, 0.12)',
+            <div className='h-8 w-44 ml-10' style={{ backgroundColor: 'rgba(1, 255, 158, 0.12)',
                     outline: '0.1rem solid #1E291E', borderRadius: '0.5rem'
                 }}
             >
@@ -64,30 +71,47 @@ export default function Arrangement({ useStore, arrangementId }: arrangementProp
                 </div>
             </div>
             {/* Render fixedComposition components */}
-            <div>    
+            <div className='pl-4 pt-6 pb-0 m-3'
+                style={{ backgroundColor: 'rgba(93, 148, 125, 0.36)',
+                    //border: '0.1rem solid #1E291E', 
+                    borderRadius: '0.5rem',
+                    boxShadow: '0rem 0rem .25rem .1rem rgba(93, 148, 125, 0.8)',
+                    overflow: 'auto',
+                }}>    
                 {stores.map(({ id, store }) => (
                     <div key={id}>
-                        <div style={{margin: "10px", padding: "10px" }}>
+                        <div className="mb-6">
+                            <div>
                             {/* Pass in the corresponding store for each Composition */}
                             <FixedComposition useStore={store} arrangementStore={useStore} compositionId={id} />
+                            </div>
                             {/* Remove Composition button */}
-                            <button className='ml-5 mr-2 items-center pr-1 pl-1 pt-1 rounded-sm mb-8'   
+                            <div className='mt-2 ml-4'>
+                            {stores.length !== 1 &&(
+                            <button className='mr-4 items-center p-1 rounded-sm'   
                                 style={{ 
-                                    backgroundColor: 'rgba(1, 255, 158, 0.12)',
+                                    backgroundColor: 'rgba(203, 22, 100, 0.32)',
                                     outline: '0.1rem solid #1E291E', 
-                                    borderRadius: '0.5rem'
+                                    borderRadius: '0.5rem',
+                                    boxShadow: '0rem 0rem .25rem .2rem rgba(183, 111, 140, 0.52)',
                                 }} 
                                 onClick={() => removeComposition(id)}>Delete
                             </button>
+                            )}              
                             {/* Add Composition button */}
-                            <button className='ml-5 mr-2 items-center pr-1 pl-1 pb-1 rounded-sm mb-8' 
-                                style={{ 
-                                    backgroundColor: 'rgba(1, 255, 158, 0.12)',
-                                    outline: '0.1rem solid #1E291E', 
-                                    borderRadius: '0.5rem'
-                                }} 
-                                onClick={addComposition}>Add New Composition
-                            </button> 
+                            {id === stores[stores.length-1].id && (
+                                <button className='ml-0 items-center p-1 rounded-sm' 
+                                    style={{ 
+                                        backgroundColor: 'rgba(1, 255, 158, 0.12)',
+                                        outline: '0.1rem solid #1E291E', 
+                                        borderRadius: '0.5rem',
+                                        boxShadow: '0rem 0rem .25rem .2rem rgba(93, 148, 125, 0.8)',
+                                    }} 
+                                    onClick={addComposition}>Add New Composition
+                                    
+                                </button> 
+                            )}               
+                            </div>
                         </div>
                     </div>
                 ))}

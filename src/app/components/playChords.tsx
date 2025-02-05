@@ -6,8 +6,9 @@ import { ChordPlaybackStore } from "../stores/chordPlaybackStore";
 import { playChord, playChordProgression } from "../utils/soundPlayer";
 
 type PlayChordsProps = {
-  useStore: UseBoundStore<StoreApi<ChordPlaybackStore>>; // Pass in Zustand store
-  compositionId: number; // Unique key for the composition
+  // 
+  useStore: UseBoundStore<StoreApi<ChordPlaybackStore>>; 
+  compositionId: number; 
 };
 
 export default function PlayChords({ useStore, compositionId }: PlayChordsProps) {

@@ -149,27 +149,31 @@ export default function fixedComposition ({useStore, compositionId, arrangementS
     }
     return (
         <div>
-            {/* Composition Label */}
-            <div>
-                <label className='ml-5 mr-2 items-center pr-1 pl-1 pb-1 rounded-sm' style={{ backgroundColor: 'rgba(1, 255, 158, 0.12)',
-                    outline: '0.1rem solid #1E291E', borderRadius: '0.5rem'
+            {/* Composition label */}
+            <div style={{ width: '{widthComposition}rem'}}>
+                <label className='ml-5 mr-2 text-grey items-center pr-1 pl-1 pb-1 m-2 rounded-sm' 
+                style={{ 
+                    backgroundColor: 'rgba(78, 155, 122, 0.70)',
+                    outline: '0.1rem solid #1E291E', 
+                    borderRadius: '0.5rem',
                 }}>Composition {compositionId}</label>
             </div>
-            {/* Composition */}
-            <div className="measure-container br-.5bg-gray-300 ml-4 mr-4 mb-6"
+            {/* Composition container for chords*/}
+            <div className="measure-container bg-gray-300"
                 style={{
                     width: `${widthComposition}rem`,
                     height: '7rem',
                     marginTop: '0px',
                     marginLeft: '1rem',
                     position: 'relative',
-                    outline: '0.25rem solid #1E291E',
+                    //outline: '0.25rem solid #1E291E',
                     borderRadius: '0.5rem',
-                    //overflow: 'hidden',
                     zIndex: 4,
+                    boxShadow: '0rem 0rem .25rem .1rem rgba(93, 148, 125, 0.8)'
                 }}
             >
-                {/* Insert alternating measure backgrounds */}
+            
+                {/* Render alternating measure backgrounds */}
                 {Array.from({ length: numMeasures }).map((_, measureIndex) => (
                 <div
                     key={`measure-bg-${measureIndex}`}
@@ -184,63 +188,64 @@ export default function fixedComposition ({useStore, compositionId, arrangementS
                     }}
                 />
                 ))}
-                
+                {/* Render lines for each beat (1/8 a measure) */}
                 {Array.from({ length: numMeasures * 8 }, (_, i) => {
-                        if (i === 0) return null;
-                        const isEndOfMeasure = i % 8 === 0; // 8th line
-                        const isMiddleOfMeasure = i % 8 === 4; // 4th line
-                        const lineWidth = isEndOfMeasure ? 6 : isMiddleOfMeasure ? 2 : 1; // Set line width
-
-                        return (
-                            <div
-                                key={i}
-                                style={{
-                                    position: 'absolute',
-                                    left: `${(i * 100) / (numMeasures * 8)}%`,
-                                    top: 0,
-                                    bottom: 0,
-                                    width: `${lineWidth}px`,
-                                    height: '100%',
-                                    background: isEndOfMeasure ? '#1E291E' : isMiddleOfMeasure ? '#1A1A1A' : '#2F2F2F',
-                                    transform: 'translateX(-50%)', // Center the line
-                                    zIndex: 2,
-                                }}
-                            />
-                        );
-                    })}
-                    {chords.map((chord) => (
+                    if (i === 0) return null;
+                    const isEndOfMeasure = i % 8 === 0; // 8th line
+                    const isMiddleOfMeasure = i % 8 === 4; // 4th line
+                    // Set line width in rem
+                    const lineWidth = isEndOfMeasure ? 6 : isMiddleOfMeasure ? 2 : 1; 
+                    return (
                         <div
-                            key={chord.id}
-                            className={`draggable draggable-${compositionId} rounded-md`}
-                            data-id={chord.id}
-                            onMouseDown={() => handleChordClick(chord.id)}
-                            onMouseUp={()=>handleChordMouseUp(chord.notes)}
+                            key={i}
                             style={{
                                 position: 'absolute',
-                                left: `${((chord.startPosition * widthMeasure) + ((chord.chordTimingBeat/4)*widthMeasure))}rem`,
-                                width: `${(chord.length * widthMeasure)}rem`,
-                                height: '7rem',
-                                border: '.15rem solid rgb(150, 227, 178)',
-                                boxShadow: activeChordId === chord.id 
-                                    ? '0rem 0rem .6rem .2rem black' 
-                                    : 'none', 
-                                boxSizing: 'border-box',
-                                textAlign: 'center',
-                                lineHeight: '100px',
-                                userSelect: 'none',
-                                backgroundColor: 'rgba(78, 155, 122, 0.98)',
-                                outline: activeChordId === chord.id ? '0.1rem solid white' : '0.085rem solid black',
-                                outlineOffset: '-0.085rem',
-                                cursor: 'move',
-                                opacity: activeChordId ? (activeChordId === chord.id ? 0.75 : 0.9) : 1, 
-                                zIndex: selectedChordId === chord.id ? 4 : 3,
+                                left: `${(i * 100) / (numMeasures * 8)}%`,
+                                top: 0,
+                                bottom: 0,
+                                width: `${lineWidth}px`,
+                                height: '100%',
+                                background: isEndOfMeasure ? '#1E291E' : isMiddleOfMeasure ? '#1A1A1A' : '#2F2F2F',
+                                transform: 'translateX(-50%)', // Center the line
+                                    zIndex: 2,
                             }}
-                        >   
-                            <div>
-                                {chord.id}
-                            </div>
+                        />
+                    );
+                })}
+                {/* Render chords */}
+                {chords.map((chord) => (
+                    <div
+                        key={chord.id}
+                        className={`draggable draggable-${compositionId} rounded-md`}
+                        data-id={chord.id}
+                        onMouseDown={() => handleChordClick(chord.id)}
+                        onMouseUp={()=>handleChordMouseUp(chord.notes)}
+                        style={{
+                            position: 'absolute',
+                            left: `${((chord.startPosition * widthMeasure) + ((chord.chordTimingBeat/4)*widthMeasure))}rem`,
+                            width: `${(chord.length * widthMeasure)}rem`,
+                            height: '7rem',
+                            border: '0.15rem solid rgba(1, 106, 66, 0.64)',
+                            boxShadow: activeChordId === chord.id 
+                                ? '0rem 0rem .6rem .2rem black' 
+                                : 'none', 
+                            boxSizing: 'border-box',
+                            textAlign: 'center',
+                            lineHeight: '100px',
+                            userSelect: 'none',
+                            backgroundColor: 'rgba(78, 155, 122, 0.98)',
+                            outline: activeChordId === chord.id ? '0.1rem solid white' : '0.1rem solid#1E291E',
+                            outlineOffset: '-0.1rem',
+                            cursor: 'move',
+                            opacity: activeChordId ? (activeChordId === chord.id ? 0.75 : 0.9) : 1, 
+                                zIndex: selectedChordId === chord.id ? 4 : 3,
+                        }}
+                    >   
+                        <div>
+                            {chord.id}
                         </div>
-                    ))}
+                    </div>
+                ))}
             </div>
         </div>
         
