@@ -1,6 +1,15 @@
 "use client";
 import * as Tone from "tone";
 let activeSynths: { synth: Tone.PolySynth, notes: string[] }[] = [];
+import { MeasureStoreType } from "../stores/MeasureStore";
+import { ArrangementStoreType } from "../stores/ArrangementStore";
+import { StoreApi, UseBoundStore } from "zustand";
+
+type PlayMeasureProps = {
+  measureStore: UseBoundStore<StoreApi<MeasureStoreType>>;
+  arrangementStore: UseBoundStore<StoreApi<ArrangementStoreType>>;
+  compositionId: number;
+}
 
 const makeSynth = async () => {
   const synth = new Tone.PolySynth(Tone.Synth, {
@@ -39,7 +48,7 @@ export const playChordProgression = async (chordNotes: string[][], bpm: number, 
   Tone.getTransport().bpm.value = bpm; // Set tempo
   const progression = await createProgression(chordNotes, chordLength, chordTimingBeat, chordStartPosition);  
   console.log(progression);
-  const part = new Tone.Part((time, chord) => {
+  let fart = new Tone.Part((time, chord) => {
     synth.triggerAttackRelease(chord.notes, chord.duration, time);
   }, progression).start(); 
   console.log(chordStartPosition);
@@ -47,6 +56,23 @@ export const playChordProgression = async (chordNotes: string[][], bpm: number, 
   console.log(chordTimingBeat);
   
   Tone.getTransport().start(); // Start the transport
+}
+export const playMeasure = async (measureStore: UseBoundStore<StoreApi<MeasureStoreType>>, arrangementStore: UseBoundStore<StoreApi<ArrangementStoreType>>, compositionId: number) => {
+  const { chords, bpm } = measureStore.getState();
+  const { numMeasures, widthMeasure, loop, loopLength } = arrangementStore.getState();
+  console.log('chords', chords);
+  console.log('bpm', bpm);
+  console.log('numMeasures', numMeasures);
+  console.log('widthMeasure', widthMeasure);
+  console.log('loop', loop);
+  console.log('loopLength', loopLength);
+  playChordProgression(
+    chords.map((c) => c.notes),
+    bpm,
+    chords.map((c) => c.length),
+    chords.map((c) => c.startPosition),
+    chords.map((c) => c.chordTimingBeat)
+  );
 }
 
 const createProgression = async (chordNotes: string[][], chordLength: number[], chordTimingBeat: number[], chordStartPosition: number[]) => {

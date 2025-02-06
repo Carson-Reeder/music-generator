@@ -7,7 +7,7 @@ type Chord = {
     length: number;
     chordTimingBeat: number;
 };
-export type ChordPlaybackStore = {
+export type MeasureStoreType = {
 
     chords: Chord[];
     setChords: (chords: Chord[]) => void;
@@ -26,7 +26,7 @@ const initialChords: Chord[] = [
     { id: '4', notes: ['F4', 'A4', 'C5'], startPosition: 2, length: 1, chordTimingBeat: 3},
   ];
 // create store instance
-export const createChordPlaybackStore = () => {return create<ChordPlaybackStore>((set) => ({
+export const createChordPlaybackStore = () => {return create<MeasureStoreType>((set) => ({
     chords: initialChords,
     setChords: (chords) =>
     set({

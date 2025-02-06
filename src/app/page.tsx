@@ -1,11 +1,11 @@
 "use client";
 import React, { useState } from "react";
 import '../../globals.css';
-import FixedComposition from "./components/Composition";
+import FixedComposition from "./components/Measure";
 import Arrangement from "./components/Arrangement";
 import PlayChord from "./components/PlayChords";
 import { getChords } from "./utils/fetchChords";
-import { createChordPlaybackStore } from "./stores/chordPlaybackStore";
+import { createChordPlaybackStore } from "./stores/MeasureStore";
 import { playChord, playChordProgression } from "./utils/soundPlayer";
 import { createArrangementStore } from "./stores/ArrangementStore";
 
@@ -90,7 +90,7 @@ export default function MyPage() {
           )}
         </div>
       </div>
-      <Arrangement useStore={createArrangementStore()} arrangementId={1} />
+      <Arrangement arrangementStore={createArrangementStore()} arrangementId={1} />
     </div>
   );
 }

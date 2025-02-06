@@ -2,12 +2,12 @@
 import React from "react";
 import * as Tone from "tone";
 import { UseBoundStore, StoreApi } from "zustand";
-import { ChordPlaybackStore } from "../stores/chordPlaybackStore";
+import { MeasureStoreType } from "../stores/MeasureStore";
 import { playChord, playChordProgression } from "../utils/soundPlayer";
 
 type PlayChordsProps = {
   // 
-  useStore: UseBoundStore<StoreApi<ChordPlaybackStore>>; 
+  useStore: UseBoundStore<StoreApi<MeasureStoreType>>; 
   compositionId: number; 
 };
 

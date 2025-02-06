@@ -2,21 +2,21 @@
 import React, { useState, useEffect, useRef } from 'react';
 import interact from "interactjs";
 import { UseBoundStore, StoreApi } from 'zustand';
-import { ChordPlaybackStore } from "../stores/chordPlaybackStore";
+import { MeasureStoreType } from "../stores/MeasureStore";
 import { flushSync } from 'react-dom';
 import { off } from 'process';
 import { playChord, playChordProgression } from '../utils/soundPlayer';
 import { ArrangementStoreType, createArrangementStore } from '../stores/ArrangementStore';
 
-type FixedCompositionProps = {
-    useStore: UseBoundStore<StoreApi<ChordPlaybackStore>>;
+type MeasureProps = {
+    measureStore: UseBoundStore<StoreApi<MeasureStoreType>>;
     compositionId: number;
     arrangementStore: UseBoundStore<StoreApi<ArrangementStoreType>>;
   };
 
-export default function fixedComposition ({useStore, compositionId, arrangementStore}: FixedCompositionProps) {
+export default function Measure ({measureStore, compositionId, arrangementStore}: MeasureProps) {
     const { chords, setChordTiming, setChordLength, setChordStartPosition
-    } = useStore();
+    } = measureStore();
     const { numMeasures, setNumMeasures, widthMeasure, setWidthMeasure,loop, setLoop, loopLength, setLoopLength, bpm, setBpm 
     } = arrangementStore();
 
@@ -76,6 +76,9 @@ export default function fixedComposition ({useStore, compositionId, arrangementS
         // Use a unique selector for this composition by including the compositionId
         interact(`.draggable-${compositionId}`)
           .draggable({
+            inertia: true,
+            autoScroll: true,
+            allowFrom: '*',
             modifiers: [
               interact.modifiers.restrictRect({
                 restriction: 'parent',
@@ -146,20 +149,27 @@ export default function fixedComposition ({useStore, compositionId, arrangementS
         target.style.transform = 'translate(' + x + 'px, ' + y + 'px)';
         target.setAttribute('data-x', x);
         target.setAttribute('data-y', y);
+        event.preventDefault();
     }
     return (
         <div>
             {/* Composition label */}
-            <div style={{ width: '{widthComposition}rem'}}>
+            <div className='pt-1'>
                 <label className='ml-5 mr-2 text-grey items-center pr-1 pl-1 pb-1 m-2 rounded-sm' 
                 style={{ 
-                    backgroundColor: 'rgba(78, 155, 122, 0.70)',
-                    outline: '0.1rem solid #1E291E', 
+                    backgroundColor: 'rgba(1, 255, 158, 0.01)',
+                    //outline: '0.1rem solid #1E291E', 
                     borderRadius: '0.5rem',
-                }}>Composition {compositionId}</label>
+                    boxShadow: '0rem 0rem .25rem .2rem rgba(93, 148, 125, 0.57)',
+                    width: '{widthComposition}rem',
+                    position: 'relative',
+                    zIndex: 1,
+                    
+                }}>Measure {compositionId}</label>
+                
             </div>
             {/* Composition container for chords*/}
-            <div className="measure-container bg-gray-300"
+            <div className="measure-container"
                 style={{
                     width: `${widthComposition}rem`,
                     height: '7rem',
@@ -167,9 +177,12 @@ export default function fixedComposition ({useStore, compositionId, arrangementS
                     marginLeft: '1rem',
                     position: 'relative',
                     //outline: '0.25rem solid #1E291E',
-                    borderRadius: '0.5rem',
-                    zIndex: 4,
-                    boxShadow: '0rem 0rem .25rem .1rem rgba(93, 148, 125, 0.8)'
+                    borderRadius: '0.2rem',
+                    zIndex: 1,
+                    display: 'flex',
+                    alignItems: 'center',
+                    boxShadow: '0.05rem 0rem .25rem .1rem rgba(93, 148, 125, 0.6)',
+                    
                 }}
             >
             
@@ -177,14 +190,15 @@ export default function fixedComposition ({useStore, compositionId, arrangementS
                 {Array.from({ length: numMeasures }).map((_, measureIndex) => (
                 <div
                     key={`measure-bg-${measureIndex}`}
-                    className='rounded-md'
+                    className='rounded-sm'
                     style={{
                     position: 'absolute',
                     left: `${(measureIndex * 100) / numMeasures}%`,
                     width: `${100 / numMeasures}%`,
                     height: '100%',
                     backgroundColor: measureIndex % 2 === 0 ? 'rgba(4, 150, 94, 0.4)' : 'rgba(1, 255, 158, 0.12)', 
-                    zIndex: 0, 
+                    zIndex: 2, 
+                    borderRadius: '0.2rem',
                     }}
                 />
                 ))}
@@ -194,21 +208,23 @@ export default function fixedComposition ({useStore, compositionId, arrangementS
                     const isEndOfMeasure = i % 8 === 0; // 8th line
                     const isMiddleOfMeasure = i % 8 === 4; // 4th line
                     // Set line width in rem
-                    const lineWidth = isEndOfMeasure ? 6 : isMiddleOfMeasure ? 2 : 1; 
+                    const lineWidth = isEndOfMeasure ? 3 : isMiddleOfMeasure ? 1.5 : 1; 
                     return (
                         <div
                             key={i}
                             style={{
                                 position: 'absolute',
                                 left: `${(i * 100) / (numMeasures * 8)}%`,
-                                top: 0,
+                                top: '50%',
                                 bottom: 0,
                                 width: `${lineWidth}px`,
-                                height: '100%',
-                                background: isEndOfMeasure ? '#1E291E' : isMiddleOfMeasure ? '#1A1A1A' : '#2F2F2F',
-                                transform: 'translateX(-50%)', // Center the line
-                                    zIndex: 2,
-                            }}
+                                alignItems: 'center',
+                                height: isEndOfMeasure ? '100%' : '100%',
+                                background: isEndOfMeasure ? '#1E291E' : isMiddleOfMeasure ? '#1A1A1A' : '#4C5A60',
+                                transform: 'translateX(-50%) translateY(-50%)', // Center the line
+                                zIndex: 2,
+                                borderRadius: '0.5rem',
+                            }}  
                         />
                     );
                 })}
@@ -226,6 +242,7 @@ export default function fixedComposition ({useStore, compositionId, arrangementS
                             width: `${(chord.length * widthMeasure)}rem`,
                             height: '7rem',
                             border: '0.15rem solid rgba(1, 106, 66, 0.64)',
+                            borderRadius: '0.5rem',
                             boxShadow: activeChordId === chord.id 
                                 ? '0rem 0rem .6rem .2rem black' 
                                 : 'none', 
@@ -241,7 +258,7 @@ export default function fixedComposition ({useStore, compositionId, arrangementS
                                 zIndex: selectedChordId === chord.id ? 4 : 3,
                         }}
                     >   
-                        <div>
+                        <div className='no-select'>
                             {chord.id}
                         </div>
                     </div>
