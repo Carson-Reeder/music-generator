@@ -152,36 +152,18 @@ export default function Measure ({measureStore, compositionId, arrangementStore}
         event.preventDefault();
     }
     return (
-        <div>
-            {/* Composition label */}
-            <div className='pt-1'>
-                <label className='ml-5 mr-2 text-grey items-center pr-1 pl-1 pb-1 m-2 rounded-sm' 
-                style={{ 
-                    backgroundColor: 'rgba(1, 255, 158, 0.01)',
-                    //outline: '0.1rem solid #1E291E', 
-                    borderRadius: '0.5rem',
-                    boxShadow: '0rem 0rem .25rem .2rem rgba(93, 148, 125, 0.57)',
-                    width: '{widthComposition}rem',
-                    position: 'relative',
-                    zIndex: 1,
-                    
-                }}>Measure {compositionId}</label>
-                
-            </div>
-            {/* Composition container for chords*/}
-            <div className="measure-container"
+            // Render measure container
+            <div className="measure-container m-5 ml-5"
                 style={{
                     width: `${widthComposition}rem`,
-                    height: '7rem',
-                    marginTop: '0px',
-                    marginLeft: '1rem',
+                    height: '4.0rem',
                     position: 'relative',
                     //outline: '0.25rem solid #1E291E',
                     borderRadius: '0.2rem',
-                    zIndex: 1,
+                    zIndex: 4,
                     display: 'flex',
                     alignItems: 'center',
-                    boxShadow: '0.05rem 0rem .25rem .1rem rgba(93, 148, 125, 0.6)',
+                    boxShadow: '0rem 0rem .25rem .2rem rgba(93, 148, 125, 0.57)'
                     
                 }}
             >
@@ -240,22 +222,23 @@ export default function Measure ({measureStore, compositionId, arrangementStore}
                             position: 'absolute',
                             left: `${((chord.startPosition * widthMeasure) + ((chord.chordTimingBeat/4)*widthMeasure))}rem`,
                             width: `${(chord.length * widthMeasure)}rem`,
-                            height: '7rem',
+                            height: '100%',
                             border: '0.15rem solid rgba(1, 106, 66, 0.64)',
                             borderRadius: '0.5rem',
                             boxShadow: activeChordId === chord.id 
                                 ? '0rem 0rem .6rem .2rem black' 
                                 : 'none', 
                             boxSizing: 'border-box',
-                            textAlign: 'center',
-                            lineHeight: '100px',
+                            display: 'flex',
+                            justifyContent: 'center',
+                            alignItems: 'center',
                             userSelect: 'none',
                             backgroundColor: 'rgba(78, 155, 122, 0.98)',
                             outline: activeChordId === chord.id ? '0.1rem solid white' : '0.1rem solid#1E291E',
                             outlineOffset: '-0.1rem',
                             cursor: 'move',
                             opacity: activeChordId ? (activeChordId === chord.id ? 0.75 : 0.9) : 1, 
-                                zIndex: selectedChordId === chord.id ? 4 : 3,
+                            zIndex: selectedChordId === chord.id ? 5 : 4,
                         }}
                     >   
                         <div className='no-select'>
@@ -264,7 +247,5 @@ export default function Measure ({measureStore, compositionId, arrangementStore}
                     </div>
                 ))}
             </div>
-        </div>
-        
     )
 }

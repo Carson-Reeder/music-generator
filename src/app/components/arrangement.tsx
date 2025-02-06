@@ -82,7 +82,25 @@ export default function Arrangement({ arrangementStore, arrangementId }: arrange
                     <div key={id}>
                         <div className="mb-6">
                             <div>
-                            <div className='pb-0'>
+                            {/* Composition label */}
+                            <div className='pt-1'>
+                                <label className='ml-5 mr-2 text-grey items-center pr-2 pl-2 pb-1 m-2 rounded-sm' 
+                                style={{ 
+                                    backgroundColor: 'rgba(1, 255, 158, 0.01)',
+                                    //outline: '0.1rem solid #1E291E', 
+                                    borderRadius: '0.5rem',
+                                    boxShadow: '0rem 0rem .25rem .2rem rgba(93, 148, 125, 0.57)',
+                                    width: '{widthComposition}rem',
+                                    position: 'relative',
+                                    zIndex: 1,
+                                    fontWeight: '500',
+                                    color: 'rgb(20, 78, 66)'
+                                
+                                    
+                                }}>Measure {id}</label>
+                                
+                            </div>
+                            <div className='p-0 m-0'>
                             <MeasureToolbar measureStore={store} arrangementStore={arrangementStore} compositionId={id} />
                             </div>
                             {/* Pass in the corresponding store for each Composition */}
@@ -108,7 +126,7 @@ export default function Arrangement({ arrangementStore, arrangementId }: arrange
                                 <button className='ml-0 items-center p-1 pr-2 pl-2 rounded-sm' 
                                     style={{ 
                                         backgroundColor: 'rgba(1, 255, 158, 0.12)',
-                                        outline: '0.1rem solid #1E291E', 
+                                        //outline: '0.1rem solid #1E291E', 
                                         borderRadius: '0.5rem',
                                         boxShadow: '0rem 0rem .25rem .2rem rgba(93, 148, 125, 0.8)',
                                     }} 
