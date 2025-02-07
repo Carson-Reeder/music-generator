@@ -31,7 +31,7 @@ export default function MyPage() {
 
       // Update chords in the first composition
       stores[(chordSelected)-1].store.setState({ chords: transformedChords });
-
+      console.log('stores', stores);
       setThreadId(parsedId);
       setResponseText(parsedMessage);
       setLoading(false);

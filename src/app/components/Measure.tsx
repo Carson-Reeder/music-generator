@@ -16,7 +16,7 @@ type MeasureProps = {
 
 export default function Measure ({measureStore, compositionId, arrangementStore}: MeasureProps) {
     const { chords, setChordTiming, setChordLength, setChordStartPosition
-    } = measureStore();
+    } = measureStore.getState();
     const { numMeasures, setNumMeasures, widthMeasure, setWidthMeasure,loop, setLoop, loopLength, setLoopLength, bpm, setBpm 
     } = arrangementStore();
 
@@ -153,14 +153,14 @@ export default function Measure ({measureStore, compositionId, arrangementStore}
     }
     return (
             // Render measure container
-            <div className="measure-container m-5 ml-5"
+            <div className="measure-container"
                 style={{
                     width: `${widthComposition}rem`,
-                    height: '4.0rem',
+                    height: '4.5rem',
                     position: 'relative',
                     //outline: '0.25rem solid #1E291E',
                     borderRadius: '0.2rem',
-                    zIndex: 4,
+                    zIndex: 3,
                     display: 'flex',
                     alignItems: 'center',
                     boxShadow: '0rem 0rem .25rem .2rem rgba(93, 148, 125, 0.57)'
@@ -233,7 +233,7 @@ export default function Measure ({measureStore, compositionId, arrangementStore}
                             justifyContent: 'center',
                             alignItems: 'center',
                             userSelect: 'none',
-                            backgroundColor: 'rgba(78, 155, 122, 0.98)',
+                            backgroundColor: 'rgb(99, 174, 134)',
                             outline: activeChordId === chord.id ? '0.1rem solid white' : '0.1rem solid#1E291E',
                             outlineOffset: '-0.1rem',
                             cursor: 'move',
