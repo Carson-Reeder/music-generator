@@ -9,16 +9,21 @@ import { createChordPlaybackStore } from "./stores/MeasureStore";
 import { playChord, playChordProgression } from "./utils/soundPlayer";
 import { createArrangementStore } from "./stores/ArrangementStore";
 
+
+// Arrangements will be saved as a file so user can leave site and resume work
+// They will be able to have multiple arrangements stores on their account
+// For now there is one arrangement
+export const useArrangementStore = createArrangementStore();
+
 export default function MyPage() {
   const [scale, setScale] = useState("C major 4");
   const [responseText, setResponseText] = useState("Chord 1: C4, E4, G4 (C major)\nChord 2: D4, F4, A4 (D minor)\nChord 3: G3, B3, D4, F4 (G7)\nChord 4: F4, A4, C5 (F major)");
   const [loading, setLoading] = useState(false);
   const [threadId, setThreadId] = useState<string | null>(null);
   const [chordSelected, setChordSelected] = useState<number>(1);
-  const [stores, setStores] = useState<{ id: number; store: ReturnType<typeof createChordPlaybackStore> }[]>([
-    { id: 1, store: createChordPlaybackStore() }
-  ]);
-
+  const stores = useArrangementStore((state) => state.stores);
+  console.log('storesRERENDER', useArrangementStore.getState().stores);
+  
   // Handles updating chords in the first store
   const handleChords = async () => {  
     setLoading(true);
@@ -37,6 +42,8 @@ export default function MyPage() {
       setLoading(false);
     }
   };
+
+  
 
   return (
     <div>
@@ -90,7 +97,7 @@ export default function MyPage() {
           )}
         </div>
       </div>
-      <Arrangement arrangementStore={createArrangementStore()} arrangementId={1} />
+      <Arrangement arrangementStore={useArrangementStore} arrangementId={1} />
     </div>
   );
 }
