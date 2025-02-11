@@ -30,7 +30,7 @@ export default function Measure ({measureStore, compositionId, arrangementStore}
                 style={{
                     width: `${widthComposition}rem`,
                     height: '4.5rem',
-                    position: 'absolute',
+                    position: 'relative',
                     //outline: '0.25rem solid #1E291E',
                     borderRadius: '0.2rem',
                     zIndex: 3,

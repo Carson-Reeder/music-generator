@@ -66,7 +66,7 @@ export default function Arrangement({ arrangementStore, arrangementId }: arrange
                             <MeasureToolbar measureStore={store} arrangementStore={arrangementStore} compositionId={id} />
                         </div>
                         {/* Pass in the corresponding store for each Composition */}
-                        <div className='ml-2 mr-2 pb-20' style={{ overflowX: 'auto', overflowY: 'visible' }}>
+                        <div className='ml-2 mr-2' style={{ overflowX: 'auto', overflowY: 'visible' }}>
                             <Measure measureStore={store} arrangementStore={arrangementStore} compositionId={id} />
                         </div>
                             {/* Remove Composition button */}

@@ -58,10 +58,19 @@ export default function Chord({ chord, compositionId, measureStore, arrangementS
     chords.forEach((chord) => {
       if (chord.startPosition >= numMeasures) {
         // Move chord back to the last valid measure
+        console.log('chord.startPosition', chord.startPosition);
+        console.log('numMeasures', numMeasures);
         setChordStartPosition(chord.id, numMeasures - 1);
       }
-      if (chord.length >= 1) {
-        setChordLength(chord.id, 1);
+      else if (chord.startPosition == numMeasures -1) {
+        const check = chord.chordTimingBeat + chord.length*4;
+        console.log('check', check);
+        console.log('startPosition', chord.startPosition);
+        console.log('chordTimingBeat', chord.chordTimingBeat);
+        console.log('length', chord.length);
+        if (check > 4) {
+          setChordLength(chord.id, chord.length - (check - 4)/4);
+        }
       }
     });
   }, [numMeasures]); // Trigger whenever numMeasures changes
