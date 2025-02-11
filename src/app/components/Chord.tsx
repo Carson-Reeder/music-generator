@@ -56,24 +56,31 @@ export default function Chord({ chord, compositionId, measureStore, arrangementS
   // Ensure chords are within the bounds of the composition
   useEffect(() => {
     chords.forEach((chord) => {
-      if (chord.startPosition >= numMeasures) {
-        // Move chord back to the last valid measure
-        console.log('chord.startPosition', chord.startPosition);
-        console.log('numMeasures', numMeasures);
-        setChordStartPosition(chord.id, numMeasures - 1);
-      }
-      else if (chord.startPosition == numMeasures -1) {
-        const check = chord.chordTimingBeat + chord.length*4;
-        console.log('check', check);
-        console.log('startPosition', chord.startPosition);
-        console.log('chordTimingBeat', chord.chordTimingBeat);
-        console.log('length', chord.length);
-        if (check > 4) {
-          setChordLength(chord.id, chord.length - (check - 4)/4);
+        // 1. Handle start position exceeding numMeasures
+        if (chord.startPosition >= numMeasures) {
+            setChordStartPosition(chord.id, numMeasures - 1);
         }
-      }
+
+        // 2. Calculate end beat of the chord (relative to the start of the piece)
+        const chordStartBeat = (chord.startPosition * 4) + chord.chordTimingBeat;
+        const chordEndBeat = chordStartBeat + (chord.length * 4); // Length is in percentage of measure (4 beats)
+
+        // 3. Calculate the end beat of the last measure
+        const lastMeasureEndBeat = numMeasures * 4;
+
+        // 4. Check if the chord extends beyond the last measure
+        if (chordEndBeat > lastMeasureEndBeat) {
+            // Calculate the overlap
+            const overlapBeats = chordEndBeat - lastMeasureEndBeat;
+
+            // Calculate the new length (percentage of a measure)
+            const newLength = (chord.length * 4 - overlapBeats) / 4;
+
+            setChordLength(chord.id, newLength);
+        }
+
     });
-  }, [numMeasures]); // Trigger whenever numMeasures changes
+}, [numMeasures, chords, setChordLength, setChordStartPosition]); // Important: Add chords to the dependency array
 
   // Deselect chord if mouseUp occurs outside of the measure container
   useEffect(() => {

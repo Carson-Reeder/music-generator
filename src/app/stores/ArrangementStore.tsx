@@ -31,6 +31,7 @@ export const createArrangementStore = () => {
         numMeasures: 5,
         setNumMeasures: (numMeasures) =>
             set((state) => {
+                if (numMeasures < 1) return state; // Return current state if invalid
                 // Automatically update widthComposition when numMeasures changes
                 const widthComposition = state.widthMeasure * numMeasures;
                 return { numMeasures, widthComposition }; // Update widthComposition as well
