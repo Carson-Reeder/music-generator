@@ -11,6 +11,8 @@ type PlayChordsProps = {
   compositionId: number; 
 };
 
+
+
 export default function PlayChords({ useStore, compositionId }: PlayChordsProps) {
   // Initialize Zustand state from the provided store
   const { chords, bpm, setBpm } = useStore();

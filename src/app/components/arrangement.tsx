@@ -3,6 +3,7 @@ import React, { useState, useEffect } from "react";
 import { UseBoundStore, StoreApi } from "zustand";
 import { ArrangementStoreType, createArrangementStore } from "../stores/ArrangementStore";
 import { createChordPlaybackStore } from "../stores/MeasureStore";
+import { playAllMeasures } from "../utils/soundPlayer";
 import Measure from "./Measure";
 import PlayChord from "./PlayChords";
 import MeasureToolbar from "./MeasureToolbar";
@@ -44,7 +45,11 @@ export default function Arrangement({ arrangementStore, arrangementId }: arrange
                     //border: '0.1rem solid #1E291E', 
                     borderRadius: '0.5rem',
                     boxShadow: '0rem 0rem .25rem .1rem rgba(93, 148, 125, 0.8)',
-                }}>    
+                }}>
+                <button className='m-4'
+                    onClick={() => playAllMeasures(arrangementStore)}>
+                    Play All Measures
+                </button>    
                 
                 {stores.map(({ id, store }) => (
                     <div key={id}>
@@ -61,7 +66,7 @@ export default function Arrangement({ arrangementStore, arrangementId }: arrange
                             <MeasureToolbar measureStore={store} arrangementStore={arrangementStore} compositionId={id} />
                         </div>
                         {/* Pass in the corresponding store for each Composition */}
-                        <div className='ml-2 mr-2' style={{ overflowX: 'auto', overflowY: 'visible' }}>
+                        <div className='ml-2 mr-2 pb-20' style={{ overflowX: 'auto', overflowY: 'visible' }}>
                             <Measure measureStore={store} arrangementStore={arrangementStore} compositionId={id} />
                         </div>
                             {/* Remove Composition button */}
@@ -70,6 +75,7 @@ export default function Arrangement({ arrangementStore, arrangementId }: arrange
                             <button className='mr-4 items-center p-1 rounded-sm'   
                                 style={{ 
                                     backgroundColor: 'rgba(203, 22, 100, 0.32)',
+                                    position: 'relative',
                                     //outline: '0.1rem solid #1E291E', 
                                     borderRadius: '0.5rem',
                                     boxShadow: '0rem 0rem .25rem .2rem rgba(101, 30, 58, 0.52)',
@@ -82,6 +88,7 @@ export default function Arrangement({ arrangementStore, arrangementId }: arrange
                                 <button className='ml-0 items-center p-1 pr-2 pl-2 rounded-sm' 
                                     style={{ 
                                         backgroundColor: 'rgba(1, 255, 158, 0.12)',
+                                        position: 'relative',
                                         //outline: '0.1rem solid #1E291E', 
                                         borderRadius: '0.5rem',
                                         boxShadow: '0rem 0rem .25rem .2rem rgba(93, 148, 125, 0.8)',

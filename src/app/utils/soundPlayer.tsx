@@ -8,7 +8,12 @@ import { StoreApi, UseBoundStore } from "zustand";
 type PlayMeasureProps = {
   measureStore: UseBoundStore<StoreApi<MeasureStoreType>>;
   arrangementStore: UseBoundStore<StoreApi<ArrangementStoreType>>;
-  compositionId: number;
+  measureId: number;
+}
+
+type PlayAllMeasuresProps = {
+  measureStore: UseBoundStore<StoreApi<MeasureStoreType>>;
+  arrangementStore: UseBoundStore<StoreApi<ArrangementStoreType>>;
 }
 
 const makeSynth = async () => {
@@ -57,7 +62,7 @@ export const playChordProgression = async (chordNotes: string[][], bpm: number, 
   
   Tone.getTransport().start(); // Start the transport
 }
-export const playMeasure = async (measureStore: UseBoundStore<StoreApi<MeasureStoreType>>, arrangementStore: UseBoundStore<StoreApi<ArrangementStoreType>>, compositionId: number) => {
+export const playMeasure = async (measureStore: UseBoundStore<StoreApi<MeasureStoreType>>, arrangementStore: UseBoundStore<StoreApi<ArrangementStoreType>>, measureId: number) => {
   const { chords, bpm } = measureStore.getState();
   const { numMeasures, widthMeasure, loop, loopLength } = arrangementStore.getState();
   console.log('chords', chords);
@@ -82,4 +87,32 @@ const createProgression = async (chordNotes: string[][], chordLength: number[], 
     notes: chord,
     duration: Tone.Time("1m").toSeconds() * chordLength[index],
   }));
+};
+
+export const playAllMeasures = async ( 
+  arrangementStore: UseBoundStore<StoreApi<ArrangementStoreType>>
+) => {
+  const { stores } = arrangementStore.getState(); // Retrieve all stored measures from arrangementStore
+
+  if (!stores || stores.length === 0) {
+    console.log("No measures to play.");
+    return;
+  }
+
+  let allChords: string[][] = [];
+  let allLengths: number[] = [];
+  let allStartPositions: number[] = [];
+  let allTimings: number[] = [];
+
+  // Loop through all measures and collect chord data
+  stores.forEach((measure) => {
+    const state = measure.store.getState();
+    allChords = [...allChords, ...state.chords.map((c) => c.notes)];
+    allLengths = [...allLengths, ...state.chords.map((c) => c.length)];
+    allStartPositions = [...allStartPositions, ...state.chords.map((c) => c.startPosition)];
+    allTimings = [...allTimings, ...state.chords.map((c) => c.chordTimingBeat)];
+  });
+
+  // Play all measures sequentially
+  playChordProgression(allChords, 120, allLengths, allStartPositions, allTimings);
 };

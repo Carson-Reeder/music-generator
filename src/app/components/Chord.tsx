@@ -22,40 +22,68 @@ export default function Chord({ chord, compositionId, measureStore, arrangementS
   const { numMeasures, setNumMeasures, widthMeasure, setWidthMeasure,loop, setLoop, loopLength, setLoopLength, bpm, setBpm 
   } = arrangementStore();
 
+  // Conversions
+  const pxToRem = (px: number) => px / parseFloat(getComputedStyle(document.documentElement).fontSize);
+  const remToPx = (rem: number) => rem * parseFloat(getComputedStyle(document.documentElement).fontSize);
+  // Convert chord position in parent element to chord indexBeat and indexMeasure
+  const relativeXtoChordPosition = (id: string, relativeX: number) => {
+    const relativeXRem = pxToRem(relativeX); // Convert px to rem
+    // Calculate indexMeasure and indexBeat
+    // indexBeat is from 0-4 with 0.5 increments
+    // indexMeasure is from 0-numMeasures with 1.0 increments
+    let indexMeasure = Math.floor(relativeXRem / widthMeasure);
+    let indexBeat = Math.round(((relativeXRem % widthMeasure) / widthMeasure)*8 ) / 2;
+    // If indexBeat is 4, that is equal to increase of indexMeasure by 1
+    if (indexBeat >= 4) {
+        indexBeat = indexBeat - 4;
+        indexMeasure += 1;
+    }
+    // Set new chord positions
+    setChordStartPosition(id, indexMeasure);
+    setChordTiming(id, indexBeat);
+  }
+
+  // Used for showing selected chord
   function handleChordClick(id: string) {
     setActiveChordId(id);
     mouseDownTimeRef.current = Date.now();
   }
-
   function handleChordMouseUp(notes: string[]) {
     const clickDuration = Date.now() - mouseDownTimeRef.current;
     if (clickDuration < clickThreshold) playChord(notes);
     setActiveChordId(null);
   }
-  
-
-  const pxToRem = (px: number) => px / parseFloat(getComputedStyle(document.documentElement).fontSize);
-      const remToPx = (rem: number) => rem * parseFloat(getComputedStyle(document.documentElement).fontSize);
-      // Convert chord position in parent element to chord indexBeat and indeMeasure
-      const relativeXtoChordPosition = (id: string, relativeX: number) => {
-          const relativeXRem = pxToRem(relativeX); // Convert px to rem
-          // Calculate indexMeasure and indexBeat
-          // indexBeat is from 0-4 with 0.5 increments
-          // indexMeasure is from 0-numMeasures with 1.0 increments
-          let indexMeasure = Math.floor(relativeXRem / widthMeasure);
-          let indexBeat = Math.round(((relativeXRem % widthMeasure) / widthMeasure)*8 ) / 2;
-          // If indexBeat is 4, that is equal to increase of indexMeasure by 1
-          if (indexBeat >= 4) {
-              indexBeat = indexBeat - 4;
-              indexMeasure += 1;
-          }
-          // Set new chord positions
-          setChordStartPosition(id, indexMeasure);
-          setChordTiming(id, indexBeat);
+  // Ensure chords are within the bounds of the composition
+  useEffect(() => {
+    chords.forEach((chord) => {
+      if (chord.startPosition >= numMeasures) {
+        // Move chord back to the last valid measure
+        setChordStartPosition(chord.id, numMeasures - 1);
       }
+      if (chord.length >= 1) {
+        setChordLength(chord.id, 1);
+      }
+    });
+  }, [numMeasures]); // Trigger whenever numMeasures changes
+
+  // Deselect chord if mouseUp occurs outside of the measure container
+  useEffect(() => {
+    const handleMouseUp = (event: any) => {
+      const measureContainer = document.querySelector(".measure-container");
+      
+      if (!measureContainer?.contains(event.target)) {
+        setActiveChordId(null); // Deselect chord if mouseUp occurs outside
+      }
+    };
   
-
-
+    window.addEventListener("mouseup", handleMouseUp);
+    
+    return () => {
+      window.removeEventListener("mouseup", handleMouseUp);
+    };
+  }, []);
+  
+  // Dragging and resizing chords
   useEffect(() => {
     // Use a unique selector for this composition by including the compositionId
     interact(`.draggable-${compositionId}`)
@@ -103,6 +131,14 @@ export default function Chord({ chord, compositionId, measureStore, arrangementS
       })
       .resizable({
         edges: { right: true },
+        modifiers: [
+          interact.modifiers.restrictEdges({
+            outer: 'parent',
+          }),
+          interact.modifiers.restrictSize({
+            min: { width: remToPx(0.5), height: 0 },
+          }),
+        ],
         listeners: {
           move(event) {
             // set new chord Length
