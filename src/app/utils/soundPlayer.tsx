@@ -26,6 +26,7 @@ const sampler = new Tone.Sampler({
         sampler.triggerAttackRelease(["C1", "E1", "G1", "B1"], 0.5);
     }
 }).connect(gainNode).toDestination();
+error 
 
 
 
