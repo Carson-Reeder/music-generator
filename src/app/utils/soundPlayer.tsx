@@ -1,6 +1,6 @@
 "use client";
 import * as Tone from "tone";
-let activeSynths: { synth: Tone.PolySynth, notes: string[] }[] = [];
+let activeSynths: { synth: Tone.PolySynth | Tone.Sampler, notes: string[] }[] = [];
 import { MeasureStoreType } from "../stores/MeasureStore";
 import { ArrangementStoreType } from "../stores/ArrangementStore";
 import { StoreApi, UseBoundStore } from "zustand";
@@ -15,23 +15,26 @@ type PlayAllMeasuresProps = {
   measureStore: UseBoundStore<StoreApi<MeasureStoreType>>;
   arrangementStore: UseBoundStore<StoreApi<ArrangementStoreType>>;
 }
+const gainNode = new Tone.Gain(-0.8).toDestination();
+const sampler = new Tone.Sampler({
+    urls: {
+        A4: "saxophone/A4.mp3",
+        A5: "saxophone/A5.mp3",
+    },
+    baseUrl: "Instruments/samples/",
+    onload: () => {
+        sampler.triggerAttackRelease(["C1", "E1", "G1", "B1"], 0.5);
+    }
+}).connect(gainNode).toDestination();
 
-const makeSynth = async () => {
-  const synth = new Tone.PolySynth(Tone.Synth, {
-    oscillator: { type: "sine" },
-    envelope: { release: 0.5 },
-    
-    
-  }).toDestination(); 
-  return synth;
-};
+
 
 export const playChord = async (notes: string[]) => {
   // Stop any currently playing notes
   activeSynths.forEach(({ synth, notes }) => synth.triggerRelease(notes));  // Stop all active synths
   activeSynths = [];  // Reset the array of active synths
 
-  const synth = await makeSynth(); // Create a new synth
+  const synth = sampler; // Create a new synth
   await Tone.start(); // Start the Tone.js context if not already started
 
   // Trigger the new chord
@@ -44,7 +47,7 @@ export const playChord = async (notes: string[]) => {
 export const playChordProgression = async (chordNotes: string[][], bpm: number, chordLength: number[], chordStartPosition: number[], chordTimingBeat: number[]) => {
   activeSynths.forEach(({ synth, notes }) => synth.triggerRelease(notes));  // Stop all active synths
   activeSynths = [];  // Reset the array of active synths
-  const synth = await makeSynth();
+  const synth = sampler;
   //await Tone.start(); // Ensure the audio context is running
 
   Tone.getTransport().stop(); // Stop the transport if it's already running
@@ -93,7 +96,7 @@ export const playAllMeasures = async (
   arrangementStore: UseBoundStore<StoreApi<ArrangementStoreType>>
 ) => {
   const { stores } = arrangementStore.getState(); // Retrieve all stored measures from arrangementStore
-
+  
   if (!stores || stores.length === 0) {
     console.log("No measures to play.");
     return;
