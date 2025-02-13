@@ -12,16 +12,19 @@ export default function AddMeasureLength({arrangementStore}: AddMeasureLengthPro
     return (
         <div className="add-measure"
         style={{
-            height: '2rem',
+            height: '100%',
+            width: '50%',
+            marginRight: '0.25rem',
         }}>
         <button
             className="pb-1"
             onClick={() => setNumMeasures(numMeasures + 1)}
             style={{
+                position: 'relative',
                 backgroundColor: 'rgba(1, 255, 158, 0.12)',
                 borderRadius: '0.5rem',
-                width: '3.5rem',
-                marginLeft: '0.25rem',
+                width: '100%',
+                height: '100%',
                 boxShadow: '0rem 0rem .25rem .2rem rgba(93, 148, 125, 0.8)',
             }}
         >+</button>

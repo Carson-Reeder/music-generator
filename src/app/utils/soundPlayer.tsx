@@ -15,18 +15,18 @@ type PlayAllMeasuresProps = {
   measureStore: UseBoundStore<StoreApi<MeasureStoreType>>;
   arrangementStore: UseBoundStore<StoreApi<ArrangementStoreType>>;
 }
-const gainNode = new Tone.Gain(-0.8).toDestination();
+const gainNode = new Tone.Gain(0.5);
 const sampler = new Tone.Sampler({
     urls: {
         A4: "saxophone/A4.mp3",
         A5: "saxophone/A5.mp3",
     },
-    baseUrl: "Instruments/samples/",
+    baseUrl: "Instruments/",
     onload: () => {
-        sampler.triggerAttackRelease(["C1", "E1", "G1", "B1"], 0.5);
+        sampler.triggerAttackRelease(["C4", "E3", "G2", "B1"], 0.25, 0, 0.25); // Play a chord to test the sampler
     }
 }).connect(gainNode).toDestination();
-error 
+
 
 
 

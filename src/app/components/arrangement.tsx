@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { UseBoundStore, StoreApi } from "zustand";
 import { ArrangementStoreType, createArrangementStore } from "../stores/ArrangementStore";
 import { createChordPlaybackStore } from "../stores/MeasureStore";
@@ -12,6 +12,7 @@ import RemoveMeasureLength from "./RemoveMeasureLength";
 import AddWidthMeasure from "./AddWidthMeasure";
 import RemoveWidthMeasure from "./RemoveWidthMeasure";
 import MeasureLabel from "./MeasureLabel";
+import RemoveMeasure from "./RemoveMeasure";
 
 type arrangementProps = {
     arrangementStore: UseBoundStore<StoreApi<ArrangementStoreType>>;
@@ -22,13 +23,11 @@ export default function Arrangement({ arrangementStore, arrangementId }: arrange
     const { numMeasures, setNumMeasures, widthMeasure, setWidthMeasure, stores, createStore, removeStore } = arrangementStore();
     const [selectedChordId, setSelectedChordId] = useState<string | null>(null); // Track last clicked chord
     const [activeChordId, setActiveChordId] = useState<string | null>(null); // Track chord being dragged
-    
+
     const addComposition = () => {
         createStore();
     };
-    const removeComposition = (targetId: number) => {
-        removeStore(targetId);
-    };
+    
 
     return (
         <div>
@@ -37,8 +36,6 @@ export default function Arrangement({ arrangementStore, arrangementId }: arrange
             <label>
                 {numMeasures}
             </label>
-            
-            
             {/* Render fixedComposition components */}
             <div className='arrangement-container pl-6 pt-6 pb-6 m-3 pr-6'
                 style={{ backgroundColor: 'rgba(93, 148, 125, 0.36)',
@@ -54,35 +51,31 @@ export default function Arrangement({ arrangementStore, arrangementId }: arrange
                 {stores.map(({ id, store }) => (
                     <div key={id}>
 
-                        <div className='flex pl-2 pr-2'>
+                        <div className='flex flex-wrap pl-2 pr-2'
+                            style={{}}>
+                            <div className='flex' style={{width: '7rem',height: '2.25rem'}} >
                             <MeasureLabel compositionId={id} />
+                            </div>
+                            <div className='flex' style={{width: '7rem',height: '2.25rem'}} >
                             <AddMeasureLength arrangementStore={arrangementStore} />
                             <RemoveMeasureLength arrangementStore={arrangementStore} />
+                            </div>
+                            <div className='flex' style={{width: '7rem',height: '2.25rem'}}>
                             <AddWidthMeasure arrangementStore={arrangementStore} />
                             <RemoveWidthMeasure arrangementStore={arrangementStore} />
+                            </div>
                         </div>
                             
                         <div className='pl-2 pr-2' >
                             <MeasureToolbar measureStore={store} arrangementStore={arrangementStore} compositionId={id} />
                         </div>
                         {/* Pass in the corresponding store for each Composition */}
-                        <div className='ml-2 mr-2' style={{ overflowX: 'auto', overflowY: 'visible' }}>
+                        <div className='ml-2 mr-2 measure' style={{ overflowX: 'auto', overflowY: 'visible' }}>
                             <Measure measureStore={store} arrangementStore={arrangementStore} compositionId={id} />
                         </div>
                             {/* Remove Composition button */}
                             <div className='mt-2'>
-                            {stores.length !== 1 &&(
-                            <button className='mr-4 items-center p-1 rounded-sm'   
-                                style={{ 
-                                    backgroundColor: 'rgba(203, 22, 100, 0.32)',
-                                    position: 'relative',
-                                    //outline: '0.1rem solid #1E291E', 
-                                    borderRadius: '0.5rem',
-                                    boxShadow: '0rem 0rem .25rem .2rem rgba(101, 30, 58, 0.52)',
-                                }} 
-                                onClick={() => removeComposition(id)}>Delete
-                            </button>
-                            )}              
+                            <RemoveMeasure arrangementStore={arrangementStore} measureId={id} />             
                             {/* Add Composition button */}
                             {id === stores[stores.length-1].id && (
                                 <button className='ml-0 items-center p-1 pr-2 pl-2 rounded-sm' 

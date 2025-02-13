@@ -3,12 +3,10 @@ import React, { useState } from "react";
 import '../../globals.css';
 import FixedComposition from "./components/Measure";
 import Arrangement from "./components/Arrangement";
-import PlayChord from "./components/PlayChords";
 import { getChords } from "./utils/fetchChords";
 import { createChordPlaybackStore } from "./stores/MeasureStore";
-import { playChord, playChordProgression } from "./utils/soundPlayer";
 import { createArrangementStore } from "./stores/ArrangementStore";
-
+import { SUPPORTED_NATIVE_MODULES } from "next/dist/build/webpack/plugins/middleware-plugin";
 
 // Arrangements will be saved as a file so user can leave site and resume work
 // They will be able to have multiple arrangements stores on their account
@@ -43,10 +41,8 @@ export default function MyPage() {
     }
   };
 
-  
-
   return (
-    <div>
+    <div style={{minWidth: '320px'}}>
       {/* Header */}
       <div id="header" className="border items-center border-black rounded-lg h-32 flex flex-col sm:flex-row" 
       style={{ backgroundColor: "rgba(78, 155, 122, 0.98)" }}>
