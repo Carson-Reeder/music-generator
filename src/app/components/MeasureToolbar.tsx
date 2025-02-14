@@ -9,7 +9,7 @@ type MeasureToolbarProps = {
     compositionId: number;
 }
 export default function MeasureToolbar ({ measureStore, arrangementStore, compositionId }: MeasureToolbarProps) {
-    const { chords, setChordTiming, setChordLength, setChordStartPosition
+    const { chords, setChordTiming, setChordLength, setChordStartPosition, instrument, setInstrument, isInstrumentClicked, setIsInstrumentClicked
     } = measureStore();
     const { numMeasures, setNumMeasures, widthMeasure, setWidthMeasure,loop, setLoop, loopLength, setLoopLength, bpm, setBpm 
     } = arrangementStore();
@@ -46,7 +46,8 @@ export default function MeasureToolbar ({ measureStore, arrangementStore, compos
                 style={{backgroundColor: 'rgba(1, 255, 158, 0.12)',
                     boxShadow: '0rem 0rem .2rem .1rem rgba(93, 148, 125, 0.57)',
                     width: '8rem',
-                }}>
+                }}
+                onClick={() => setIsInstrumentClicked(!isInstrumentClicked)}>
                 Instrument
             </button>
 

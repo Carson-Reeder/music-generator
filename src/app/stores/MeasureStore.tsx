@@ -13,6 +13,10 @@ export type MeasureStoreType = {
     setChords: (chords: Chord[]) => void;
     bpm: number;
     setBpm: (bpm: number) => void;
+    instrument: string;
+    isInstrumentClicked: boolean;
+    setIsInstrumentClicked: (isInstrumentClicked: boolean) => void;
+    setInstrument: (instrument: string) => void;
     setChordNotes: (id: string, notes: string[]) => void;
     setChordTiming: (id: string, chordTimingBeat: number) => void;
     setChordLength: (id: string, length: number) => void;
@@ -35,6 +39,12 @@ export const createChordPlaybackStore = () => {return create<MeasureStoreType>((
 
     bpm: 120,
     setBpm: (bpm: number) => set({ bpm }),
+
+    instrument: '1',
+    setInstrument: (instrument: string) => set({ instrument }),
+
+    isInstrumentClicked: false,
+    setIsInstrumentClicked: (isInstrumentClicked: boolean) => set({ isInstrumentClicked }),
     
     setChordNotes: (id: string, notes: string[]) =>
         set((state) => {

@@ -30,3 +30,21 @@ input[type="number"] {
   -webkit-user-drag: none; /* Prevents dragging behavior */
   user-select: none;  /* Prevents accidental text selection */
 }
+
+/* Hide the default scrollbar */
+::-webkit-scrollbar {
+  display: none; /* For Chrome, Safari, and Opera */
+}
+
+.measure-label-child {
+  display: flex;
+  width: 7rem;
+  height: 2.25rem;
+}
+
+.measure-label-parent {
+  display: flex;
+  flex-wrap: wrap;
+  padding-right: 0.5rem;
+  padding-left: 0.5rem;
+}

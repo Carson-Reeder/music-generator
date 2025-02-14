@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from "react";
 import { UseBoundStore, StoreApi } from "zustand";
 import { ArrangementStoreType, createArrangementStore } from "../stores/ArrangementStore";
@@ -13,6 +12,7 @@ import AddWidthMeasure from "./AddWidthMeasure";
 import RemoveWidthMeasure from "./RemoveWidthMeasure";
 import MeasureLabel from "./MeasureLabel";
 import RemoveMeasure from "./RemoveMeasure";
+import AddMeasure from "./AddMeasure";
 
 type arrangementProps = {
     arrangementStore: UseBoundStore<StoreApi<ArrangementStoreType>>;
@@ -24,9 +24,7 @@ export default function Arrangement({ arrangementStore, arrangementId }: arrange
     const [selectedChordId, setSelectedChordId] = useState<string | null>(null); // Track last clicked chord
     const [activeChordId, setActiveChordId] = useState<string | null>(null); // Track chord being dragged
 
-    const addComposition = () => {
-        createStore();
-    };
+    
     
 
     return (
@@ -50,47 +48,37 @@ export default function Arrangement({ arrangementStore, arrangementId }: arrange
                 
                 {stores.map(({ id, store }) => (
                     <div key={id}>
-
-                        <div className='flex flex-wrap pl-2 pr-2'
-                            style={{}}>
-                            <div className='flex' style={{width: '7rem',height: '2.25rem'}} >
-                            <MeasureLabel compositionId={id} />
+                        {!store().isInstrumentClicked && (
+                        <div className='measure-label-parent'>
+                            <div className='measure-label-child'>
+                                <MeasureLabel compositionId={id} />
                             </div>
-                            <div className='flex' style={{width: '7rem',height: '2.25rem'}} >
-                            <AddMeasureLength arrangementStore={arrangementStore} />
-                            <RemoveMeasureLength arrangementStore={arrangementStore} />
+                            <div className='measure-label-child'>
+                                <AddMeasureLength arrangementStore={arrangementStore} />
+                                <RemoveMeasureLength arrangementStore={arrangementStore} />
                             </div>
-                            <div className='flex' style={{width: '7rem',height: '2.25rem'}}>
-                            <AddWidthMeasure arrangementStore={arrangementStore} />
-                            <RemoveWidthMeasure arrangementStore={arrangementStore} />
+                            <div className='measure-label-child'>
+                                <AddWidthMeasure arrangementStore={arrangementStore} />
+                                <RemoveWidthMeasure arrangementStore={arrangementStore} />
                             </div>
                         </div>
-                            
+                        )}
+                        {/* Measure Toolbar */}
                         <div className='pl-2 pr-2' >
                             <MeasureToolbar measureStore={store} arrangementStore={arrangementStore} compositionId={id} />
                         </div>
-                        {/* Pass in the corresponding store for each Composition */}
+                        {/* Measure */}
                         <div className='ml-2 mr-2 measure' style={{ overflowX: 'auto', overflowY: 'visible' }}>
                             <Measure measureStore={store} arrangementStore={arrangementStore} compositionId={id} />
                         </div>
-                            {/* Remove Composition button */}
-                            <div className='mt-2'>
+                        {/* Add or Remove Measures */}
+                        <div className='mt-2 mb-2 flex flex-wrap'
+                            style={{marginLeft: '0.5rem'
+
+                            }}>
                             <RemoveMeasure arrangementStore={arrangementStore} measureId={id} />             
-                            {/* Add Composition button */}
-                            {id === stores[stores.length-1].id && (
-                                <button className='ml-0 items-center p-1 pr-2 pl-2 rounded-sm' 
-                                    style={{ 
-                                        backgroundColor: 'rgba(1, 255, 158, 0.12)',
-                                        position: 'relative',
-                                        //outline: '0.1rem solid #1E291E', 
-                                        borderRadius: '0.5rem',
-                                        boxShadow: '0rem 0rem .25rem .2rem rgba(93, 148, 125, 0.8)',
-                                    }} 
-                                    onClick={addComposition}>Add New Composition
-                                    
-                                </button> 
-                            )}               
-                            </div>
+                            <AddMeasure arrangementStore={arrangementStore} measureId={id} />               
+                        </div>
                     </div>
                 ))}
                   
