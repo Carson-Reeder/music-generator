@@ -4,18 +4,12 @@ import { UseBoundStore, StoreApi } from 'zustand';
 
 type RemoveMeasureLengthProps = {
     arrangementStore: UseBoundStore<StoreApi<ArrangementStoreType>>;
-
 }
 
 export default function RemoveMeasureLength({arrangementStore}: RemoveMeasureLengthProps) {
     const { numMeasures, setNumMeasures } = arrangementStore();
     return (
-        <div className="add-measure"
-        style={{
-            height: '100%',
-            width: '50%',
-            marginRight: '0.25rem',
-        }}>
+        <div className="add-measure">
         <button
             className="pb-1"
             onClick={() => setNumMeasures(numMeasures - 1)}

@@ -3,7 +3,7 @@ export const getChords = async (scale: string, threadId: any, chords: any) => {
     if (!scale.trim()) return; // scale is empty
 
     try {
-        const response = await fetch("/api", {
+        const response = await fetch("/api/assistant", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ scale, threadId }),

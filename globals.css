@@ -35,16 +35,54 @@ input[type="number"] {
 ::-webkit-scrollbar {
   display: none; /* For Chrome, Safari, and Opera */
 }
-
+.add-measure {
+  display: flex;
+  justify-content: center;
+  height: 100%;
+  width: 46%;
+}
 .measure-label-child {
   display: flex;
-  width: 7rem;
-  height: 2.25rem;
+  width: 45%;
+  height: 2.25rem; /* Stack button wrappers */
+  justify-content: space-between; /* Ensures equal spacing */
+  align-items: center;
 }
 
 .measure-label-parent {
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: wrap; 
+  justify-content: space-between;
   padding-right: 0.5rem;
   padding-left: 0.5rem;
+  width: 100%;
+  min-width: 5rem;
+  padding-bottom: 0.75rem;
+  
+}
+.measure-display-parent {
+  display: grid;
+  grid-template-rows: 1.3rem 1.3rem 1.3rem 1.3rem 1.3rem 1.3rem; 
+  grid-template-columns: 6rem 6rem 6rem 6rem 6rem 6rem;
+  gap: 0rem; 
+  list-style: none; 
+  height: 5.25rem;
+  overflow-y: scroll;
+}
+
+
+.measure-display-child {
+  height: 100%;
+  width: 100%;
+  background-color: 'rgba(1, 255, 158, 0.01)';
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 0.875rem;
+}
+
+.measure-display-child:hover {
+  background-color: #111827; 
+  color: white; 
+  cursor: pointer;
 }

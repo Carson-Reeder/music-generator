@@ -14,7 +14,7 @@ export default function MeasureToolbar ({ measureStore, arrangementStore, compos
     const { numMeasures, setNumMeasures, widthMeasure, setWidthMeasure,loop, setLoop, loopLength, setLoopLength, bpm, setBpm 
     } = arrangementStore();
     return(
-        <div className='flex bg-gray-200 mt-5 mb-2 mr-0 border border-0 h-8 p-0'
+        <div className='flex bg-gray-200 mb-2 mr-0 border border-0 h-8 p-0'
             style={{
                 borderRadius: '0.5rem',
                 overflow: 'hidden',
