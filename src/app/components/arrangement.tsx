@@ -76,6 +76,7 @@ export default function Arrangement({
                     width: "20%",
                     height: "100%",
                     flexShrink: "0",
+                    flexGrow: "0",
                     minWidth: "6rem",
                     maxWidth: "9rem",
                   }}
@@ -89,11 +90,17 @@ export default function Arrangement({
                 <div
                   style={{
                     width: "80%",
-                    height: "100%",
+                    height: "5.25rem",
+                    left: "0",
+                    flexGrow: "2",
+                    bottom: "0",
                     boxShadow:
                       "0rem 0rem .25rem .2rem rgba(93, 148, 125, 0.57)",
                     borderRadius: "0.5rem",
                     marginRight: "0.5rem",
+                    marginLeft: "0.5rem",
+                    marginBottom: "0.75rem",
+                    overflowY: "auto",
                   }}
                   className=""
                 >

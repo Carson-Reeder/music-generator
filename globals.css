@@ -3,9 +3,9 @@
 @tailwind utilities;
 
 :root {
-    --background: black; /* Light background */
-    --foreground: #111827; /* Dark text */
-  }
+  --background: black; /* Light background */
+  --foreground: #111827; /* Dark text */
+}
 
 /* Remove spinner controls in Chrome, Safari, Edge, Opera */
 input::-webkit-inner-spin-button,
@@ -26,9 +26,9 @@ input[type="number"] {
   -ms-user-select: none; /* Internet Explorer/Edge */
 }
 .draggable {
-  touch-action: none;  /* Prevents touch scrolling during dragging */
+  touch-action: none; /* Prevents touch scrolling during dragging */
   -webkit-user-drag: none; /* Prevents dragging behavior */
-  user-select: none;  /* Prevents accidental text selection */
+  user-select: none; /* Prevents accidental text selection */
 }
 
 /* Hide the default scrollbar */
@@ -51,38 +51,34 @@ input[type="number"] {
 
 .measure-label-parent {
   display: flex;
-  flex-wrap: wrap; 
+  flex-wrap: wrap;
   justify-content: space-between;
-  padding-right: 0.5rem;
   padding-left: 0.5rem;
   width: 100%;
   min-width: 5rem;
   padding-bottom: 0.75rem;
-  
 }
 .measure-display-parent {
-  display: grid;
-  grid-template-rows: 1.3rem 1.3rem 1.3rem 1.3rem 1.3rem 1.3rem; 
-  grid-template-columns: 6rem 6rem 6rem 6rem 6rem 6rem;
-  gap: 0rem; 
-  list-style: none; 
+  gap: 0rem;
+  list-style: none;
   height: 5.25rem;
+  bottom: 0;
   overflow-y: scroll;
+  font-size: 0.875rem;
 }
-
 
 .measure-display-child {
   height: 100%;
   width: 100%;
-  background-color: 'rgba(1, 255, 158, 0.01)';
-  display: flex;
+  background-color: "rgba(1, 255, 158, 0.01)";
+  display: block;
   justify-content: center;
   align-items: center;
   font-size: 0.875rem;
 }
 
 .measure-display-child:hover {
-  background-color: #111827; 
-  color: white; 
+  background-color: #111827;
+  color: white;
   cursor: pointer;
 }
