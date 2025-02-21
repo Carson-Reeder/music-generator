@@ -51,10 +51,13 @@ export const loadInstrument = async ({ measureStore }: loadInstrumentProps) => {
       urls: {
         [selectedInstrument
           .knownNotes[0]]: `${selectedInstrument.category}/${selectedInstrument.name}/${selectedInstrument.knownNotes[0]}.mp3`,
-        [selectedInstrument
-          .knownNotes[1]]: `${selectedInstrument.category}/${selectedInstrument.name}/${selectedInstrument.knownNotes[1]}.mp3`,
-        [selectedInstrument
-          .knownNotes[2]]: `${selectedInstrument.category}/${selectedInstrument.name}/${selectedInstrument.knownNotes[2]}.mp3`,
+        ...selectedInstrument.knownNotes.reduce(
+          (acc, note) => ({
+            ...acc,
+            [note]: `${selectedInstrument.category}/${selectedInstrument.name}/${note}.mp3`,
+          }),
+          {}
+        ),
       },
       baseUrl: "Instruments/",
       onerror: (error) => {
@@ -73,18 +76,25 @@ export const loadInstrument = async ({ measureStore }: loadInstrumentProps) => {
 };
 
 export const playChord = async ({ notes, measureStore }: playChordsProps) => {
-  // Stop any currently playing notes
-  activeSynths.forEach(({ sampler, notes }) => sampler.triggerRelease(notes)); // Stop all active synths
-  activeSynths = []; // Reset the array of active synths
-  const { instrument } = measureStore.getState();
-  await loadInstrument({ measureStore }); // Load the instrument if not already loaded
-  const sampler = loadedInstruments[instrument.id]; // Create a new synth
-  await Tone.start(); // Start the Tone.js context if not already started
-  await Tone.loaded(); // Ensure all samples are loaded
-  // Trigger the new chord
-  sampler.triggerAttackRelease(notes, "4n");
+  activeSynths.forEach(({ sampler, notes }) => sampler.triggerRelease(notes));
+  activeSynths = [];
 
-  // Store the new synth in the activeSynths array
+  const { instrument } = measureStore.getState();
+  const sampler = loadedInstruments[instrument.id];
+
+  await Tone.start();
+  await Tone.loaded();
+
+  notes.forEach((note) => {
+    const detune = Math.random() * 0.5 - 0.25; // Slight detuning
+    sampler.triggerAttackRelease(
+      Tone.Frequency(note).transpose(detune).toFrequency(),
+      "4n",
+      Tone.now(),
+      Math.random() * 0.2 + 0.8 // Slight velocity variation
+    );
+  });
+
   activeSynths.push({ sampler, notes });
 };
 
@@ -93,32 +103,40 @@ export const playChordProgression = async (
   bpm: number,
   chordLength: number[],
   chordStartPosition: number[],
-  chordTimingBeat: number[]
+  chordTimingBeat: number[],
+  measureStore: UseBoundStore<StoreApi<MeasureStoreType>>
 ) => {
-  activeSynths.forEach(({ synth, notes }) => synth.triggerRelease(notes)); // Stop all active synths
-  activeSynths = []; // Reset the array of active synths
-  const synth = sampler;
-  //await Tone.start(); // Ensure the audio context is running
+  activeSynths.forEach(({ sampler, notes }) => sampler.triggerRelease(notes));
+  activeSynths = [];
 
-  Tone.getTransport().stop(); // Stop the transport if it's already running
-  Tone.getTransport().cancel(); // Clear all scheduled events
-  Tone.getTransport().position = "0:0"; // Reset the position to the start
-  Tone.getTransport().bpm.value = bpm; // Set tempo
+  const { instrument } = measureStore.getState();
+  const sampler = loadedInstruments[instrument.id];
+
+  Tone.getTransport().stop();
+  Tone.getTransport().cancel();
+  Tone.getTransport().position = "0:0";
+  Tone.getTransport().bpm.value = bpm;
+
   const progression = await createProgression(
     chordNotes,
     chordLength,
     chordTimingBeat,
     chordStartPosition
   );
-  console.log(progression);
-  let fart = new Tone.Part((time, chord) => {
-    synth.triggerAttackRelease(chord.notes, chord.duration, time);
-  }, progression).start();
-  console.log(chordStartPosition);
-  console.log(chordLength);
-  console.log(chordTimingBeat);
 
-  Tone.getTransport().start(); // Start the transport
+  let part = new Tone.Part((time, chord) => {
+    chord.notes.forEach((note: any) => {
+      const detune = Math.random() * 0.05 - 0.025; // Slight detuning
+      sampler.triggerAttackRelease(
+        Tone.Frequency(note).transpose(detune).toFrequency(),
+        chord.duration,
+        time,
+        Math.random() * 0.2 + 0.8 // Slight velocity variation
+      );
+    });
+  }, progression).start();
+
+  Tone.getTransport().start("+0.05");
 };
 export const playMeasure = async (
   measureStore: UseBoundStore<StoreApi<MeasureStoreType>>,
@@ -128,18 +146,13 @@ export const playMeasure = async (
   const { chords, bpm } = measureStore.getState();
   const { numMeasures, widthMeasure, loop, loopLength } =
     arrangementStore.getState();
-  console.log("chords", chords);
-  console.log("bpm", bpm);
-  console.log("numMeasures", numMeasures);
-  console.log("widthMeasure", widthMeasure);
-  console.log("loop", loop);
-  console.log("loopLength", loopLength);
   playChordProgression(
     chords.map((c) => c.notes),
     bpm,
     chords.map((c) => c.length),
     chords.map((c) => c.startPosition),
-    chords.map((c) => c.chordTimingBeat)
+    chords.map((c) => c.chordTimingBeat),
+    measureStore
   );
 };
 
@@ -160,7 +173,7 @@ const createProgression = async (
 export const playAllMeasures = async (
   arrangementStore: UseBoundStore<StoreApi<ArrangementStoreType>>
 ) => {
-  const { stores } = arrangementStore.getState(); // Retrieve all stored measures from arrangementStore
+  const { stores } = arrangementStore.getState();
 
   if (!stores || stores.length === 0) {
     console.log("No measures to play.");
@@ -171,25 +184,30 @@ export const playAllMeasures = async (
   let allLengths: number[] = [];
   let allStartPositions: number[] = [];
   let allTimings: number[] = [];
+  let measureStores: UseBoundStore<StoreApi<MeasureStoreType>>[] = [];
 
-  // Loop through all measures and collect chord data
-  stores.forEach((measure) => {
+  for (const measure of stores) {
     const state = measure.store.getState();
-    allChords = [...allChords, ...state.chords.map((c) => c.notes)];
-    allLengths = [...allLengths, ...state.chords.map((c) => c.length)];
-    allStartPositions = [
-      ...allStartPositions,
-      ...state.chords.map((c) => c.startPosition),
-    ];
-    allTimings = [...allTimings, ...state.chords.map((c) => c.chordTimingBeat)];
-  });
+
+    // Load instrument if needed
+    await loadInstrument({ measureStore: measure.store });
+
+    allChords.push(...state.chords.map((c) => c.notes));
+    allLengths.push(...state.chords.map((c) => c.length));
+    allStartPositions.push(...state.chords.map((c) => c.startPosition));
+    allTimings.push(...state.chords.map((c) => c.chordTimingBeat));
+    measureStores.push(measure.store);
+  }
 
   // Play all measures sequentially
-  playChordProgression(
-    allChords,
-    120,
-    allLengths,
-    allStartPositions,
-    allTimings
-  );
+  for (const measureStore of measureStores) {
+    await playChordProgression(
+      allChords,
+      120,
+      allLengths,
+      allStartPositions,
+      allTimings,
+      measureStore
+    );
+  }
 };

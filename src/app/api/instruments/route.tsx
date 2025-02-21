@@ -13,6 +13,7 @@ const knownNotes: Record<string, [string, string, string]> = {
   trumpet: ["A3", "C4", "D5"],
   tuba: ["F2", "F3", "D4"],
   harmonium: ["C2", "C3", "C4"],
+  flute: ["C4", "C5", "C6"],
 };
 
 // Read instruments folder and create an object with the instrument name and its samples
@@ -62,7 +63,7 @@ export async function GET() {
         category,
         name: instrument,
         //samples: files,
-        knownNotes: knownNotes[instrument] || ["Unknown", "Unknown"],
+        knownNotes: knownNotes[instrument] || ["Unknown"],
       });
     });
   });
