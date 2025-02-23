@@ -60,7 +60,7 @@ export default function Arrangement({
           Play All Measures
         </button>
 
-        {stores.map(({ id, store }) => {
+        {stores.map(({ id, store }, index) => {
           return (
             <div key={id}>
               <div
@@ -82,10 +82,10 @@ export default function Arrangement({
                   }}
                   className="flex flex-wrap"
                 >
-                  {id === 1 ? (
+                  {index === 0 ? (
                     <MeasureControls arrangementStore={arrangementStore} />
                   ) : null}
-                  <MeasureLabel compositionId={id} />
+                  <MeasureLabel index={index} />
                 </div>
                 <div
                   style={{

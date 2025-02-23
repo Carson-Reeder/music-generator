@@ -1,10 +1,10 @@
 //import React from "react";
 
 type MeasureLabelProps = {
-  compositionId: number;
+  index: number;
 };
 
-export default function MeasureLabel({ compositionId }: MeasureLabelProps) {
+export default function MeasureLabel({ index }: MeasureLabelProps) {
   return (
     <div className="flex measure-label-parent">
       <label
@@ -22,7 +22,7 @@ export default function MeasureLabel({ compositionId }: MeasureLabelProps) {
           color: "rgb(20, 78, 66)",
         }}
       >
-        Measure {compositionId}
+        Measure {index + 1}
       </label>
     </div>
   );
