@@ -6,7 +6,7 @@ import { loadInstrument } from "../utils/soundPlayer";
 import Arrangement from "./Arrangement";
 
 type Instrument = {
-  id: number;
+  id: string;
   category: string;
   name: string;
   knownNotes: string[];
@@ -18,8 +18,8 @@ type ShowInstrumentProps = {
 
 export default function ShowInstruments({ measureStore }: ShowInstrumentProps) {
   //const [instruments, setInstruments] = useState<InstrumentData[]>([]);
-  const [selectedCategory, setSelectedCategory] = useState<number | null>(null);
-  const [selectedInstrument, setSelectedInstrument] = useState<number | null>(
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [selectedInstrument, setSelectedInstrument] = useState<string | null>(
     null
   );
   const { setInstrument } = measureStore();

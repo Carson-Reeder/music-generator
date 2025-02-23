@@ -23,6 +23,7 @@ export default function Measure ({measureStore, compositionId, arrangementStore}
     const { widthComposition, numMeasures, setNumMeasures, widthMeasure, setWidthMeasure,loop, setLoop, loopLength, setLoopLength, bpm, setBpm 
     } = arrangementStore();
     const chords = measureStore((state) => state.chords);
+    
   
     return (
             // Render measure container

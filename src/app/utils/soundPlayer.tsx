@@ -1,6 +1,6 @@
 "use client";
 import * as Tone from "tone";
-let activeSynths: { sampler: Tone.Sampler; notes: string[] }[] = [];
+
 import { MeasureStoreType } from "../stores/MeasureStore";
 import { ArrangementStoreType } from "../stores/ArrangementStore";
 import { StoreApi, UseBoundStore } from "zustand";
@@ -23,6 +23,21 @@ type PlayAllMeasuresProps = {
 
 // Store all instruments in a cache to avoid reloading them
 let loadedInstruments: { [id: string]: Tone.Sampler } = {};
+// Keep track of active samplers
+let lastNotesPlayed: string[] = [];
+let activeSynths: { sampler: Tone.Sampler; lastNotesPlayed: string[] }[] = [];
+
+function cancelActiveNotes(notes: string[], sampler: Tone.Sampler) {
+  if (activeSynths.length === 0) {
+    lastNotesPlayed = notes;
+    return;
+  }
+  activeSynths.forEach(({ sampler, lastNotesPlayed }) =>
+    sampler.triggerRelease(lastNotesPlayed)
+  );
+  lastNotesPlayed = notes;
+  activeSynths.push({ sampler: sampler, lastNotesPlayed });
+}
 
 export const loadInstrument = async ({ measureStore }: loadInstrumentProps) => {
   // Ensure the audio context is running.
@@ -47,10 +62,10 @@ export const loadInstrument = async ({ measureStore }: loadInstrumentProps) => {
 
   // If we don't have the sampler cached, create it.
   if (!loadedInstruments[instrument.id]) {
+    const compressor = new Tone.Compressor(-40, 4).toDestination();
+
     sampler = new Tone.Sampler({
       urls: {
-        [selectedInstrument
-          .knownNotes[0]]: `${selectedInstrument.category}/${selectedInstrument.name}/${selectedInstrument.knownNotes[0]}.mp3`,
         ...selectedInstrument.knownNotes.reduce(
           (acc, note) => ({
             ...acc,
@@ -64,23 +79,27 @@ export const loadInstrument = async ({ measureStore }: loadInstrumentProps) => {
         console.error("Sampler error:", error);
       },
       onload: () => {},
-    }).toDestination();
+      attack: 0.05, // Smooth fade-out
+    });
+
+    // Connect the sampler to the filter before sending it to the destination
+    sampler.connect(compressor);
+
     loadedInstruments[instrument.id] = sampler;
     console.log("Loaded new sampler for instrument:", instrument.id);
   } else {
     sampler = loadedInstruments[instrument.id];
     console.log("Using cached sampler for instrument:", instrument.id);
   }
+
   await Tone.loaded();
-  sampler.triggerAttackRelease("C4", 0.5, Tone.now(), 0.25);
+  sampler.triggerAttackRelease("C4", 0.5, Tone.now() * 1.01, 0.25);
 };
 
 export const playChord = async ({ notes, measureStore }: playChordsProps) => {
-  activeSynths.forEach(({ sampler, notes }) => sampler.triggerRelease(notes));
-  activeSynths = [];
-
   const { instrument } = measureStore.getState();
   const sampler = loadedInstruments[instrument.id];
+  cancelActiveNotes(notes, sampler);
 
   await Tone.start();
   await Tone.loaded();
@@ -94,8 +113,6 @@ export const playChord = async ({ notes, measureStore }: playChordsProps) => {
       Math.random() * 0.2 + 0.8 // Slight velocity variation
     );
   });
-
-  activeSynths.push({ sampler, notes });
 };
 
 export const playChordProgression = async (
@@ -106,9 +123,6 @@ export const playChordProgression = async (
   chordTimingBeat: number[],
   measureStore: UseBoundStore<StoreApi<MeasureStoreType>>
 ) => {
-  activeSynths.forEach(({ sampler, notes }) => sampler.triggerRelease(notes));
-  activeSynths = [];
-
   const { instrument } = measureStore.getState();
   const sampler = loadedInstruments[instrument.id];
 

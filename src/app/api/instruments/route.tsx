@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import fs from "fs";
 import path from "path";
 
-const knownNotes: Record<string, [string, string, string]> = {
+const knownNotes: Record<string, string[]> = {
   "bass-electric": ["E2", "E3", "E4"],
   bassoon: ["A2", "A3", "A4"],
   cello: ["A2", "A3", "A4"],
@@ -10,7 +10,7 @@ const knownNotes: Record<string, [string, string, string]> = {
   "french-horn": ["A1", "C2", "C4"],
   saxophone: ["B3", "B4", "C5"],
   trombone: ["F2", "C3", "C4"],
-  trumpet: ["A3", "C4", "D5"],
+  trumpet: ["A3", "A5", "C4", "C5", "C6", "D5", "F3", "F4", "F5", "G4"],
   tuba: ["F2", "F3", "D4"],
   harmonium: ["C2", "C3", "C4"],
   flute: ["C4", "C5", "C6"],
@@ -32,7 +32,7 @@ export async function GET() {
     category: string;
     name: string;
     //samples: { name: string }[];
-    knownNotes: [string, string, string];
+    knownNotes: string[];
   }[] = [];
 
   let idCounter = 1;
