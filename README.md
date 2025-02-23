@@ -7,7 +7,9 @@ The goal for this web app is to:
 
 Known Bugs:
 - Load the page and create 2 extra measures. Delete the first measure. Now when trying to move chords, they are bugged and dragging on measure 2 moves the chords on measure 1.
-  This obviously has something to do with me changing the id after removing a measure and how the measures are rendered
+  This obviously has something to do with me changing the id after removing a measure and how the measures are rendered. More specifically in Chords.tsx component I am using compositionId as a unique class for the chords.
+  I believe this to be the issue.
+  
   
 
 
