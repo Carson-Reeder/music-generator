@@ -18,6 +18,7 @@ import RemoveMeasure from "./RemoveMeasure";
 import AddMeasure from "./AddMeasure";
 import ShowInstruments from "./ShowInstruments";
 import MeasureControls from "./MeasureControls";
+import { ScrollSync, ScrollSyncPane } from "react-scroll-sync";
 
 type arrangementProps = {
   arrangementStore: UseBoundStore<StoreApi<ArrangementStoreType>>;
@@ -60,90 +61,100 @@ export default function Arrangement({
           Play All Measures
         </button>
 
-        {stores.map(({ id, store }, index) => {
-          return (
-            <div key={id}>
-              <div
-                className="flex"
-                style={{
-                  width: "100%",
-                  height: "100%",
-                  justifyContent: "space-between",
-                }}
-              >
-                <div
-                  style={{
-                    width: "20%",
-                    height: "100%",
-                    flexShrink: "0",
-                    flexGrow: "0",
-                    minWidth: "6rem",
-                    maxWidth: "9rem",
-                  }}
-                  className="flex flex-wrap"
-                >
-                  {index === 0 ? (
-                    <MeasureControls arrangementStore={arrangementStore} />
-                  ) : null}
-                  <MeasureLabel index={index} />
-                </div>
-                <div
-                  style={{
-                    width: "80%",
-                    height: "5.25rem",
-                    left: "0",
-                    flexGrow: "2",
-                    bottom: "0",
-                    boxShadow:
-                      "0rem 0rem .25rem .2rem rgba(93, 148, 125, 0.57)",
-                    borderRadius: "0.5rem",
-                    marginRight: "0.5rem",
-                    marginLeft: "0.5rem",
-                    marginBottom: "0.75rem",
-                    overflowY: "auto",
-                  }}
-                  className=""
-                >
-                  <ShowInstruments measureStore={store} />
-                </div>
-              </div>
+        <ScrollSync>
+          <div>
+            {stores.map(({ id, store }, index) => {
+              return (
+                <div key={id}>
+                  <div
+                    className="flex"
+                    style={{
+                      width: "100%",
+                      height: "100%",
+                      justifyContent: "space-between",
+                    }}
+                  >
+                    <div
+                      style={{
+                        width: "20%",
+                        height: "100%",
+                        flexShrink: "0",
+                        flexGrow: "0",
+                        minWidth: "6rem",
+                        maxWidth: "9rem",
+                      }}
+                      className="flex flex-wrap"
+                    >
+                      {index === 0 ? (
+                        <MeasureControls arrangementStore={arrangementStore} />
+                      ) : null}
+                      <MeasureLabel index={index} />
+                    </div>
+                    <div
+                      style={{
+                        width: "80%",
+                        height: "5.25rem",
+                        left: "0",
+                        flexGrow: "2",
+                        bottom: "0",
+                        boxShadow:
+                          "0rem 0rem .25rem .2rem rgba(93, 148, 125, 0.57)",
+                        borderRadius: "0.5rem",
+                        marginRight: "0.5rem",
+                        marginLeft: "0.5rem",
+                        marginBottom: "0.75rem",
+                        overflowY: "auto",
+                      }}
+                      className=""
+                    >
+                      <ShowInstruments measureStore={store} />
+                    </div>
+                  </div>
 
-              {/* Measure Toolbar */}
-              <div className="pl-2 pr-2">
-                <MeasureToolbar
-                  measureStore={store}
-                  arrangementStore={arrangementStore}
-                  compositionId={id}
-                />
-              </div>
-              {/* Measure */}
-              <div
-                className="ml-2 mr-2 measure"
-                style={{ overflowX: "auto", overflowY: "visible" }}
-              >
-                <Measure
-                  measureStore={store}
-                  arrangementStore={arrangementStore}
-                  compositionId={id}
-                />
-              </div>
-              {/* Add or Remove Measures */}
-              <div
-                className="mt-2 mb-2 flex flex-wrap"
-                style={{ marginLeft: "0.5rem" }}
-              >
-                <RemoveMeasure
-                  arrangementStore={arrangementStore}
-                  measureId={id}
-                />
-                <AddMeasure
-                  arrangementStore={arrangementStore}
-                  measureId={id}
-                />
-              </div>
-            </div>
-          );
-        })}
+                  {/* Measure Toolbar */}
+                  <div className="pl-2 pr-2">
+                    <MeasureToolbar
+                      measureStore={store}
+                      arrangementStore={arrangementStore}
+                      compositionId={id}
+                    />
+                  </div>
+                  {/* Measure */}
+
+                  <div
+                    className="ml-2 mr-2 measure"
+                    style={{ overflowX: "auto", overflowY: "visible" }}
+                  >
+                    <ScrollSyncPane>
+                      <div>
+                        <Measure
+                          measureStore={store}
+                          arrangementStore={arrangementStore}
+                          compositionId={id}
+                        />
+                      </div>
+                    </ScrollSyncPane>
+                  </div>
+
+                  {/* Add or Remove Measures */}
+                  <div
+                    className="mt-2 mb-2 flex flex-wrap"
+                    style={{ marginLeft: "0.5rem" }}
+                  >
+                    <RemoveMeasure
+                      arrangementStore={arrangementStore}
+                      measureId={id}
+                    />
+                    <AddMeasure
+                      arrangementStore={arrangementStore}
+                      measureId={id}
+                    />
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </ScrollSync>
       </div>
     </div>
   );

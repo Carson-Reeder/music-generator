@@ -6,47 +6,39 @@ import { ArrangementStoreType } from "../stores/ArrangementStore";
 import { StoreApi, UseBoundStore } from "zustand";
 import { useInstrumentStore } from "../stores/InstrumentStore";
 import { useState } from "react";
+// Store all instruments in a cache to avoid reloading them
+let loadedInstruments: { [id: string]: Tone.Sampler } = {};
 
 type loadInstrumentProps = {
   measureStore: UseBoundStore<StoreApi<MeasureStoreType>>;
 };
 
-type playChordsProps = {
+type playNotesProps = {
   notes: string[];
   measureStore: UseBoundStore<StoreApi<MeasureStoreType>>;
 };
 
-type PlayAllMeasuresProps = {
+type PlayNotesProgressionProps = {
   measureStore: UseBoundStore<StoreApi<MeasureStoreType>>;
   arrangementStore: UseBoundStore<StoreApi<ArrangementStoreType>>;
 };
 
-// Store all instruments in a cache to avoid reloading them
-let loadedInstruments: { [id: string]: Tone.Sampler } = {};
-// Keep track of active samplers
-let lastNotesPlayed: string[] = [];
-let activeSynths: { sampler: Tone.Sampler; lastNotesPlayed: string[] }[] = [];
-
-function cancelActiveNotes(notes: string[], sampler: Tone.Sampler) {
-  if (activeSynths.length === 0) {
-    lastNotesPlayed = notes;
-    return;
-  }
-  activeSynths.forEach(({ sampler, lastNotesPlayed }) =>
-    sampler.triggerRelease(lastNotesPlayed)
-  );
-  lastNotesPlayed = notes;
-  activeSynths.push({ sampler: sampler, lastNotesPlayed });
-}
+const createProgression = async (
+  chordNotes: string[][],
+  chordLength: number[],
+  chordTimingBeat: number[],
+  chordStartPosition: number[]
+) => {
+  return chordNotes.map((chord: any, index: any) => ({
+    time: `${chordStartPosition[index]}:${chordTimingBeat[index]}`,
+    notes: chord,
+    duration: Tone.Time("1m").toSeconds() * chordLength[index],
+  }));
+};
 
 export const loadInstrument = async ({ measureStore }: loadInstrumentProps) => {
-  // Ensure the audio context is running.
-  await Tone.start();
-
   const { instrument } = measureStore.getState();
   const { instruments } = useInstrumentStore.getState();
-  console.log("instrument", instrument);
-  console.log("instruments", instruments);
 
   // Find the selected instrument data.
   const selectedInstrument = instruments.find(
@@ -58,13 +50,11 @@ export const loadInstrument = async ({ measureStore }: loadInstrumentProps) => {
   }
   console.log("Selected instrument:", selectedInstrument);
 
-  let sampler: Tone.Sampler;
-
   // If we don't have the sampler cached, create it.
   if (!loadedInstruments[instrument.id]) {
     const compressor = new Tone.Compressor(-40, 4).toDestination();
 
-    sampler = new Tone.Sampler({
+    var sampler = new Tone.Sampler({
       urls: {
         ...selectedInstrument.knownNotes.reduce(
           (acc, note) => ({
@@ -79,109 +69,73 @@ export const loadInstrument = async ({ measureStore }: loadInstrumentProps) => {
         console.error("Sampler error:", error);
       },
       onload: () => {},
-      attack: 0.05, // Smooth fade-out
+      attack: 0.5,
     });
 
-    // Connect the sampler to the filter before sending it to the destination
     sampler.connect(compressor);
-
     loadedInstruments[instrument.id] = sampler;
     console.log("Loaded new sampler for instrument:", instrument.id);
   } else {
-    sampler = loadedInstruments[instrument.id];
     console.log("Using cached sampler for instrument:", instrument.id);
   }
 
   await Tone.loaded();
-  sampler.triggerAttackRelease("C4", 0.5, Tone.now() * 1.01, 0.25);
+  //sampler.triggerAttackRelease("C4", 0.5, Tone.now() * 1.01, 0.25);
 };
 
-export const playChord = async ({ notes, measureStore }: playChordsProps) => {
+// Can be used to play one note or multiple notes at the same time
+export const playNotes = async ({ notes, measureStore }: playNotesProps) => {
   const { instrument } = measureStore.getState();
+  await loadInstrument({ measureStore });
   const sampler = loadedInstruments[instrument.id];
-  cancelActiveNotes(notes, sampler);
 
-  await Tone.start();
-  await Tone.loaded();
+  if (!sampler) console.error("Sampler not loaded");
+  if (!notes) console.error("No notes to play");
+  if (Tone.context.state !== "running") await Tone.start();
 
   notes.forEach((note) => {
-    const detune = Math.random() * 0.5 - 0.25; // Slight detuning
-    sampler.triggerAttackRelease(
-      Tone.Frequency(note).transpose(detune).toFrequency(),
-      "4n",
-      Tone.now(),
-      Math.random() * 0.2 + 0.8 // Slight velocity variation
-    );
+    sampler.triggerAttackRelease(note, "4n", Tone.now() * 1.0);
+    console.log(Tone.now());
   });
 };
 
-export const playChordProgression = async (
-  chordNotes: string[][],
-  bpm: number,
-  chordLength: number[],
-  chordStartPosition: number[],
-  chordTimingBeat: number[],
-  measureStore: UseBoundStore<StoreApi<MeasureStoreType>>
-) => {
-  const { instrument } = measureStore.getState();
-  const sampler = loadedInstruments[instrument.id];
-
+// Can be used to schedule a progression of notes to be played
+export const playNotesProgression = async ({
+  measureStore,
+  arrangementStore,
+}: PlayNotesProgressionProps) => {
   Tone.getTransport().stop();
   Tone.getTransport().cancel();
-  Tone.getTransport().position = "0:0";
-  Tone.getTransport().bpm.value = bpm;
 
+  const { instrument } = measureStore.getState();
+  await loadInstrument({ measureStore });
+  const sampler = loadedInstruments[instrument.id];
+
+  if (!sampler) console.error("Sampler not loaded");
+  if (Tone.context.state !== "running") await Tone.start();
+
+  const { chords } = measureStore.getState();
+  const { bpm, loop, loopLength } = arrangementStore.getState();
+
+  Tone.getTransport().bpm.value = bpm;
+  Tone.getTransport().loop = loop;
+  Tone.getTransport().loopEnd = "{numMeasures}m";
+  Tone.getTransport().loopStart = "0m";
+
+  // Create progression so that a single array can be passed into Tone.Part
   const progression = await createProgression(
-    chordNotes,
-    chordLength,
-    chordTimingBeat,
-    chordStartPosition
+    chords.map((c) => c.notes), // Contains notes
+    chords.map((c) => c.length), // Contains note lengths
+    chords.map((c) => c.chordTimingBeat), // Contains note timings
+    chords.map((c) => c.startPosition) // Contains note start positions
   );
 
   let part = new Tone.Part((time, chord) => {
     chord.notes.forEach((note: any) => {
-      const detune = Math.random() * 0.05 - 0.025; // Slight detuning
-      sampler.triggerAttackRelease(
-        Tone.Frequency(note).transpose(detune).toFrequency(),
-        chord.duration,
-        time,
-        Math.random() * 0.2 + 0.8 // Slight velocity variation
-      );
+      sampler.triggerAttackRelease(note, chord.duration, time);
     });
   }, progression).start();
-
   Tone.getTransport().start("+0.05");
-};
-export const playMeasure = async (
-  measureStore: UseBoundStore<StoreApi<MeasureStoreType>>,
-  arrangementStore: UseBoundStore<StoreApi<ArrangementStoreType>>,
-  measureId: number
-) => {
-  const { chords, bpm } = measureStore.getState();
-  const { numMeasures, widthMeasure, loop, loopLength } =
-    arrangementStore.getState();
-  playChordProgression(
-    chords.map((c) => c.notes),
-    bpm,
-    chords.map((c) => c.length),
-    chords.map((c) => c.startPosition),
-    chords.map((c) => c.chordTimingBeat),
-    measureStore
-  );
-};
-
-const createProgression = async (
-  chordNotes: string[][],
-  chordLength: number[],
-  chordTimingBeat: number[],
-  chordStartPosition: number[]
-) => {
-  console.log("chordNotes", chordNotes);
-  return chordNotes.map((chord: any, index: any) => ({
-    time: `${chordStartPosition[index]}:${chordTimingBeat[index]}`,
-    notes: chord,
-    duration: Tone.Time("1m").toSeconds() * chordLength[index],
-  }));
 };
 
 export const playAllMeasures = async (
@@ -194,34 +148,45 @@ export const playAllMeasures = async (
     return;
   }
 
-  let allChords: string[][] = [];
-  let allLengths: number[] = [];
-  let allStartPositions: number[] = [];
-  let allTimings: number[] = [];
-  let measureStores: UseBoundStore<StoreApi<MeasureStoreType>>[] = [];
+  Tone.getTransport().cancel();
+  Tone.getTransport().stop();
 
+  // Load all instruments before playing
+  await Promise.all(
+    stores.map((measure) => loadInstrument({ measureStore: measure.store }))
+  );
+
+  let parts: Tone.Part[] = [];
+
+  // Iterate over each measure to create its own Tone.Part
   for (const measure of stores) {
-    const state = measure.store.getState();
+    const { chords } = measure.store.getState();
+    const { instrument } = measure.store.getState();
+    const sampler = loadedInstruments[instrument.id];
 
-    // Load instrument if needed
-    await loadInstrument({ measureStore: measure.store });
+    if (!sampler) {
+      console.error("Sampler not loaded for measure", measure);
+      continue;
+    }
 
-    allChords.push(...state.chords.map((c) => c.notes));
-    allLengths.push(...state.chords.map((c) => c.length));
-    allStartPositions.push(...state.chords.map((c) => c.startPosition));
-    allTimings.push(...state.chords.map((c) => c.chordTimingBeat));
-    measureStores.push(measure.store);
-  }
-
-  // Play all measures sequentially
-  for (const measureStore of measureStores) {
-    await playChordProgression(
-      allChords,
-      120,
-      allLengths,
-      allStartPositions,
-      allTimings,
-      measureStore
+    // Build progression for this measure
+    const progression = await createProgression(
+      chords.map((c) => c.notes),
+      chords.map((c) => c.length),
+      chords.map((c) => c.chordTimingBeat),
+      chords.map((c) => c.startPosition)
     );
+
+    // Create and store a Tone.Part for this measure
+    const part = new Tone.Part((time, chord) => {
+      chord.notes.forEach((note: string) => {
+        sampler.triggerAttackRelease(note, chord.duration, time);
+      });
+    }, progression).start();
+
+    parts.push(part);
   }
+
+  // Start playback with slight delay to ensure timing consistency
+  Tone.getTransport().start("+0.05");
 };

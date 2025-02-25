@@ -28,7 +28,7 @@ export async function GET() {
     ); // Ensure it's a directory
 
   let instrumentMapping: {
-    id: number;
+    id: string;
     category: string;
     name: string;
     //samples: { name: string }[];
@@ -59,7 +59,7 @@ export async function GET() {
         }));
 
       instrumentMapping.push({
-        id: idCounter++,
+        id: (idCounter++).toString(),
         category,
         name: instrument,
         //samples: files,

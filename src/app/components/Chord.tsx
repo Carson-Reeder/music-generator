@@ -3,7 +3,7 @@ import interact from "interactjs";
 import { UseBoundStore, StoreApi } from "zustand";
 import { MeasureStoreType } from "../stores/MeasureStore";
 import { ArrangementStoreType } from "../stores/ArrangementStore";
-import { playChord } from "../utils/soundPlayer";
+import { playNotes } from "../utils/soundPlayer";
 
 type ChordProps = {
   chord: any;
@@ -68,7 +68,7 @@ export default function Chord({
   }
   function handleChordMouseUp(notes: string[]) {
     const clickDuration = Date.now() - mouseDownTimeRef.current;
-    if (clickDuration < clickThreshold) playChord({ notes, measureStore });
+    if (clickDuration < clickThreshold) playNotes({ notes, measureStore });
     setActiveChordId(null);
   }
   // *FIX-sometimes shrinks chord too small when 2 chords occupy last measure* Ensure chords are within the bounds of the composition

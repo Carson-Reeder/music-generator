@@ -7,7 +7,7 @@ import Arrangement from "./components/Arrangement";
 import { getChords } from "./utils/fetchChords";
 import { createChordPlaybackStore } from "./stores/MeasureStore";
 import { createArrangementStore } from "./stores/ArrangementStore";
-import { SUPPORTED_NATIVE_MODULES } from "next/dist/build/webpack/plugins/middleware-plugin";
+import { ScrollSync, ScrollSyncPane } from "react-scroll-sync";
 
 // Arrangements will be saved as a file so user can leave site and resume work
 // They will be able to have multiple arrangements stores on their account
@@ -123,7 +123,14 @@ export default function MyPage() {
           )}
         </div>
       </div>
-      <Arrangement arrangementStore={useArrangementStore} arrangementId={1} />
+      <ScrollSync>
+        <ScrollSyncPane>
+          <Arrangement
+            arrangementStore={useArrangementStore}
+            arrangementId={1}
+          />
+        </ScrollSyncPane>
+      </ScrollSync>
     </div>
   );
 }
