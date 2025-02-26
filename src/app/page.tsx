@@ -3,7 +3,7 @@ import React, { useState, useEffect } from "react";
 import "../../globals.css";
 import { useInstrumentStore } from "./stores/InstrumentStore";
 import FixedComposition from "./components/Measure";
-import Arrangement from "./components/Arrangement";
+import Arrangement from "./components/ArrangementComp";
 import { getChords } from "./utils/fetchChords";
 import { createChordPlaybackStore } from "./stores/MeasureStore";
 import { createArrangementStore } from "./stores/ArrangementStore";

@@ -20,6 +20,9 @@ export type ArrangementStoreType = {
   bpm: number;
   setBpm: (bpm: number) => void;
 
+  allPlaying: boolean;
+  setAllPlaying: (allPlaying: boolean) => void;
+
   stores: { id: number; store: ReturnType<typeof createChordPlaybackStore> }[];
   setStores: (
     stores: { id: number; store: ReturnType<typeof createChordPlaybackStore> }[]
@@ -59,6 +62,9 @@ export const createArrangementStore = () => {
     bpm: 120,
     setBpm: (bpm) => set({ bpm }),
 
+    allPlaying: false,
+    setAllPlaying: (allPlaying) => set({ allPlaying }),
+
     stores: [{ id: 1, store: createChordPlaybackStore() }],
     setStores: (
       stores: {
@@ -67,12 +73,15 @@ export const createArrangementStore = () => {
       }[]
     ) => set({ stores }),
     createStore: () => {
+      console.log("Creating new store...");
       set((state) => {
         const newId =
           state.stores.length > 0
             ? Math.max(...state.stores.map((s) => s.id)) + 1
             : 1;
+        console.log("newId", newId);
         const newStore = createChordPlaybackStore();
+        console.log("newStore", newStore);
         return { stores: [...state.stores, { id: newId, store: newStore }] };
       });
     },

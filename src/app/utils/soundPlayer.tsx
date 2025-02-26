@@ -104,12 +104,41 @@ export const playNotesProgression = async ({
   measureStore,
   arrangementStore,
 }: PlayNotesProgressionProps) => {
-  Tone.getTransport().stop();
-  Tone.getTransport().cancel();
-
   const { instrument } = measureStore.getState();
+  const { numMeasures, stores, allPlaying, setAllPlaying } =
+    arrangementStore.getState();
   await loadInstrument({ measureStore });
   const sampler = loadedInstruments[instrument.id];
+
+  setAllPlaying(false);
+  if (allPlaying) {
+    for (const measure of stores) {
+      measure.store.setState({ isPlaying: false });
+      Tone.getTransport().stop();
+      Tone.getTransport().cancel();
+      Tone.getTransport().position = 0;
+    }
+  }
+
+  const isPlaying = measureStore.getState().isPlaying;
+
+  if (isPlaying && Tone.getTransport().state === "started") {
+    Tone.getTransport().pause();
+    return;
+  } else if (isPlaying && Tone.getTransport().state === "paused") {
+    Tone.getTransport().start();
+    return;
+  }
+
+  for (const measure of stores) {
+    if (measure.store.getState().isPlaying) {
+      measure.store.setState({ isPlaying: false });
+      Tone.getTransport().stop();
+      Tone.getTransport().cancel();
+      Tone.getTransport().position = 0;
+    }
+  }
+  measureStore.setState({ isPlaying: true });
 
   if (!sampler) console.error("Sampler not loaded");
   if (Tone.context.state !== "running") await Tone.start();
@@ -119,7 +148,7 @@ export const playNotesProgression = async ({
 
   Tone.getTransport().bpm.value = bpm;
   Tone.getTransport().loop = loop;
-  Tone.getTransport().loopEnd = "{numMeasures}m";
+  Tone.getTransport().loopEnd = `${numMeasures}m`;
   Tone.getTransport().loopStart = "0m";
 
   // Create progression so that a single array can be passed into Tone.Part
@@ -135,19 +164,28 @@ export const playNotesProgression = async ({
       sampler.triggerAttackRelease(note, chord.duration, time);
     });
   }, progression).start();
+
   Tone.getTransport().start("+0.05");
+  Tone.getTransport().scheduleOnce(() => {
+    console.log("Resetting transport position to 0");
+    part.dispose();
+    Tone.getTransport().stop();
+    Tone.getTransport().position = 0; // Resets the transport position to the start of the loop
+  }, Tone.getTransport().loopEnd);
 };
 
 export const playAllMeasures = async (
   arrangementStore: UseBoundStore<StoreApi<ArrangementStoreType>>
 ) => {
-  const { stores } = arrangementStore.getState();
+  const { stores, setAllPlaying } = arrangementStore.getState();
+  setAllPlaying(true);
 
   if (!stores || stores.length === 0) {
     console.log("No measures to play.");
     return;
   }
 
+  Tone.getTransport().pause();
   Tone.getTransport().cancel();
   Tone.getTransport().stop();
 
@@ -160,6 +198,7 @@ export const playAllMeasures = async (
 
   // Iterate over each measure to create its own Tone.Part
   for (const measure of stores) {
+    measure.store.setState({ isPlaying: true });
     const { chords } = measure.store.getState();
     const { instrument } = measure.store.getState();
     const sampler = loadedInstruments[instrument.id];

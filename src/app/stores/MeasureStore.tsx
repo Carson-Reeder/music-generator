@@ -1,28 +1,25 @@
 import { create } from "zustand";
+import { Instrument } from "./InstrumentStore";
 
-type Chord = {
+export type ChordType = {
   id: string;
   notes: string[];
   startPosition: number;
   length: number;
   chordTimingBeat: number;
 };
-type Instrument = {
-  id: string;
-  category: string;
-  name: string;
-  knownNotes: string[];
-};
 
 export type MeasureStoreType = {
-  chords: Chord[];
-  setChords: (chords: Chord[]) => void;
+  chords: ChordType[];
+  setChords: (chords: ChordType[]) => void;
   bpm: number;
   setBpm: (bpm: number) => void;
   instrument: Instrument;
   setInstrument: (instrument: Instrument) => void;
   isInstrumentClicked: boolean;
   setIsInstrumentClicked: (isInstrumentClicked: boolean) => void;
+  isPlaying: boolean;
+  setIsPlaying: (isPlaying: boolean) => void;
 
   setChordNotes: (id: string, notes: string[]) => void;
   setChordTiming: (id: string, chordTimingBeat: number) => void;
@@ -30,7 +27,7 @@ export type MeasureStoreType = {
   setChordStartPosition: (id: string, startPosition: number) => void;
 };
 // define default chords for array
-const initialChords: Chord[] = [
+const initialChords: ChordType[] = [
   {
     id: "1",
     notes: ["C4", "E4", "G4"],
@@ -80,8 +77,11 @@ export const createChordPlaybackStore = () => {
 
     instrument: initialInstrument,
     setInstrument: (instrument: Instrument) => {
-      set({ instrument }), console.log("Instrument set to:", instrument);
+      set({ instrument });
     },
+
+    isPlaying: false,
+    setIsPlaying: (isPlaying: boolean) => set({ isPlaying: isPlaying }),
 
     isInstrumentClicked: true,
     setIsInstrumentClicked: (isInstrumentClicked: boolean) =>

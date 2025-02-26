@@ -7,6 +7,7 @@ import { ArrangementStoreType } from "../stores/ArrangementStore";
 import MeasureBackground from "./MeasureBackground";
 import MeasureLines from "./MeasureLines";
 import Chord from "./Chord";
+import PlaybackSlider from "./PlaybackSlider";
 
 type MeasureProps = {
   measureStore: UseBoundStore<StoreApi<MeasureStoreType>>;
@@ -19,8 +20,8 @@ export default function Measure({
   compositionId,
   arrangementStore,
 }: MeasureProps) {
-  const chords = measureStore((state) => state.chords);
-  const { widthComposition, bpm, numMeasures } = arrangementStore();
+  const { isPlaying, chords } = measureStore();
+  const { widthComposition, numMeasures } = arrangementStore();
 
   const beatsPerMeasure = 4;
   const totalBeats = numMeasures * beatsPerMeasure;
@@ -47,7 +48,7 @@ export default function Measure({
     const interval = setInterval(updatePosition, 50); // Update every 50ms
 
     return () => clearInterval(interval);
-  }, [numMeasures]);
+  }, [numMeasures, beatsPerMeasure, totalBeats]);
 
   return (
     <div
@@ -67,22 +68,7 @@ export default function Measure({
       <MeasureLines numMeasures={numMeasures} />
 
       {/* Moving slider */}
-      <div
-        className="slider"
-        style={{
-          position: "absolute",
-          top: 0,
-          bottom: 0,
-          left: `${sliderPosition}%`,
-          width: "0.25rem",
-          backgroundColor: "rgba(161, 125, 238, 1)",
-          borderRadius: "0.2rem",
-          border: "0.02rem solid rgb(209, 190, 251)",
-          boxShadow: "0rem 0rem 1.5rem 0.5rem rgba(255, 255, 255, 0.57)",
-          transition: "left 0.02s linear",
-          zIndex: 10,
-        }}
-      />
+      {isPlaying && <PlaybackSlider sliderPosition={sliderPosition} />}
 
       {/* Render chords */}
       {chords.map((chord) => (

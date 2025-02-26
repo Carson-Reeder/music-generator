@@ -1,5 +1,5 @@
 import { create } from "zustand";
-type Instrument = {
+export type Instrument = {
   id: string;
   category: string;
   name: string;
