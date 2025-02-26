@@ -36,7 +36,7 @@ export default function Arrangement({
   const [activeChordId, setActiveChordId] = useState<string | null>(null); // Track chord being dragged
 
   return (
-    <div>
+    <div style={{ zIndex: 0 }}>
       <h1 className="ml-6 pb-1">Arrangement:</h1>
       {/* Render fixedComposition components */}
       <div
@@ -120,7 +120,7 @@ export default function Arrangement({
                     style={{ overflowX: "auto", overflowY: "visible" }}
                   >
                     <ScrollSyncPane>
-                      <div>
+                      <div style={{ overflow: "visible", height: "6rem" }}>
                         <Measure
                           measureStore={store}
                           arrangementStore={arrangementStore}

@@ -93,6 +93,10 @@ export default function Chord({
 
         // Calculate the new length (percentage of a measure)
         const newLength = (chord.length * 4 - overlapBeats) / 4;
+        if (newLength < 0.125) {
+          setChordLength(chord.id, 0.125);
+          return;
+        } // Prevent negative lengths
 
         setChordLength(chord.id, newLength);
       }
@@ -218,6 +222,7 @@ export default function Chord({
       onMouseDown={() => handleChordClick(chord.id)}
       onMouseUp={() => handleChordMouseUp(chord.notes)}
       style={{
+        top: "0rem",
         position: "absolute",
         left: `${
           chord.startPosition * widthMeasure +

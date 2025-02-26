@@ -1,26 +1,30 @@
 import * as Tone from "tone";
 import interact from "interactjs";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { UseBoundStore, StoreApi } from "zustand";
 import { MeasureStoreType } from "../stores/MeasureStore";
 import { ArrangementStoreType } from "../stores/ArrangementStore";
+import { relative } from "path";
+
+const sliderWidth = 0.3; // Width of the slider in rem
 
 type PlaybackSliderProps = {
-  sliderPosition: number;
   compositionId: number;
   arrangementStore: UseBoundStore<StoreApi<ArrangementStoreType>>;
   measureStore: UseBoundStore<StoreApi<MeasureStoreType>>;
 };
 
 export default function PlaybackSlider({
-  sliderPosition,
   compositionId,
   arrangementStore,
   measureStore,
 }: PlaybackSliderProps) {
   const { chords, setChordTiming, setChordLength, setChordStartPosition } =
     measureStore();
-  const { widthMeasure } = arrangementStore();
+  const { widthMeasure, numMeasures } = arrangementStore();
+  const [sliderPosition, setSliderPosition] = useState(0);
+  const beatsPerMeasure = 4;
+  const totalBeats = numMeasures * beatsPerMeasure;
   const pxToRem = (px: number) =>
     px / parseFloat(getComputedStyle(document.documentElement).fontSize);
   const remToPx = (rem: number) =>
@@ -38,15 +42,42 @@ export default function PlaybackSlider({
     if (indexBeat >= 4) {
       indexBeat = indexBeat - 4;
       indexMeasure += 1;
+    } else if (indexBeat < 0) {
+      indexBeat = 0;
+    }
+    if (indexMeasure < 0) {
+      indexMeasure = 0;
     }
     // Set new chord positions
     Tone.getTransport().position = `${indexMeasure}:${indexBeat}:0`;
+    console.log("indexMeasure", indexMeasure);
+    console.log("indexBeat", indexBeat);
     //setChordStartPosition(id, indexMeasure);
     //setChordTiming(id, indexBeat);
   };
   useEffect(() => {
+    const transport = Tone.getTransport();
+
+    const updatePosition = () => {
+      const [bars, beats, sixteenths] = String(transport.position)
+        .split(":")
+        .map(Number);
+
+      const currentBeat = bars * beatsPerMeasure + beats + sixteenths / 4;
+      const progress = currentBeat / totalBeats;
+      if (progress >= 1) {
+        transport.stop();
+        setSliderPosition(0);
+      }
+      setSliderPosition(progress * 100);
+    };
+
+    const interval = setInterval(updatePosition, 50); // Update every 50ms
+
+    return () => clearInterval(interval);
+  }, [numMeasures, beatsPerMeasure, totalBeats]);
+  useEffect(() => {
     interact(`.draggableSlider-${compositionId}`).draggable({
-      inertia: true,
       autoScroll: true,
       allowFrom: "*",
       modifiers: [
@@ -60,14 +91,18 @@ export default function PlaybackSlider({
               const parent = document.querySelector(".measure-container");
               if (!parent) return { x: 0, y: 0 };
               const parentRect = parent.getBoundingClientRect();
+
+              // Ensure snapping stays within bounds
+              const snappedX = Math.max(
+                parentRect.left, // Prevent moving too far left
+                Math.round(
+                  (x - parentRect.left) / (remToPx(widthMeasure) / 8)
+                ) *
+                  (remToPx(widthMeasure) / 8) +
+                  parentRect.left
+              );
               return {
-                // Snap to 1/8th of a measure
-                x:
-                  Math.round(
-                    (x - parentRect.left) / (remToPx(widthMeasure) / 8)
-                  ) *
-                    (remToPx(widthMeasure) / 8) +
-                  parentRect.left,
+                x: snappedX - remToPx(sliderWidth) / 2, // Adjust for slider width
                 y,
               };
             },
@@ -80,15 +115,30 @@ export default function PlaybackSlider({
         move: dragMoveListener,
         end(event) {
           const id = event.target.getAttribute("data-id");
-          // Calculate rem distance of chord from far left of measure container
+          // Calculate rem distance of slider from far left of measure container
           const parentRect = event.target.parentNode.getBoundingClientRect();
           const targetRect = event.target.getBoundingClientRect();
-          const relativeX = targetRect.left - parentRect.left;
+          let relativeX = targetRect.left - parentRect.left;
+          if (relativeX < 0) {
+            relativeX = 0;
+          }
           relativeXtoChordPosition(id, relativeX);
           // Reset position (chords jump around without this)
           event.target.style.transform = "none";
           event.target.setAttribute("data-x", "0");
           event.target.setAttribute("data-y", "0");
+          const transport = Tone.getTransport();
+          const [bars, beats, sixteenths] = String(transport.position)
+            .split(":")
+            .map(Number);
+
+          const currentBeat = bars * beatsPerMeasure + beats + sixteenths / 4;
+          const progress = currentBeat / totalBeats;
+          if (progress >= 1) {
+            transport.stop();
+            setSliderPosition(0);
+          }
+          setSliderPosition(progress * 100);
         },
       },
     });
@@ -97,29 +147,81 @@ export default function PlaybackSlider({
   // Boilerplate interact.js function for dragging chords
   function dragMoveListener(event: any) {
     var target = event.target;
-    var x = (parseFloat(target.getAttribute("data-x")) || 0) + event.dx;
-    var y = (parseFloat(target.getAttribute("data-y")) || 0) + event.dy;
-    target.style.transform = "translate(" + x + "px, " + y + "px)";
-    target.setAttribute("data-x", x);
-    target.setAttribute("data-y", y);
-    event.preventDefault();
+    var parent = target.parentNode.getBoundingClientRect();
+    var x = event.clientX - parent.left;
+
+    // Convert x to percentage for responsive updates
+    var parentWidth = parent.width;
+    var newLeft = (x / parentWidth) * 100;
+
+    // Prevent going out of bounds
+    newLeft = Math.max(0, Math.min(100, newLeft));
+    if (newLeft < sliderWidth) {
+      newLeft = sliderWidth;
+    }
+
+    target.style.left = `calc(${newLeft}% - ${sliderWidth / 2}rem)`; // Adjust for slider width
+    target.setAttribute("data-left", newLeft);
   }
   return (
     <div
-      className={`slider draggable draggableSlider-${compositionId} rounded-md`}
+      className={`slider draggable draggableSlider-${compositionId} rounded-md relative`}
       style={{
         position: "absolute",
-        top: 0,
-        bottom: 0,
-        left: `${sliderPosition}%`,
-        width: "0.25rem",
+        height: "6rem",
+        top: "0rem",
+        left:
+          sliderPosition === 0
+            ? "0rem"
+            : `calc(${sliderPosition}% - ${sliderWidth / 2}rem)`,
+        width: `${sliderWidth}rem`,
         backgroundColor: "rgba(161, 125, 238, 1)",
         borderRadius: "0.2rem",
         border: "0.02rem solid rgb(209, 190, 251)",
         boxShadow: "0rem 0rem 1.5rem 0.5rem rgba(157, 154, 171, 0.57)",
-        transition: "left 0.02s linear",
-        zIndex: 10,
+        transition: "left 0.05s linear",
+        zIndex: 5,
       }}
-    />
+    >
+      {/* Invisible hitbox for better touch targeting */}
+      <div
+        style={{
+          position: "absolute",
+          bottom: 0,
+          width: "2rem", // Make it wider
+          height: "1.5rem", // Increase touch area
+          transform: "translateX(-45%)", // Center it
+          backgroundColor: "rgba(161, 125, 238, 0.15)",
+          borderRadius: "0.2rem", // Invisible but interactive
+          zIndex: 4,
+        }}
+      />
+      {/* Add the bow effect using a pseudo-element */}
+      <div
+        style={{
+          content: '""',
+          position: "absolute",
+          bottom: 0,
+          left: 0,
+          width: "200%",
+          height: "1.25rem", // Height of the bow effect
+          borderRadius: "50% 50% 0 0", // Rounded bottom corners for bow shape
+          backgroundColor: "rgba(161, 125, 238, 1)", // Same as slider color
+        }}
+      />
+      <div
+        style={{
+          content: '""',
+          position: "absolute",
+          bottom: 0,
+          left: 0,
+          width: "200%",
+          transform: "translateX(-50%)",
+          height: "1.25rem", // Height of the bow effect
+          borderRadius: "50% 50% 0 0", // Rounded bottom corners for bow shape
+          backgroundColor: "rgba(161, 125, 238, 1)", // Same as slider color
+        }}
+      />
+    </div>
   );
 }
