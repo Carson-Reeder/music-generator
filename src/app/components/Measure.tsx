@@ -68,7 +68,14 @@ export default function Measure({
       <MeasureLines numMeasures={numMeasures} />
 
       {/* Moving slider */}
-      {isPlaying && <PlaybackSlider sliderPosition={sliderPosition} />}
+      {isPlaying && (
+        <PlaybackSlider
+          sliderPosition={sliderPosition}
+          compositionId={compositionId}
+          arrangementStore={arrangementStore}
+          measureStore={measureStore}
+        />
+      )}
 
       {/* Render chords */}
       {chords.map((chord) => (
