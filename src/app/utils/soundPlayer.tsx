@@ -122,15 +122,20 @@ export const playNotesProgression = async ({
 
   const isPlaying = measureStore.getState().isPlaying;
 
+  // If the transport is playing, pause it
   if (isPlaying && Tone.getTransport().state === "started") {
     Tone.getTransport().pause();
     console.log("Paused transport");
     return;
-  } else if (isPlaying && Tone.getTransport().state === "paused") {
+  } // If the transport is paused, start it again
+  else if (isPlaying && Tone.getTransport().state === "paused") {
     Tone.getTransport().start("+0.05");
     return;
-  } else if (!allPlaying) {
+  } // Stop all measures then start this one
+  else if (!allPlaying) {
     Tone.getTransport().cancel();
+    Tone.getTransport().stop();
+    Tone.getTransport().start();
     for (const measure of stores) {
       if (measure.store.getState().isPlaying) {
         measure.store.setState({ isPlaying: false });
@@ -166,9 +171,9 @@ export const playNotesProgression = async ({
     chord.notes.forEach((note: any) => {
       sampler.triggerAttackRelease(note, chord.duration, time);
     });
-  }, progression).start();
+  }, progression).start("+0.05");
   setAllPlaying(false);
-  Tone.getTransport().start("+0.05");
+  //Tone.getTransport().start("+0.05");
 };
 
 export const playAllMeasures = async (
