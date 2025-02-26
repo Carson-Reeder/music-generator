@@ -8,6 +8,7 @@ import { useInstrumentStore } from "../stores/InstrumentStore";
 import { useState } from "react";
 // Store all instruments in a cache to avoid reloading them
 let loadedInstruments: { [id: string]: Tone.Sampler } = {};
+let currentPart: Tone.Part | null = null;
 
 type loadInstrumentProps = {
   measureStore: UseBoundStore<StoreApi<MeasureStoreType>>;
@@ -110,7 +111,7 @@ export const playNotesProgression = async ({
   await loadInstrument({ measureStore });
   const sampler = loadedInstruments[instrument.id];
 
-  setAllPlaying(false);
+  //setAllPlaying(false);
   if (allPlaying) {
     for (const measure of stores) {
       measure.store.setState({ isPlaying: false });
@@ -128,16 +129,22 @@ export const playNotesProgression = async ({
   } else if (isPlaying && Tone.getTransport().state === "paused") {
     Tone.getTransport().start();
     return;
-  }
-
-  for (const measure of stores) {
-    if (measure.store.getState().isPlaying) {
-      measure.store.setState({ isPlaying: false });
-      Tone.getTransport().stop();
-      Tone.getTransport().cancel();
-      Tone.getTransport().position = 0;
+  } else if (!allPlaying) {
+    for (const measure of stores) {
+      if (measure.store.getState().isPlaying) {
+        measure.store.setState({ isPlaying: false });
+        Tone.getTransport().stop();
+        Tone.getTransport().cancel();
+        Tone.getTransport().position = 0;
+      }
+    }
+    if (currentPart) {
+      console.log("Disposing previous Tone.Part");
+      currentPart?.dispose();
+      currentPart = null;
     }
   }
+
   measureStore.setState({ isPlaying: true });
 
   if (!sampler) console.error("Sampler not loaded");
@@ -159,16 +166,15 @@ export const playNotesProgression = async ({
     chords.map((c) => c.startPosition) // Contains note start positions
   );
 
-  let part = new Tone.Part((time, chord) => {
+  currentPart = new Tone.Part((time, chord) => {
     chord.notes.forEach((note: any) => {
       sampler.triggerAttackRelease(note, chord.duration, time);
     });
   }, progression).start();
-
+  setAllPlaying(false);
   Tone.getTransport().start("+0.05");
   Tone.getTransport().scheduleOnce(() => {
     console.log("Resetting transport position to 0");
-    part.dispose();
     Tone.getTransport().stop();
     Tone.getTransport().position = 0; // Resets the transport position to the start of the loop
   }, Tone.getTransport().loopEnd);
