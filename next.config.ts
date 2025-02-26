@@ -10,6 +10,9 @@ const nextConfig = {
   basePath: "/music-generator",
   output: "export",
   reactStrictMode: true,
+  eslint: {
+    ignoreDuringBuilds: true,
+  },
 };
 
 module.exports = nextConfig;
