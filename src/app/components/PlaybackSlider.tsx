@@ -20,18 +20,7 @@ export default function PlaybackSlider({
 }: PlaybackSliderProps) {
   const { chords, setChordTiming, setChordLength, setChordStartPosition } =
     measureStore();
-  const {
-    numMeasures,
-    setNumMeasures,
-    widthMeasure,
-    setWidthMeasure,
-    loop,
-    setLoop,
-    loopLength,
-    setLoopLength,
-    bpm,
-    setBpm,
-  } = arrangementStore();
+  const { widthMeasure } = arrangementStore();
   const pxToRem = (px: number) =>
     px / parseFloat(getComputedStyle(document.documentElement).fontSize);
   const remToPx = (rem: number) =>
@@ -51,7 +40,7 @@ export default function PlaybackSlider({
       indexMeasure += 1;
     }
     // Set new chord positions
-    Tone.getTransport().position = `${indexMeasure}:${indexBeat}`;
+    Tone.getTransport().position = `${indexMeasure}:${indexBeat}:0`;
     //setChordStartPosition(id, indexMeasure);
     //setChordTiming(id, indexBeat);
   };
@@ -130,7 +119,6 @@ export default function PlaybackSlider({
         boxShadow: "0rem 0rem 1.5rem 0.5rem rgba(157, 154, 171, 0.57)",
         transition: "left 0.02s linear",
         zIndex: 10,
-        transform: "translateX(-50%)",
       }}
     />
   );
