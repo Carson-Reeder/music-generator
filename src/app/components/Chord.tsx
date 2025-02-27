@@ -4,6 +4,8 @@ import { UseBoundStore, StoreApi } from "zustand";
 import { MeasureStoreType } from "../stores/MeasureStore";
 import { ArrangementStoreType } from "../stores/ArrangementStore";
 import { playNotes } from "../utils/soundPlayer";
+import * as Tone from "tone";
+import { playNotesProgression } from "../utils/soundPlayer";
 
 type ChordProps = {
   chord: any;
@@ -22,8 +24,16 @@ export default function Chord({
   const [selectedChordId, setSelectedChordId] = useState<string | null>(null);
   const mouseDownTimeRef = useRef<number>(0);
   const clickThreshold = 200;
-  const { chords, setChordTiming, setChordLength, setChordStartPosition } =
-    measureStore();
+  const {
+    chords,
+    setChordTiming,
+    setChordLength,
+    setChordStartPosition,
+    measureProgress,
+    setMeasureProgress,
+    isPlaying,
+    instrument,
+  } = measureStore();
   const {
     numMeasures,
     setNumMeasures,
@@ -35,7 +45,21 @@ export default function Chord({
     setLoopLength,
     bpm,
     setBpm,
+    allPlaying,
   } = arrangementStore();
+
+  useEffect(() => {
+    if (!isPlaying) return;
+    const progress = Tone.getTransport().position;
+    setMeasureProgress(progress);
+    if (!allPlaying) {
+      playNotesProgression({
+        measureStore,
+        arrangementStore,
+        compositionId,
+      });
+    }
+  }, [chord, instrument]);
 
   // Conversions
   const pxToRem = (px: number) =>

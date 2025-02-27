@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import { Instrument } from "./InstrumentStore";
+import * as Tone from "tone";
 
 export type ChordType = {
   id: string;
@@ -20,6 +21,10 @@ export type MeasureStoreType = {
   setIsInstrumentClicked: (isInstrumentClicked: boolean) => void;
   isPlaying: boolean;
   setIsPlaying: (isPlaying: boolean) => void;
+  measureProgress: any | null;
+  setMeasureProgress: (measureProgress: any) => void;
+  currentPart: any;
+  setCurrentPart: (currentPart: any) => void;
 
   setChordNotes: (id: string, notes: string[]) => void;
   setChordTiming: (id: string, chordTimingBeat: number) => void;
@@ -82,6 +87,12 @@ export const createChordPlaybackStore = () => {
 
     isPlaying: false,
     setIsPlaying: (isPlaying: boolean) => set({ isPlaying: isPlaying }),
+
+    measureProgress: null,
+    setMeasureProgress: (measureProgress: any) => set({ measureProgress }),
+
+    currentPart: null,
+    setCurrentPart: (currentPart: any) => set({ currentPart }),
 
     isInstrumentClicked: true,
     setIsInstrumentClicked: (isInstrumentClicked: boolean) =>

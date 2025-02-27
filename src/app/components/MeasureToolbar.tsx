@@ -67,7 +67,13 @@ export default function MeasureToolbar({
           boxShadow: "0rem 0rem .2rem .1rem rgba(93, 148, 125, 0.57)",
           width: "8rem",
         }}
-        onClick={() => playNotesProgression({ measureStore, arrangementStore })}
+        onClick={() =>
+          playNotesProgression({
+            measureStore,
+            arrangementStore,
+            compositionId,
+          })
+        }
       >
         Play/Pause
       </button>
