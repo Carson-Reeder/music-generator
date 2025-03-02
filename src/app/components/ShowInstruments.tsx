@@ -1,4 +1,5 @@
 import { MeasureStoreType } from "../stores/MeasureStore";
+import { ArrangementStoreType } from "../stores/ArrangementStore";
 import { UseBoundStore, StoreApi } from "zustand";
 import { useState } from "react";
 import { useInstrumentStore } from "../stores/InstrumentStore";
@@ -7,9 +8,13 @@ import { Instrument } from "../stores/InstrumentStore";
 
 type ShowInstrumentProps = {
   measureStore: UseBoundStore<StoreApi<MeasureStoreType>>;
+  arrangementStore: UseBoundStore<StoreApi<ArrangementStoreType>>;
 };
 
-export default function ShowInstruments({ measureStore }: ShowInstrumentProps) {
+export default function ShowInstruments({
+  arrangementStore,
+  measureStore,
+}: ShowInstrumentProps) {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [selectedInstrument, setSelectedInstrument] = useState<string | null>(
     null
@@ -22,7 +27,11 @@ export default function ShowInstruments({ measureStore }: ShowInstrumentProps) {
     new Set(instruments.map((value: Instrument) => value.category))
   ) as string[];
 
-  if (!measureStore().isInstrumentClicked) return null;
+  console.log(
+    "arrangementStore.getState().toolBarSelector",
+    arrangementStore.getState().toolBarSelector
+  );
+  if (arrangementStore.getState().toolBarSelector != "instrument") return null;
 
   return (
     <div className="measure-display-parent">

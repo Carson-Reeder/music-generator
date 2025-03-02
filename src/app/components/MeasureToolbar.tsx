@@ -1,13 +1,14 @@
 import { UseBoundStore, StoreApi } from "zustand";
 import { MeasureStoreType } from "../stores/MeasureStore";
 import { ArrangementStoreType } from "../stores/ArrangementStore";
-import { playNotesProgression } from "../utils/soundPlayer";
+import { playMeasure } from "../utils/soundPlayer";
 
 type MeasureToolbarProps = {
   measureStore: UseBoundStore<StoreApi<MeasureStoreType>>;
   arrangementStore: UseBoundStore<StoreApi<ArrangementStoreType>>;
   compositionId: number;
 };
+
 export default function MeasureToolbar({
   measureStore,
   arrangementStore,
@@ -34,6 +35,8 @@ export default function MeasureToolbar({
     setLoopLength,
     bpm,
     setBpm,
+    toolBarSelector,
+    setToolBarSelector,
   } = arrangementStore();
   return (
     <div
@@ -68,7 +71,7 @@ export default function MeasureToolbar({
           width: "8rem",
         }}
         onClick={() =>
-          playNotesProgression({
+          playMeasure({
             measureStore,
             arrangementStore,
             compositionId,
@@ -86,7 +89,6 @@ export default function MeasureToolbar({
           boxShadow: "0rem 0rem .2rem .1rem rgba(93, 148, 125, 0.57)",
           width: "8rem",
         }}
-        onClick={() => setIsInstrumentClicked(!isInstrumentClicked)}
       >
         Instrument
       </button>
