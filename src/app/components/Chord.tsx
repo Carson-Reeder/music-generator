@@ -6,6 +6,7 @@ import { ArrangementStoreType } from "../stores/ArrangementStore";
 import { playNotes } from "../utils/soundPlayer";
 import * as Tone from "tone";
 import { playNotesProgression } from "../utils/soundPlayer";
+import { loadInstrument } from "../utils/soundPlayer";
 
 type ChordProps = {
   chord: any;
@@ -50,16 +51,25 @@ export default function Chord({
 
   useEffect(() => {
     if (!isPlaying) return;
-    const progress = Tone.getTransport().position;
-    setMeasureProgress(progress);
-    if (!allPlaying) {
-      playNotesProgression({
-        measureStore,
-        arrangementStore,
-        compositionId,
-      });
-    }
-  }, [chord, instrument]);
+    const handleChordChange = async () => {
+      const transportState = Tone.getTransport().state;
+      Tone.getTransport().pause();
+
+      const progress = Tone.getTransport().position;
+      setMeasureProgress(progress);
+
+      if (!allPlaying) {
+        playNotesProgression({
+          measureStore,
+          arrangementStore,
+          compositionId,
+          transportState,
+          reason: "chordUpdate",
+        });
+      }
+    };
+    handleChordChange();
+  }, [chord]);
 
   // Conversions
   const pxToRem = (px: number) =>

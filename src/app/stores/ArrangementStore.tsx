@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import { createChordPlaybackStore } from "./MeasureStore";
+import * as Tone from "tone";
 
 export type ArrangementStoreType = {
   numMeasures: number;
@@ -22,6 +23,9 @@ export type ArrangementStoreType = {
 
   allPlaying: boolean;
   setAllPlaying: (allPlaying: boolean) => void;
+
+  currentPart: Tone.Part | null;
+  setCurrentPart: (currentPart: Tone.Part | null) => void;
 
   stores: { id: number; store: ReturnType<typeof createChordPlaybackStore> }[];
   setStores: (
@@ -64,6 +68,9 @@ export const createArrangementStore = () => {
 
     allPlaying: false,
     setAllPlaying: (allPlaying) => set({ allPlaying }),
+
+    currentPart: null,
+    setCurrentPart: (currentPart) => set({ currentPart }),
 
     stores: [{ id: 1, store: createChordPlaybackStore() }],
     setStores: (

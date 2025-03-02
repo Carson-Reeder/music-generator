@@ -1,33 +1,25 @@
 import { MeasureStoreType } from "../stores/MeasureStore";
 import { UseBoundStore, StoreApi } from "zustand";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useInstrumentStore } from "../stores/InstrumentStore";
 import { loadInstrument } from "../utils/soundPlayer";
-import Arrangement from "./Arrangement";
-
-type Instrument = {
-  id: string;
-  category: string;
-  name: string;
-  knownNotes: string[];
-};
+import { Instrument } from "../stores/InstrumentStore";
 
 type ShowInstrumentProps = {
   measureStore: UseBoundStore<StoreApi<MeasureStoreType>>;
 };
 
 export default function ShowInstruments({ measureStore }: ShowInstrumentProps) {
-  //const [instruments, setInstruments] = useState<InstrumentData[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [selectedInstrument, setSelectedInstrument] = useState<string | null>(
     null
   );
   const { setInstrument } = measureStore();
-  const { instruments, setInstruments } = useInstrumentStore();
+  const { instruments } = useInstrumentStore();
 
   // Get unique categories
   const categories = Array.from(
-    new Set(instruments.map((inst: Instrument) => inst.category))
+    new Set(instruments.map((value: Instrument) => value.category))
   ) as string[];
 
   if (!measureStore().isInstrumentClicked) return null;

@@ -72,6 +72,8 @@ export default function MeasureToolbar({
             measureStore,
             arrangementStore,
             compositionId,
+            transportState: null,
+            reason: "button",
           })
         }
       >

@@ -6,8 +6,18 @@ import { ArrangementStoreType } from "../stores/ArrangementStore";
 import { StoreApi, UseBoundStore } from "zustand";
 import { useInstrumentStore } from "../stores/InstrumentStore";
 import { useEffect } from "react";
+import { ChordType } from "../stores/MeasureStore";
 // Store all instruments in a cache to avoid reloading them
 let loadedInstruments: { [id: string]: Tone.Sampler } = {};
+let currentMeasureStore: UseBoundStore<StoreApi<MeasureStoreType>> | null =
+  null;
+let currentPart: Tone.Part | null = null;
+
+type ProgressionType = {
+  time: string;
+  notes: string[];
+  duration: number;
+}[];
 
 type loadInstrumentProps = {
   measureStore: UseBoundStore<StoreApi<MeasureStoreType>>;
@@ -22,19 +32,68 @@ type PlayNotesProgressionProps = {
   measureStore: UseBoundStore<StoreApi<MeasureStoreType>>;
   arrangementStore: UseBoundStore<StoreApi<ArrangementStoreType>>;
   compositionId: number;
+  transportState: string | null;
+  reason: string;
 };
 
-const createProgression = async (
-  chordNotes: string[][],
-  chordLength: number[],
-  chordTimingBeat: number[],
-  chordStartPosition: number[]
-) => {
-  return chordNotes.map((chord: any, index: any) => ({
+type CreatePartType = {
+  arrangementStore: UseBoundStore<StoreApi<ArrangementStoreType>>;
+  measureStore: UseBoundStore<StoreApi<MeasureStoreType>>;
+  progression: ProgressionType;
+};
+// This function will create an object that contains each note and their timings, this
+// object is used by Tonejs and passed into Tone.Part
+// Called when: measureStore.getState().chords changes, the user clicks the play/pause
+// button
+const createProgression = async (chords: ChordType[]) => {
+  const chordsArray = chords.map((c) => c.notes);
+  const chordLength = chords.map((c) => c.length);
+  const chordTimingBeat = chords.map((c) => c.chordTimingBeat);
+  const chordStartPosition = chords.map((c) => c.startPosition);
+  return chordsArray.map((chord: any, index: any) => ({
     time: `${chordStartPosition[index]}:${chordTimingBeat[index]}`,
     notes: chord,
     duration: Tone.Time("1m").toSeconds() * chordLength[index],
   }));
+};
+const createPart = async ({
+  arrangementStore,
+  measureStore,
+  progression,
+}: CreatePartType) => {
+  const sampler = await loadInstrument({ measureStore });
+  if (!sampler) {
+    console.error("Sampler not loaded");
+    return null;
+  }
+  if (currentPart) {
+    currentPart.dispose();
+  }
+  const part = new Tone.Part((time, chord) => {
+    chord.notes.forEach((note: any) => {
+      sampler.triggerAttackRelease(note, chord.duration, time);
+    });
+  }, progression).start(0);
+  currentPart = part;
+};
+// This function will stop the transport, set isPlaying to false
+// for all measures and set allPlaying to false.
+// Called when: All measures are playing and the user clicks the play/pause button
+// on a specific measure.
+const handleAllPlaying = async (
+  arrangementStore: UseBoundStore<StoreApi<ArrangementStoreType>>
+) => {
+  const transport = Tone.getTransport();
+  const { setAllPlaying, stores } = arrangementStore.getState();
+  transport.stop();
+  transport.cancel();
+  transport.position = "0:0:0";
+  if (Array.isArray(stores)) {
+    for (const measure of stores) {
+      measure.store.setState({ isPlaying: false });
+    }
+  }
+  setAllPlaying(false);
 };
 
 export const loadInstrument = async ({ measureStore }: loadInstrumentProps) => {
@@ -47,7 +106,7 @@ export const loadInstrument = async ({ measureStore }: loadInstrumentProps) => {
   );
   if (!selectedInstrument) {
     console.error("Selected instrument not found");
-    return;
+    return null;
   }
   console.log("Selected instrument:", selectedInstrument);
 
@@ -75,12 +134,12 @@ export const loadInstrument = async ({ measureStore }: loadInstrumentProps) => {
 
     sampler.connect(compressor);
     loadedInstruments[instrument.id] = sampler;
+    await Tone.loaded();
     console.log("Loaded new sampler for instrument:", instrument.id);
   } else {
     console.log("Using cached sampler for instrument:", instrument.id);
   }
-
-  await Tone.loaded();
+  return loadedInstruments[instrument.id];
   //sampler.triggerAttackRelease("C4", 0.5, Tone.now() * 1.01, 0.25);
 };
 
@@ -105,37 +164,92 @@ export const playNotesProgression = async ({
   measureStore,
   arrangementStore,
   compositionId,
+  transportState,
+  reason,
 }: PlayNotesProgressionProps) => {
+  const transport = Tone.getTransport();
+  switch (reason) {
+    // Function being called from play/pause button
+    case "button":
+      switch (transport.state) {
+        // (KEEP PART) If the transport is started, pause it
+        case "started":
+          if (measureStore == currentMeasureStore) {
+            transport.pause();
+            console.log("Paused1 transport");
+            console.log(measureStore);
+          } else {
+            transport.stop();
+            playNotesProgression({
+              measureStore,
+              arrangementStore,
+              compositionId,
+              transportState,
+              reason: "button",
+            });
+          }
+          return;
+        // (KEEP PART) If the transport is paused, start it again
+        case "paused":
+          if (measureStore == currentMeasureStore) {
+            transport.start();
+            console.log("Paused1 transport");
+            console.log(measureStore);
+          } else {
+            transport.stop();
+            playNotesProgression({
+              measureStore,
+              arrangementStore,
+              compositionId,
+              transportState,
+              reason: "button",
+            });
+          }
+          return;
+        // (NEW PART) If the transport is stopped, set everything up again
+        case "stopped":
+          const { bpm, loop, numMeasures } = arrangementStore.getState();
+          const { chords, instrument } = measureStore.getState();
+          Tone.getTransport().cancel();
+          Tone.getTransport().bpm.value = bpm;
+          Tone.getTransport().loop = loop;
+          Tone.getTransport().loopEnd = `${numMeasures}m`;
+
+          const progression = await createProgression(chords);
+
+          if (arrangementStore.getState().currentPart != null) {
+            arrangementStore.getState().currentPart?.dispose();
+          }
+          await createPart({ arrangementStore, measureStore, progression });
+          Tone.getTransport().start();
+          if (currentMeasureStore) {
+            currentMeasureStore.setState({ isPlaying: false });
+          }
+          measureStore.setState({ isPlaying: true });
+          currentMeasureStore = measureStore;
+          return;
+      }
+    case "chordUpdate":
+      Tone.getTransport;
+  }
+  console.log("test");
   const { instrument, isPlaying, measureProgress, setMeasureProgress, chords } =
     measureStore.getState();
   const { numMeasures, stores, allPlaying, setAllPlaying, bpm, loop } =
     arrangementStore.getState();
-  await loadInstrument({ measureStore });
-  const sampler = loadedInstruments[instrument.id];
-  if (!sampler) console.error("Sampler not loaded");
-  const transport = Tone.getTransport();
+  const sampler = await loadInstrument({ measureStore });
+  console.log(sampler);
+  if (!sampler) {
+    console.error("Sampler not loaded");
+    return;
+  }
+  await Tone.loaded();
+
   if (Tone.getContext().state !== "running") await Tone.start();
 
-  // If all measures are playing, stop them all
+  // If all measures are playing, stop them all and set allPlaying/isPlaying to false for all
   if (allPlaying) {
-    transport.stop();
-    transport.cancel();
-    transport.position = "0:0:0";
-    for (const measure of stores) {
-      measure.store.setState({ isPlaying: false });
-    }
-  }
-
-  // (KEEP PART) If the transport is started, pause it
-  if (transport.state === "started" && !measureProgress && isPlaying) {
-    transport.pause();
-    console.log("Paused1 transport");
-    return;
-  } // (KEEP PART) If the transport is paused, start it again
-  else if (transport.state === "paused" && !measureProgress && isPlaying) {
-    transport.start("+0.05");
-    console.log("Resumed1 transport");
-    return;
+    handleAllPlaying(arrangementStore);
   }
   // (NEW PART) Reset transport/slider to 0 if switching to play another measure
   let resetTransport = true;
@@ -153,11 +267,10 @@ export const playNotesProgression = async ({
   if (resetTransport) {
     transport.stop();
   }
-  let transportState = transport.state;
   // Pause transport so new part can be made and position can be changed if needed before resuming
   transport.cancel();
   transport.stop();
-  //transport.position = "0:0:0";
+  transport.position = "0:0:0";
 
   Tone.getTransport().bpm.value = bpm;
   Tone.getTransport().loop = loop;
@@ -165,22 +278,8 @@ export const playNotesProgression = async ({
   //Tone.getTransport().loopStart = "0m";
 
   // Create progression so that a single array can be passed into Tone.Part
-  const progression = await createProgression(
-    chords.map((c) => c.notes), // Contains notes
-    chords.map((c) => c.length), // Contains note lengths
-    chords.map((c) => c.chordTimingBeat), // Contains note timings
-    chords.map((c) => c.startPosition) // Contains note start positions
-  );
-
-  if (measureStore.getState().currentPart) {
-    measureStore.getState().currentPart.dispose();
-  }
-
-  const part = new Tone.Part((time, chord) => {
-    chord.notes.forEach((note: any) => {
-      sampler.triggerAttackRelease(note, chord.duration, time);
-    });
-  }, progression).start();
+  const progression = await createProgression(chords);
+  const part = createPart({ arrangementStore, measureStore, progression });
 
   measureStore.setState({ currentPart: part });
   setAllPlaying(false);
@@ -192,7 +291,7 @@ export const playNotesProgression = async ({
     transport.position = seekTime;
     console.log("Transport position:", transport.position);
     measureStore.setState({ isPlaying: true });
-    transport.start("+0.05");
+    transport.start();
     measureStore.setState({ measureProgress: null });
     return;
   } else if (measureProgress && transportState === "paused") {
@@ -202,8 +301,9 @@ export const playNotesProgression = async ({
     return;
   }
   console.log("Starting from beginning");
+  console.log("Transport position:", transport.position);
   measureStore.setState({ isPlaying: true });
-  Tone.getTransport().start("+0.05");
+  transport.start();
 };
 
 export const playAllMeasures = async (
@@ -242,12 +342,7 @@ export const playAllMeasures = async (
     }
 
     // Build progression for this measure
-    const progression = await createProgression(
-      chords.map((c) => c.notes),
-      chords.map((c) => c.length),
-      chords.map((c) => c.chordTimingBeat),
-      chords.map((c) => c.startPosition)
-    );
+    const progression = await createProgression(chords);
 
     // Create and store a Tone.Part for this measure
     const part = new Tone.Part((time, chord) => {
@@ -260,5 +355,5 @@ export const playAllMeasures = async (
   }
 
   // Start playback with slight delay to ensure timing consistency
-  Tone.getTransport().start("+0.05");
+  Tone.getTransport().start();
 };
