@@ -24,7 +24,7 @@ export default function MyPage() {
   const [chordSelected, setChordSelected] = useState<number>(1);
   const { setInstruments } = useInstrumentStore();
   const stores = useArrangementStore((state) => state.stores);
-  console.log("storesRERENDER", useArrangementStore.getState().stores);
+  console.log("RERENDER page.tsx");
 
   // Handles updating chords in the first store
   const handleChords = async () => {

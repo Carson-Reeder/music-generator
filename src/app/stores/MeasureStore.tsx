@@ -1,36 +1,6 @@
 import { create } from "zustand";
 import { Instrument } from "./InstrumentStore";
-import * as Tone from "tone";
 
-export type ChordType = {
-  id: string;
-  notes: string[];
-  startPosition: number;
-  length: number;
-  chordTimingBeat: number;
-};
-
-export type MeasureStoreType = {
-  chords: ChordType[];
-  setChords: (chords: ChordType[]) => void;
-  bpm: number;
-  setBpm: (bpm: number) => void;
-  instrument: Instrument;
-  setInstrument: (instrument: Instrument) => void;
-  isInstrumentClicked: boolean;
-  setIsInstrumentClicked: (isInstrumentClicked: boolean) => void;
-  isPlaying: boolean;
-  setIsPlaying: (isPlaying: boolean) => void;
-  measureProgress: any | null;
-  setMeasureProgress: (measureProgress: any) => void;
-  currentPart: any;
-  setCurrentPart: (currentPart: any) => void;
-
-  setChordNotes: (id: string, notes: string[]) => void;
-  setChordTiming: (id: string, chordTimingBeat: number) => void;
-  setChordLength: (id: string, length: number) => void;
-  setChordStartPosition: (id: string, startPosition: number) => void;
-};
 // define default chords for array
 const initialChords: ChordType[] = [
   {
@@ -68,6 +38,37 @@ const initialInstrument: Instrument = {
   knownNotes: ["A1", "C2", "C4"],
   name: "french-horn",
 };
+
+export type ChordType = {
+  id: string;
+  notes: string[];
+  startPosition: number;
+  length: number;
+  chordTimingBeat: number;
+};
+
+export type MeasureStoreType = {
+  chords: ChordType[];
+  setChords: (chords: ChordType[]) => void;
+  bpm: number;
+  setBpm: (bpm: number) => void;
+  instrument: Instrument;
+  setInstrument: (instrument: Instrument) => void;
+  isInstrumentClicked: boolean;
+  setIsInstrumentClicked: (isInstrumentClicked: boolean) => void;
+  isPlaying: boolean;
+  setIsPlaying: (isPlaying: boolean) => void;
+  measureProgress: any | null;
+  setMeasureProgress: (measureProgress: any) => void;
+  currentPart: any;
+  setCurrentPart: (currentPart: any) => void;
+
+  setChordNotes: (id: string, notes: string[]) => void;
+  setChordTiming: (id: string, chordTimingBeat: number) => void;
+  setChordLength: (id: string, length: number) => void;
+  setChordStartPosition: (id: string, startPosition: number) => void;
+};
+
 // create store instance
 export const createChordPlaybackStore = () => {
   return create<MeasureStoreType>((set) => ({

@@ -105,7 +105,6 @@ export const loadInstrument = async ({ measureStore }: loadInstrumentProps) => {
     console.error("Selected instrument not found");
     return null;
   }
-  console.log("Selected instrument:", selectedInstrument);
 
   // If we don't have the sampler cached, create it.
   if (!loadedInstruments[instrument.id]) {
@@ -128,13 +127,10 @@ export const loadInstrument = async ({ measureStore }: loadInstrumentProps) => {
       onload: () => {},
       attack: 0.5,
     });
-
     sampler.connect(compressor);
     loadedInstruments[instrument.id] = sampler;
     await Tone.loaded();
-    console.log("Loaded new sampler for instrument:", instrument.id);
   } else {
-    console.log("Using cached sampler for instrument:", instrument.id);
   }
   return loadedInstruments[instrument.id];
   //sampler.triggerAttackRelease("C4", 0.5, Tone.now() * 1.01, 0.25);
@@ -152,7 +148,6 @@ export const playNotes = async ({ notes, measureStore }: playNotesProps) => {
 
   notes.forEach((note) => {
     sampler.triggerAttackRelease(note, "4n", Tone.now() * 1.0);
-    console.log(Tone.now());
   });
 };
 
@@ -168,6 +163,7 @@ export const playMeasure = async ({
   const { bpm, loop, numMeasures, allPlaying, setAllPlaying, stores } =
     arrangementStore.getState();
   const { chords, instrument, measureProgress } = measureStore.getState();
+  let progression: ProgressionType;
   // If all measures are playing, stop them all and set allPlaying/isPlaying
   // to false for all measures
   if (allPlaying) handleAllPlaying(arrangementStore);
@@ -179,8 +175,6 @@ export const playMeasure = async ({
         case "started":
           if (measureStore == currentMeasureStore) {
             transport.pause();
-            console.log("Paused1 transport");
-            console.log(measureStore);
           } else {
             // (NEW PART)
             transport.stop();
@@ -197,8 +191,6 @@ export const playMeasure = async ({
         case "paused":
           if (measureStore == currentMeasureStore) {
             transport.start();
-            console.log("Paused1 transport");
-            console.log(measureStore);
           } else {
             // (NEW PART)
             transport.stop();
@@ -232,9 +224,9 @@ export const playMeasure = async ({
           currentMeasureStore = measureStore;
           return;
       }
-    case "chordUpdate":
-      console.log("chordUpdate");
-      const progression = await createProgression(chords);
+    case "measureUpdate":
+      console.log("measureUpdate");
+      progression = await createProgression(chords);
 
       if (arrangementStore.getState().currentPart != null) {
         arrangementStore.getState().currentPart?.dispose();

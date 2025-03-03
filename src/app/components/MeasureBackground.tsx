@@ -8,7 +8,7 @@ export default function MeasureBackground({
   numMeasures,
 }: MeasureBackgroundProps) {
   return (
-    <>
+    <div>
       {Array.from({ length: numMeasures }).map((_, measureIndex) => (
         <div
           key={`measure-bg-${measureIndex}`}
@@ -33,9 +33,10 @@ export default function MeasureBackground({
           height: "1.5rem",
           backgroundColor: "rgba(0, 0, 0, 0.05)",
           borderRadius: "0.2rem",
-          boxShadow: "inset 0rem 0rem .25rem .2rem rgba(0, 0, 0, 0.1)",
+          //boxShadow: "inset 0rem 0rem .25rem .2rem rgba(0, 0, 0, 0.1)",
+          boxShadow: "0rem 0rem .25rem .2rem rgba(93, 148, 125, 0.57)",
         }}
       ></div>
-    </>
+    </div>
   );
 }

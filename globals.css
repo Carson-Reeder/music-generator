@@ -31,10 +31,6 @@ input[type="number"] {
   user-select: none; /* Prevents accidental text selection */
 }
 
-/* Hide the default scrollbar */
-::-webkit-scrollbar {
-  display: none; /* For Chrome, Safari, and Opera */
-}
 .add-measure {
   display: flex;
   justify-content: center;

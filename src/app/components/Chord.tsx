@@ -50,6 +50,7 @@ export default function Chord({
   } = arrangementStore();
 
   useEffect(() => {
+    if (Tone.getTransport().state === "stopped") return;
     if (!isPlaying) return;
     const handleChordChange = async () => {
       const transportState = Tone.getTransport().state;
@@ -64,12 +65,12 @@ export default function Chord({
           arrangementStore,
           compositionId,
           transportState,
-          reason: "chordUpdate",
+          reason: "measureUpdate",
         });
       }
     };
     handleChordChange();
-  }, [chord]);
+  }, [chord, instrument]);
 
   // Conversions
   const pxToRem = (px: number) =>
@@ -223,15 +224,8 @@ export default function Chord({
             if (!chord) return;
             const remWidth = pxToRem(event.rect.width);
             const newLength = Math.round((remWidth / widthMeasure) * 8) / 8;
-            setChordLength(id, newLength);
-          },
-          end(event) {
-            // set new chord Length
-            const id = event.target.getAttribute("data-id");
-            const chord = chords.find((chord) => chord.id === id);
-            if (!chord) return;
-            const remWidth = pxToRem(event.rect.width);
-            const newLength = Math.round((remWidth / widthMeasure) * 8) / 8;
+            if (newLength < 0.125) return; // Prevent negative lengths
+            if (chord.length === newLength) return; // Prevent unnecessary updates
             setChordLength(id, newLength);
           },
         },

@@ -105,6 +105,7 @@ export default function Arrangement({
                         className=""
                       >
                         <ShowInstruments
+                          compositionId={id}
                           arrangementStore={arrangementStore}
                           measureStore={store}
                         />
@@ -123,10 +124,20 @@ export default function Arrangement({
 
                     <div
                       className="ml-2 mr-2 measure"
-                      style={{ overflowX: "auto", overflowY: "visible" }}
+                      style={{
+                        overflowX: "auto",
+                        overflowY: "visible",
+                        scrollbarColor: "rgba(93, 148, 125, 0.57)",
+                        scrollbarWidth: "thin",
+                      }}
                     >
                       <ScrollSyncPane key={id}>
-                        <div style={{ overflow: "visible", height: "6rem" }}>
+                        <div
+                          style={{
+                            overflow: "visible",
+                            height: "6rem",
+                          }}
+                        >
                           <Measure
                             measureStore={store}
                             arrangementStore={arrangementStore}

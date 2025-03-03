@@ -35,6 +35,8 @@ export default function Measure({
         alignItems: "center",
         boxShadow: "0rem 0rem .25rem .2rem rgba(93, 148, 125, 0.57)",
         overflow: "visible",
+        scrollbarColor: "rgba(93, 148, 125, 0.57)",
+        scrollbarWidth: "thin",
       }}
     >
       <MeasureBackground numMeasures={numMeasures} />

@@ -1,17 +1,21 @@
 import { MeasureStoreType } from "../stores/MeasureStore";
 import { ArrangementStoreType } from "../stores/ArrangementStore";
 import { UseBoundStore, StoreApi } from "zustand";
-import { useState } from "react";
+import { use, useEffect, useState } from "react";
 import { useInstrumentStore } from "../stores/InstrumentStore";
 import { loadInstrument } from "../utils/soundPlayer";
 import { Instrument } from "../stores/InstrumentStore";
+import * as Tone from "tone";
+import { playMeasure } from "../utils/soundPlayer";
 
 type ShowInstrumentProps = {
+  compositionId: number;
   measureStore: UseBoundStore<StoreApi<MeasureStoreType>>;
   arrangementStore: UseBoundStore<StoreApi<ArrangementStoreType>>;
 };
 
 export default function ShowInstruments({
+  compositionId,
   arrangementStore,
   measureStore,
 }: ShowInstrumentProps) {
@@ -19,18 +23,20 @@ export default function ShowInstruments({
   const [selectedInstrument, setSelectedInstrument] = useState<string | null>(
     null
   );
-  const { setInstrument } = measureStore();
-  const { instruments } = useInstrumentStore();
+  const { instrument, setInstrument, isPlaying, setMeasureProgress } =
+    measureStore();
+  const { allPlaying } = arrangementStore();
+  const instruments = useInstrumentStore.getState().instruments;
+  const [prevInstrument, setPrevInstrument] = useState<Instrument | null>(null);
+  const [currentInstrument, setCurrentInstrument] = useState<Instrument | null>(
+    null
+  );
 
   // Get unique categories
   const categories = Array.from(
     new Set(instruments.map((value: Instrument) => value.category))
   ) as string[];
 
-  console.log(
-    "arrangementStore.getState().toolBarSelector",
-    arrangementStore.getState().toolBarSelector
-  );
   if (arrangementStore.getState().toolBarSelector != "instrument") return null;
 
   return (
@@ -67,6 +73,8 @@ export default function ShowInstruments({
                     : ""
                 }`}
                 onClick={() => {
+                  setPrevInstrument(currentInstrument);
+                  setCurrentInstrument(instrument);
                   setInstrument(instrument);
                   setSelectedInstrument(instrument.name);
                   loadInstrument({ measureStore });
