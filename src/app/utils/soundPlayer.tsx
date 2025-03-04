@@ -66,6 +66,7 @@ const createPart = async ({ measureStore, progression }: CreatePartType) => {
   if (currentPart) {
     currentPart.dispose();
   }
+  await Tone.loaded();
   const part = new Tone.Part((time, chord) => {
     chord.notes.forEach((note: any) => {
       sampler.triggerAttackRelease(note, chord.duration, time);
@@ -228,6 +229,8 @@ export const playMeasure = async ({
     case "measureUpdate":
       console.log("measureUpdate");
       progression = await createProgression(chords);
+      //transport.pause();
+      transport.cancel();
 
       if (arrangementStore.getState().currentPart != null) {
         arrangementStore.getState().currentPart?.dispose();

@@ -19,10 +19,9 @@ export default function ShowInstruments({
   measureStore,
 }: ShowInstrumentProps) {
   const [loading, setLoading] = useState(true);
-  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
-  const [selectedInstrument, setSelectedInstrument] = useState<string | null>(
-    null
-  );
+  const [selectedCategory, setSelectedCategory] = useState<string>("brass");
+  const [selectedInstrument, setSelectedInstrument] =
+    useState<string>("french-horn");
   const { setInstrument } = measureStore();
 
   const instruments = useInstrumentStore((state) => state.instruments);
@@ -53,13 +52,26 @@ export default function ShowInstruments({
   return (
     <div className={`measure-display-parent `}>
       {loading ? (
-        <div className="instrument-selection">
-          <div className={`category-selection `}>
-            <button className="category-button-loading">brass</button>
-            <button className="category-button-loading">keyboards</button>
-            <button className="category-button-loading">percussion</button>
-            <button className="category-button-loading">strings</button>
-            <button className="category-button-loading">woodwinds</button>
+        <div>
+          <div className="instrument-selection">
+            <div className={`category-selection `}>
+              <button className="category-button-loading selected">
+                brass
+              </button>
+              <button className="category-button-loading">keyboards</button>
+              <button className="category-button-loading">percussion</button>
+              <button className="category-button-loading">strings</button>
+              <button className="category-button-loading">woodwinds</button>
+            </div>
+          </div>
+
+          <div className="instrument-selection">
+            <button className="instrument-button-loading selected-instrument">
+              french-horn
+            </button>
+            <button className="instrument-button-loading">trombone</button>
+            <button className="instrument-button-loading">trumpet</button>
+            <button className="instrument-button-loading">tuba</button>
           </div>
         </div>
       ) : (
