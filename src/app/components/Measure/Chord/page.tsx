@@ -1,12 +1,13 @@
+"use client";
 import React, { useRef, useState, useEffect } from "react";
 import interact from "interactjs";
 import { UseBoundStore, StoreApi } from "zustand";
-import { MeasureStoreType } from "../stores/MeasureStore";
-import { ArrangementStoreType } from "../stores/ArrangementStore";
-import { playNotes } from "../utils/soundPlayer";
+import { MeasureStoreType } from "../../../stores/MeasureStore";
+import { ArrangementStoreType } from "../../../stores/ArrangementStore";
+import { playNotes } from "../../../utils/soundPlayer";
 import * as Tone from "tone";
-import { playMeasure } from "../utils/soundPlayer";
-import { loadInstrument } from "../utils/soundPlayer";
+import { playMeasure } from "../../../utils/soundPlayer";
+import { loadInstrument } from "../../../utils/soundPlayer";
 
 type ChordProps = {
   chord: any;

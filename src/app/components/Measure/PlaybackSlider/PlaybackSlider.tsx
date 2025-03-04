@@ -1,9 +1,10 @@
+"use client";
 import * as Tone from "tone";
 import interact from "interactjs";
 import { useEffect, useState } from "react";
 import { UseBoundStore, StoreApi } from "zustand";
-import { MeasureStoreType } from "../stores/MeasureStore";
-import { ArrangementStoreType } from "../stores/ArrangementStore";
+import { MeasureStoreType } from "../../../stores/MeasureStore";
+import { ArrangementStoreType } from "../../../stores/ArrangementStore";
 import { relative } from "path";
 
 const sliderWidth = 0.3; // Width of the slider in rem
@@ -65,10 +66,6 @@ export default function PlaybackSlider({
 
       const currentBeat = bars * beatsPerMeasure + beats + sixteenths / 4;
       const progress = currentBeat / totalBeats;
-      if (progress >= 1) {
-        transport.stop();
-        setSliderPosition(0);
-      }
       setSliderPosition(progress * 100);
     };
 

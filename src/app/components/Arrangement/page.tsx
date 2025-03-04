@@ -1,39 +1,18 @@
-import React, { useState, useEffect, useRef } from "react";
-import { UseBoundStore, StoreApi } from "zustand";
-import {
-  ArrangementStoreType,
-  createArrangementStore,
-} from "../stores/ArrangementStore";
-import { playAllMeasures } from "../utils/soundPlayer";
-import Measure from "./Measure";
-import MeasureToolbar from "./MeasureToolbar";
-import MeasureLabel from "./MeasureLabel";
-import RemoveMeasure from "./RemoveMeasure";
-import AddMeasure from "./AddMeasure";
-import ShowInstruments from "./ShowInstruments";
-import MeasureControls from "./MeasureControls";
+"use client";
+import { playAllMeasures } from "../../utils/soundPlayer";
 import { ScrollSync, ScrollSyncPane } from "react-scroll-sync";
+import dynamic from "next/dynamic";
+import MeasureToolbar from "../MeasureToolbar/page";
+const Measure = dynamic(() => import("../Measure/page"));
+const MeasureLabel = dynamic(() => import("../MeasureLabel/page"));
+const RemoveMeasure = dynamic(() => import("../RemoveMeasure/page"));
+const AddMeasure = dynamic(() => import("../AddMeasure/page"));
+import ShowInstruments from "../ShowInstruments/page";
+const MeasureControls = dynamic(() => import("../MeasureControls/page"));
+import { arrangementStore } from "../../stores/ArrangementStore";
 
-type arrangementProps = {
-  arrangementStore: UseBoundStore<StoreApi<ArrangementStoreType>>;
-  arrangementId: number;
-};
-
-export default function Arrangement({
-  arrangementStore,
-  arrangementId,
-}: arrangementProps) {
-  const {
-    numMeasures,
-    setNumMeasures,
-    widthMeasure,
-    setWidthMeasure,
-    stores,
-    createStore,
-    removeStore,
-  } = arrangementStore();
-  const [selectedChordId, setSelectedChordId] = useState<string | null>(null); // Track last clicked chord
-  const [activeChordId, setActiveChordId] = useState<string | null>(null); // Track chord being dragged
+export default function Arrangement() {
+  const { stores } = arrangementStore();
 
   return (
     <div style={{ zIndex: 0 }}>

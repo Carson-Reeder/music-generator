@@ -1,7 +1,7 @@
 import { UseBoundStore, StoreApi } from "zustand";
-import { MeasureStoreType } from "../stores/MeasureStore";
-import { ArrangementStoreType } from "../stores/ArrangementStore";
-import { playMeasure } from "../utils/soundPlayer";
+import { MeasureStoreType } from "../../stores/MeasureStore";
+import { ArrangementStoreType } from "../../stores/ArrangementStore";
+import { playMeasure } from "../../utils/soundPlayer";
 
 type MeasureToolbarProps = {
   measureStore: UseBoundStore<StoreApi<MeasureStoreType>>;

@@ -1,13 +1,12 @@
-"use client";
 import { UseBoundStore, StoreApi } from "zustand";
 import { useState, useEffect } from "react";
 import * as Tone from "tone";
-import { MeasureStoreType } from "../stores/MeasureStore";
-import { ArrangementStoreType } from "../stores/ArrangementStore";
-import MeasureBackground from "./MeasureBackground";
-import MeasureLines from "./MeasureLines";
-import Chord from "./Chord";
-import PlaybackSlider from "./PlaybackSlider";
+import { MeasureStoreType } from "../../stores/MeasureStore";
+import { ArrangementStoreType } from "../../stores/ArrangementStore";
+import MeasureBackground from "./MeasureBackground/page";
+import MeasureLines from "./MeasureLines/page";
+import Chord from "./Chord/page";
+import PlaybackSlider from "./PlaybackSlider/PlaybackSlider";
 
 type MeasureProps = {
   measureStore: UseBoundStore<StoreApi<MeasureStoreType>>;
@@ -35,8 +34,6 @@ export default function Measure({
         alignItems: "center",
         boxShadow: "0rem 0rem .25rem .2rem rgba(93, 148, 125, 0.57)",
         overflow: "visible",
-        scrollbarColor: "rgba(93, 148, 125, 0.57)",
-        scrollbarWidth: "thin",
       }}
     >
       <MeasureBackground numMeasures={numMeasures} />

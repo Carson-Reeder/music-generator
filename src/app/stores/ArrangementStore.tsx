@@ -63,7 +63,7 @@ export const createArrangementStore = () => {
     widthComposition: 5 * 8,
     setWidthComposition: (widthComposition) => set({ widthComposition }),
 
-    loop: false,
+    loop: true,
     setLoop: (loop) => set({ loop }),
 
     loopLength: 5 * 8,
@@ -111,3 +111,5 @@ export const createArrangementStore = () => {
     },
   }));
 };
+
+export const arrangementStore = createArrangementStore();

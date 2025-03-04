@@ -207,7 +207,8 @@ export const playMeasure = async ({
         case "stopped":
           Tone.getTransport().cancel();
           Tone.getTransport().bpm.value = bpm;
-          Tone.getTransport().loop = loop;
+          Tone.getTransport().loop = true;
+          console.log("numMeasures:", numMeasures);
           Tone.getTransport().loopEnd = `${numMeasures}m`;
 
           const progression = await createProgression(chords);

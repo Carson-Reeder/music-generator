@@ -58,9 +58,12 @@ input[type="number"] {
   gap: 0rem;
   list-style: none;
   height: 5.25rem;
+  width: 100%;
   bottom: 0;
   overflow-y: scroll;
   font-size: 0.875rem;
+  scrollbar-width: thin;
+  scrollbar-color: #111827 #f3f4f6;
 }
 
 .measure-display-child {
@@ -77,4 +80,99 @@ input[type="number"] {
   background-color: #111827;
   color: white;
   cursor: pointer;
+}
+
+.category-selection {
+  border-radius: 0.25rem;
+  padding: 0.125rem;
+  background-color: rgba(57, 201, 133, 0.08);
+  display: flex;
+  width: 100%;
+  gap: 0rem;
+  margin-bottom: 0rem;
+  border-bottom: 0.125rem solid rgba(42, 131, 94, 0.32);
+  border-offset: -0.125rem;
+}
+
+.category-button {
+  margin-right: 0.25rem;
+  padding: 0rem 0.125rem;
+  background-color: rgba(155, 231, 199, 0.92);
+  cursor: pointer;
+  border: 0.125rem solid rgba(42, 131, 94, 0.42);
+  border-offset: -0.125rem;
+  border-radius: 5px;
+  transition: background 0.6s;
+  animation: loaded 1s ease-in 1;
+}
+.category-button-loading {
+  margin-right: 0.25rem;
+  padding: 0rem 0.125rem;
+  background-color: rgba(203, 232, 220, 0.92);
+  color: grey;
+  cursor: pointer;
+  border: 0.125rem solid rgba(123, 139, 133, 0.42);
+  border-offset: -0.125rem;
+  border-radius: 5px;
+  transition: background 0.3s;
+  animation: flash 2s infinite;
+}
+
+.category-button.selected {
+  background-color: #007bff;
+  color: white;
+  font-weight: bold;
+}
+
+.instrument-selection {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+}
+
+.instrument-button {
+  margin-right: 0.25rem;
+  padding: 0rem 0.125rem;
+  background-color: #fff;
+  border-radius: 0.25rem;
+  transition: background 0.3s;
+}
+
+.instrument-button.selected-instrument {
+  background-color: #28a745; /* Green highlight for selected instrument */
+  color: white;
+  font-weight: bold;
+}
+
+.instrument-button:hover {
+  background-color: #e0e0e0;
+}
+.instrument-button.selected-instrument:hover {
+  background-color: #28a765;
+}
+@keyframes flash {
+  0% {
+    opacity: 0.2;
+  }
+  50% {
+    opacity: 0.9;
+  }
+  100% {
+    opacity: 0.2;
+  }
+}
+@keyframes loaded {
+  0% {
+    opacity: 0.2;
+  }
+  50% {
+    opacity: 0.5;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+.flashing {
+  animation: flash 2s infinite;
 }
