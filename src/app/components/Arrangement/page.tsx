@@ -10,6 +10,7 @@ const AddMeasure = dynamic(() => import("../AddMeasure/page"));
 import ShowInstruments from "../ShowInstruments/page";
 const MeasureControls = dynamic(() => import("../MeasureControls/page"));
 import { arrangementStore } from "../../stores/ArrangementStore";
+import ShowNotes from "../ShowNotes/page";
 
 export default function Arrangement() {
   const { stores } = arrangementStore();
@@ -59,17 +60,18 @@ export default function Arrangement() {
                         }}
                         className="flex flex-wrap"
                       >
+                        <MeasureLabel index={index} />
                         {index === 0 ? (
                           <MeasureControls
                             arrangementStore={arrangementStore}
                           />
                         ) : null}
-                        <MeasureLabel index={index} />
                       </div>
                       <div
                         style={{
                           width: "80%",
-                          height: "5.25rem",
+                          position: "relative",
+                          height: "7rem",
                           left: "0",
                           flexGrow: "2",
                           bottom: "0",
@@ -79,11 +81,20 @@ export default function Arrangement() {
                           marginRight: "0.5rem",
                           marginLeft: "0.5rem",
                           marginBottom: "0.75rem",
-                          overflowY: "auto",
+                          //overflowX: "auto",
+                          overflowY: "hidden",
+                          zIndex: 1,
                         }}
                         className=""
                       >
+                        {/*  
                         <ShowInstruments
+                          compositionId={id}
+                          arrangementStore={arrangementStore}
+                          measureStore={store}
+                        />
+                        */}
+                        <ShowNotes
                           compositionId={id}
                           arrangementStore={arrangementStore}
                           measureStore={store}

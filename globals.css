@@ -57,28 +57,26 @@ input[type="number"] {
 .measure-display-parent {
   gap: 0rem;
   list-style: none;
-  height: 5.25rem;
+  height: 100%;
   width: 100%;
   bottom: 0;
-  overflow-y: scroll;
+  display: flex column;
   font-size: 0.875rem;
   scrollbar-width: thin;
   scrollbar-color: #111827 #f3f4f6;
 }
 
-.measure-display-child {
-  height: 100%;
-  width: 100%;
-  background-color: "rgba(1, 255, 158, 0.01)";
-  display: block;
+.note {
+  display: inline-block;
   justify-content: center;
   align-items: center;
-  font-size: 0.875rem;
-}
-
-.measure-display-child:hover {
-  background-color: #111827;
+  height: 100%;
+  min-width: 3rem;
+  max-width: 3rem;
+  background-color: #1357ea;
+  border: 1px solid black;
   color: white;
+  font-size: 0.875rem;
   cursor: pointer;
 }
 

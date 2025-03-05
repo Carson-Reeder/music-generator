@@ -1,5 +1,5 @@
-import { NextResponse } from 'next/server';
-import OpenAI from 'openai';
+import { NextResponse } from "next/server";
+import OpenAI from "openai";
 
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY as string;
 const ASSISTANT_ID = process.env.ASSISTANT_ID as string;
@@ -10,35 +10,47 @@ export async function POST(request: Request) {
     const { scale, threadId } = await request.json();
 
     if (!scale) {
-      return NextResponse.json({ error: 'Scale is required in the request body' }, { status: 400 });
+      return NextResponse.json(
+        { error: "Scale is required in the request body" },
+        { status: 400 }
+      );
     }
 
     let thread;
     if (threadId) {
-      console.log('Reusing existing thread');
+      console.log("Reusing existing thread");
       thread = { id: threadId };
       await openai.beta.threads.messages.create(thread.id, {
-        role: 'user',
+        role: "user",
         content: `Generate a chord progression in the ${scale} scale.`,
       });
     } else {
       console.log("Creating a new thread...");
       thread = await openai.beta.threads.create({
-        messages: [{ role: 'user', content: `Generate a chord progression in the ${scale} scale.` }],
+        messages: [
+          {
+            role: "user",
+            content: `Generate a chord progression in the ${scale} scale.`,
+          },
+        ],
       });
+      console.log("Thread created:", thread.id);
     }
-
+    console.log("Running assistant...");
     const run = await openai.beta.threads.runs.createAndPoll(thread.id, {
       assistant_id: ASSISTANT_ID,
     });
 
-    if (run.status === 'completed') {
+    if (run.status === "completed") {
+      console.log("Run completed successfully");
       const messages = await openai.beta.threads.messages.list(thread.id);
-      const assistantMessageObject = messages.getPaginatedItems().find(msg => msg.role === 'assistant')?.content;
+      const assistantMessageObject = messages
+        .getPaginatedItems()
+        .find((msg) => msg.role === "assistant")?.content;
 
       // Extract the "value" field from the response
       const assistantMessage = Array.isArray(assistantMessageObject)
-        ? assistantMessageObject.map(item => item.text?.value).join('\n')
+        ? assistantMessageObject.map((item) => item.text?.value).join("\n")
         : "No response from assistant";
 
       return NextResponse.json({
@@ -46,10 +58,16 @@ export async function POST(request: Request) {
         threadId: thread.id,
       });
     } else {
-      return NextResponse.json({ error: "Run did not complete successfully" }, { status: 500 });
+      return NextResponse.json(
+        { error: "Run did not complete successfully" },
+        { status: 500 }
+      );
     }
   } catch (error) {
     console.error("API error:", error);
-    return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Internal Server Error" },
+      { status: 500 }
+    );
   }
 }
