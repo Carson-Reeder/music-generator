@@ -48,6 +48,7 @@ export type ChordType = {
 };
 
 export type MeasureStoreType = {
+  id: number;
   chords: ChordType[];
   setChords: (chords: ChordType[]) => void;
   bpm: number;
@@ -74,8 +75,9 @@ export type MeasureStoreType = {
 };
 
 // create store instance
-export const createChordPlaybackStore = () => {
+export const createChordPlaybackStore = (id: number) => {
   return create<MeasureStoreType>((set) => ({
+    id,
     chords: initialChords,
     setChords: (chords) =>
       set((state) => ({

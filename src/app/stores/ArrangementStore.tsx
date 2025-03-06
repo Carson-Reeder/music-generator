@@ -78,7 +78,7 @@ export const createArrangementStore = () => {
     currentPart: null,
     setCurrentPart: (currentPart) => set({ currentPart }),
 
-    stores: [{ id: 1, store: createChordPlaybackStore() }],
+    stores: [{ id: 1, store: createChordPlaybackStore(1) }],
     setStores: (
       stores: {
         id: number;
@@ -93,7 +93,7 @@ export const createArrangementStore = () => {
             ? Math.max(...state.stores.map((s) => s.id)) + 1
             : 1;
         console.log("newId", newId);
-        const newStore = createChordPlaybackStore();
+        const newStore = createChordPlaybackStore(newId);
         console.log("newStore", newStore);
         return { stores: [...state.stores, { id: newId, store: newStore }] };
       });
