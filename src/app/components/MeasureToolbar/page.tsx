@@ -60,6 +60,9 @@ export default function MeasureToolbar({
           alignItems: "center",
           width: "6rem",
         }}
+        onClick={() => {
+          setToolBarSelector("note");
+        }}
       >
         + Note
       </button>
@@ -89,6 +92,7 @@ export default function MeasureToolbar({
           boxShadow: "0rem 0rem .2rem .1rem rgba(93, 148, 125, 0.57)",
           width: "8rem",
         }}
+        onClick={() => setToolBarSelector("instrument")}
       >
         Instrument
       </button>

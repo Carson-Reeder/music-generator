@@ -13,7 +13,7 @@ import { arrangementStore } from "../../stores/ArrangementStore";
 import ShowNotes from "../ShowNotes/page";
 
 export default function Arrangement() {
-  const { stores } = arrangementStore();
+  const { stores, toolBarSelector } = arrangementStore();
 
   return (
     <div style={{ zIndex: 0 }}>
@@ -87,18 +87,21 @@ export default function Arrangement() {
                         }}
                         className=""
                       >
-                        {/*  
-                        <ShowInstruments
-                          compositionId={id}
-                          arrangementStore={arrangementStore}
-                          measureStore={store}
-                        />
-                        */}
-                        <ShowNotes
-                          compositionId={id}
-                          arrangementStore={arrangementStore}
-                          measureStore={store}
-                        />
+                        {toolBarSelector === "instrument" ? (
+                          <ShowInstruments
+                            compositionId={id}
+                            arrangementStore={arrangementStore}
+                            measureStore={store}
+                          />
+                        ) : null}
+
+                        {toolBarSelector === "note" ? (
+                          <ShowNotes
+                            compositionId={id}
+                            arrangementStore={arrangementStore}
+                            measureStore={store}
+                          />
+                        ) : null}
                       </div>
                     </div>
 

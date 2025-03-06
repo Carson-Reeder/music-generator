@@ -74,9 +74,9 @@ export const createChordPlaybackStore = () => {
   return create<MeasureStoreType>((set) => ({
     chords: initialChords,
     setChords: (chords) =>
-      set({
+      set((state) => ({
         chords,
-      }),
+      })),
 
     bpm: 120,
     setBpm: (bpm: number) => set({ bpm }),

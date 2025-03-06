@@ -17,7 +17,7 @@ export default function ShowNotes({
   measureStore,
   arrangementStore,
 }: ShowNotesProps) {
-  const chords = measureStore((state) => state.chords);
+  const { chords, setChordNotes } = measureStore();
   console.log("chords", chords);
   console.log("rerender");
 
@@ -47,19 +47,45 @@ export default function ShowNotes({
   const [activeInput, setActiveInput] = useState<{ id: string; itr: number }[]>(
     []
   );
-  const [activeNote, setActiveNote] = useState<string | null>(null);
-  const [selectedNote, setSelectedNote] = useState<string | null>(null);
+  const [activeNote, setActiveNote] = useState<string>("C4");
+  const [selectedNote, setSelectedNote] = useState<string>("4");
   const [selectedOctave, setSelectedOctave] = useState<string | null>(null);
 
   const handleNoteClick = (note: string) => {
     console.log("note", note);
     console.log("activeInput", activeInput);
-    setSelectedNote(note);
-  };
 
+    if (activeInput.length === 0) return;
+    console.log(activeNote);
+    const parsedNote = parseNote(note);
+    console.log("parsedNote", parsedNote);
+    const parsedOctave = parseOctave(selectedNote);
+    console.log("parsedOctave", parsedOctave);
+    const fullNote = `${parsedNote}${parsedOctave}`; // Combine note and octave
+    console.log("fullNote", fullNote);
+
+    // Find the active chord
+    const activeChord = chords.find((chord) => chord.id === activeInput[0].id);
+    if (!activeChord) return;
+
+    // Create a new notes array with the updated note
+    const updatedNotes = [...activeChord.notes];
+    updatedNotes[activeInput[0].itr] = fullNote; // Update with combined note + octave
+
+    // Call setChordNotes to update state
+    setChordNotes(activeChord.id, updatedNotes);
+  };
+  const parsedNote = (note: string) => {
+    return note.slice(0, -1); // Removes the last character (octave number)
+  };
   // Function to extract note name (handling sharps correctly)
   const parseNote = (note: string) => {
+    if (!note) return null;
     return note.length > 1 && note[1] === "#" ? note.slice(0, 2) : note[0];
+  };
+
+  const parseOctave = (note: string) => {
+    return note.at(-1); // Gets only the last character (octave number)
   };
 
   // Function to determine background color for the **specific selected note**
@@ -96,13 +122,13 @@ export default function ShowNotes({
 
               return (
                 <input
-                  key={note}
+                  key={`${chord.id}-${itr}`}
                   className={`note-input `}
                   value={finalValue}
                   readOnly
                   placeholder={note}
                   onFocus={() => setActiveInput([{ id: chord.id, itr }])}
-                  onClick={() => setActiveNote(parseNote(note))}
+                  onClick={() => setSelectedNote(note)}
                 />
               );
             })}
@@ -123,7 +149,9 @@ export default function ShowNotes({
           <div
             className={`note-container ${getNoteBackground(note)}`}
             key={note}
-            onClick={() => handleNoteClick(note)}
+            onClick={() => {
+              handleNoteClick(note);
+            }}
           >
             {note}
           </div>
