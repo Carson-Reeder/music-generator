@@ -54,6 +54,10 @@ export type MeasureStoreType = {
   setBpm: (bpm: number) => void;
   instrument: Instrument;
   setInstrument: (instrument: Instrument) => void;
+  selectedInstrumentCategory: string;
+  setSelectedInstrumentCategory: (selectedInstrumentCategory: string) => void;
+  selectedInstrument: string;
+  setSelectedInstrument: (selectedInstrument: string) => void;
   isInstrumentClicked: boolean;
   setIsInstrumentClicked: (isInstrumentClicked: boolean) => void;
   isPlaying: boolean;
@@ -84,6 +88,16 @@ export const createChordPlaybackStore = () => {
     instrument: initialInstrument,
     setInstrument: (instrument: Instrument) => {
       set({ instrument });
+    },
+
+    selectedInstrumentCategory: "brass",
+    setSelectedInstrumentCategory: (selectedInstrumentCategory: string) => {
+      set({ selectedInstrumentCategory });
+    },
+
+    selectedInstrument: "french-horn",
+    setSelectedInstrument: (selectedInstrument: string) => {
+      set({ selectedInstrument });
     },
 
     isPlaying: false,

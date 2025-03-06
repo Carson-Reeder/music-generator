@@ -231,6 +231,10 @@ export const playMeasure = async ({
       progression = await createProgression(chords);
       //transport.pause();
       transport.cancel();
+      Tone.getTransport().bpm.value = bpm;
+      Tone.getTransport().loop = true;
+      console.log("numMeasures:", numMeasures);
+      Tone.getTransport().loopEnd = `${numMeasures}m`;
 
       if (arrangementStore.getState().currentPart != null) {
         arrangementStore.getState().currentPart?.dispose();

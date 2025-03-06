@@ -71,7 +71,7 @@ export default function Chord({
       }
     };
     handleChordChange();
-  }, [chord, instrument]);
+  }, [chord, instrument, numMeasures]);
 
   // Conversions
   const pxToRem = (px: number) =>

@@ -41,6 +41,14 @@ export default function Arrangement() {
               {stores.map(({ id, store }, index) => {
                 return (
                   <div key={id}>
+                    {/* Measure Toolbar */}
+                    <div className="pl-2 pr-2">
+                      <MeasureToolbar
+                        measureStore={store}
+                        arrangementStore={arrangementStore}
+                        compositionId={id}
+                      />
+                    </div>
                     <div
                       className="flex"
                       style={{
@@ -105,14 +113,6 @@ export default function Arrangement() {
                       </div>
                     </div>
 
-                    {/* Measure Toolbar */}
-                    <div className="pl-2 pr-2">
-                      <MeasureToolbar
-                        measureStore={store}
-                        arrangementStore={arrangementStore}
-                        compositionId={id}
-                      />
-                    </div>
                     {/* Measure */}
 
                     <div

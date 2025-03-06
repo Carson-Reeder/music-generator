@@ -19,17 +19,19 @@ export default function ShowInstruments({
   measureStore,
 }: ShowInstrumentProps) {
   const [loading, setLoading] = useState(true);
-  const [selectedCategory, setSelectedCategory] = useState<string>("brass");
-  const [selectedInstrument, setSelectedInstrument] =
-    useState<string>("french-horn");
   const { setInstrument } = measureStore();
-
   const instruments = useInstrumentStore((state) => state.instruments);
   const { setInstruments } = useInstrumentStore.getState();
   const [prevInstrument, setPrevInstrument] = useState<Instrument | null>(null);
   const [currentInstrument, setCurrentInstrument] = useState<Instrument | null>(
     null
   );
+  const {
+    selectedInstrumentCategory,
+    setSelectedInstrumentCategory,
+    selectedInstrument,
+    setSelectedInstrument,
+  } = measureStore();
 
   useEffect(() => {
     // Fetch instrument data on page load
@@ -81,9 +83,9 @@ export default function ShowInstruments({
               <button
                 key={category}
                 className={`category-button ${
-                  selectedCategory === category ? "selected" : ""
+                  selectedInstrumentCategory === category ? "selected" : ""
                 }`}
-                onClick={() => setSelectedCategory(category)}
+                onClick={() => setSelectedInstrumentCategory(category)}
               >
                 {category}
               </button>
@@ -91,11 +93,11 @@ export default function ShowInstruments({
           </div>
 
           <div className="instrument-selection">
-            {selectedCategory &&
+            {selectedInstrumentCategory &&
               instruments
                 .filter(
                   (instrument: Instrument) =>
-                    instrument.category === selectedCategory
+                    instrument.category === selectedInstrumentCategory
                 )
                 .map((instrument: Instrument) => (
                   <button
