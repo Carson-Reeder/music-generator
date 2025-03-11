@@ -13,7 +13,7 @@ import { arrangementStore } from "../../stores/ArrangementStore";
 import ShowNotes from "../ShowNotes/page";
 
 export default function Arrangement() {
-  const { stores, toolBarSelector } = arrangementStore();
+  const { stores } = arrangementStore();
 
   return (
     <div style={{ zIndex: 0 }}>
@@ -41,19 +41,6 @@ export default function Arrangement() {
               {stores.map(({ id, store }, index) => {
                 return (
                   <div key={id}>
-                    {/* Measure Toolbar */}
-                    <div
-                      style={{
-                        position: "relative",
-                        zIndex: 9999,
-                      }}
-                    >
-                      <MeasureToolbar
-                        measureStore={store}
-                        arrangementStore={arrangementStore}
-                        compositionId={id}
-                      />
-                    </div>
                     <div
                       className="flex"
                       style={{
@@ -64,14 +51,13 @@ export default function Arrangement() {
                     >
                       <div
                         style={{
-                          width: "20%",
                           height: "100%",
                           flexShrink: "0",
                           flexGrow: "0",
-                          minWidth: "6rem",
+                          minWidth: "9rem",
                           maxWidth: "9rem",
                         }}
-                        className="flex flex-wrap"
+                        className="flex"
                       >
                         <MeasureLabel index={index} />
                         {index === 0 ? (
@@ -80,41 +66,18 @@ export default function Arrangement() {
                           />
                         ) : null}
                       </div>
-                      <div
-                        style={{
-                          width: "80%",
-                          height: "7rem",
-                          left: "0",
-                          flexGrow: "2",
-                          bottom: "0",
-                          boxShadow:
-                            "0rem 0rem .25rem .2rem rgba(93, 148, 125, 0.57)",
-                          borderRadius: "0.5rem",
-                          marginRight: "0.5rem",
-                          marginLeft: "0.5rem",
-                          marginBottom: "0.75rem",
-                          //overflowX: "auto",
-                          overflowY: "hidden",
-                          zIndex: 0,
-                        }}
-                        className=""
-                      >
-                        {toolBarSelector === "instrument" ? (
-                          <ShowInstruments
-                            compositionId={id}
-                            arrangementStore={arrangementStore}
-                            measureStore={store}
-                          />
-                        ) : null}
-
-                        {toolBarSelector === "note" ? (
-                          <ShowNotes
-                            compositionId={id}
-                            arrangementStore={arrangementStore}
-                            measureStore={store}
-                          />
-                        ) : null}
-                      </div>
+                    </div>
+                    {/* Measure Toolbar */}
+                    <div
+                      style={{
+                        position: "relative",
+                      }}
+                    >
+                      <MeasureToolbar
+                        measureStore={store}
+                        arrangementStore={arrangementStore}
+                        compositionId={id}
+                      />
                     </div>
 
                     {/* Measure */}

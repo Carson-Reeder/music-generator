@@ -11,25 +11,25 @@ type MeasureToolbarProps = {
   compositionId: number;
 };
 
+const toggleToolbar = (
+  toggle: string,
+  measureStore: UseBoundStore<StoreApi<MeasureStoreType>>
+) => {
+  if (measureStore.getState().toolBarSelector === toggle) {
+    measureStore.setState({ toolBarSelector: "" });
+  } else {
+    measureStore.setState({ toolBarSelector: toggle });
+  }
+};
+
 export default function MeasureToolbar({
   measureStore,
   arrangementStore,
   compositionId,
 }: MeasureToolbarProps) {
-  const { setIsInstrumentClicked } = measureStore();
   const { setToolBarSelector, toolBarSelector } = measureStore();
   return (
-    <div
-      className="flex bg-gray-200 mb-2 mr-2 ml-2 border border-0 h-8 p-0"
-      style={{
-        borderRadius: "0.5rem",
-        overflow: "hidden",
-        zIndex: 9999,
-        boxShadow: "0rem 0rem .25rem .2rem rgba(93, 148, 125, 0.57)",
-        backgroundColor: "transparent",
-        height: "2rem",
-      }}
-    >
+    <div className="toolbar">
       <button
         className="bg-gray-300 pl-0 pr-1"
         style={{
@@ -38,7 +38,7 @@ export default function MeasureToolbar({
           display: "flex",
           justifyContent: "center",
           alignItems: "center",
-          width: "6rem",
+          width: "clamp(4rem, calc(100% / 3), 7rem)",
         }}
         onClick={() => {
           setToolBarSelector("note");
@@ -51,7 +51,7 @@ export default function MeasureToolbar({
         style={{
           backgroundColor: "rgba(1, 255, 158, 0.12)",
           boxShadow: "0rem 0rem .2rem .1rem rgba(93, 148, 125, 0.57)",
-          width: "8rem",
+          width: "clamp(6rem, calc(100% / 3), 9rem)",
         }}
         onClick={() =>
           playMeasure({
@@ -68,7 +68,7 @@ export default function MeasureToolbar({
       <div
         style={{
           //position: "relative",
-          width: "8rem",
+          width: "clamp(6rem, calc(100% / 3), 12rem)",
           height: "100%",
         }}
       >
@@ -80,16 +80,16 @@ export default function MeasureToolbar({
             width: "100%",
             height: "100%",
           }}
-          onClick={() => setToolBarSelector("instrument")}
+          onClick={() => toggleToolbar("instrument", measureStore)}
         >
           Instrument
         </button>
-        <ShowInstruments
-          measureStore={measureStore}
-          arrangementStore={arrangementStore}
-          compositionId={compositionId}
-        />
       </div>
+      <ShowInstruments
+        measureStore={measureStore}
+        arrangementStore={arrangementStore}
+        compositionId={compositionId}
+      />
       <style jsx>{`
         button:focus {
           outline: 0.25rem solid black;

@@ -51,7 +51,7 @@ input[type="number"] {
   justify-content: space-between;
   padding-left: 0.5rem;
   width: 100%;
-  min-width: 5rem;
+  min-width: 10rem;
   padding-bottom: 0.75rem;
 }
 .measure-display-parent {
@@ -82,39 +82,50 @@ input[type="number"] {
 
 .category-selection {
   border-radius: 0.25rem;
+  width: 8rem;
   padding: 0.125rem;
   background-color: rgba(57, 201, 133, 0.08);
   display: flex;
   flex-direction: column;
   gap: 0rem;
   margin-bottom: 0rem;
-  border-bottom: 0.125rem solid rgba(42, 131, 94, 0.32);
-  border-offset: -0.125rem;
+  border-right: 0.1rem solid rgba(93, 148, 125, 0.57);
 }
 
 .category-button {
-  margin-right: 0.25rem;
-  padding: 0rem 0.125rem;
-  width: 8rem;
+  margin: 0.25rem;
+  padding: 0.125rem 0.5rem;
   background-color: rgba(155, 231, 199, 0.92);
   cursor: pointer;
-  border: 0.125rem solid rgba(42, 131, 94, 0.42);
+  border: 0.05rem solid rgba(73, 99, 90, 0.959);
   border-offset: -0.125rem;
   border-radius: 5px;
-  transition: background 0.6s;
-  animation: loaded 1s ease-in 1;
+  box-shadow: 0rem 0rem 0.25rem 0.1rem rgba(242, 245, 244, 0.659);
+  transition: background 0.25s;
 }
-.category-button-loading {
-  margin-right: 0.25rem;
-  padding: 0rem 0.125rem;
-  background-color: rgba(203, 232, 220, 0.92);
-  color: grey;
+.category-button-close {
+  margin: 0.25rem;
+  margin-bottom: 1rem;
+  margin-top: 2rem;
+  padding: 0.25rem 0.5rem;
+  background-color: rgba(203, 22, 100, 0.32);
   cursor: pointer;
-  border: 0.125rem solid rgba(123, 139, 133, 0.42);
-  border-offset: -0.125rem;
+  border: 0.05rem solid rgba(203, 22, 100, 0.92);
   border-radius: 5px;
-  transition: background 0.6s;
-  animation: flash 2s infinite;
+  box-shadow: 0rem 0rem 0.25rem 0.1rem rgba(242, 245, 244, 0.659);
+  transition: background 0.25s;
+}
+
+.category-button-close:hover {
+  background-color: rgba(203, 22, 100, 0.92);
+  color: white;
+  transition: background 0.25s;
+}
+
+.category-button:hover {
+  background-color: rgba(84, 120, 106, 0.859);
+  color: white;
+  transition: background 0.25s;
 }
 
 .category-button-loading.selected {
@@ -139,7 +150,8 @@ input[type="number"] {
 
 .instrument-selection {
   padding: 0.125rem;
-
+  padding-bottom: 0.25rem;
+  min-width: 8rem;
   display: flex;
   flex-direction: column;
   flex-wrap: wrap;
@@ -147,16 +159,14 @@ input[type="number"] {
 }
 
 .instrument-button {
-  margin-right: 0.25rem;
-  width: 8rem;
+  margin: 0.25rem 1rem 0rem 1rem;
   justify-content: center;
   display: flex;
   flex-wrap: wrap;
-  padding: 0rem 0.125rem;
+  padding: 0rem 0.25rem;
   background-color: #fff;
   border-radius: 0.25rem;
-  transition: background 0.6s;
-  animation: loaded 0.2s ease-in 1;
+  transition: background 0.2s;
 }
 
 .instrument-button-loading {
@@ -165,35 +175,57 @@ input[type="number"] {
   background-color: #ffffff53;
   color: grey;
   border-radius: 0.25rem;
-  transition: background 0.6s;
-  animation: flash 2s infinite;
 }
 
 .instrument-button.selected-instrument {
-  background-color: #28a746c0; /* Green highlight for selected instrument */
+  background-color: rgba(
+    138,
+    58,
+    177,
+    0.959
+  ); /* Green highlight for selected instrument */
   color: white;
   font-weight: bold;
-}
-.instrument-button-loading.selected-instrument {
-  background-color: #28a7469d; /* Green highlight for selected instrument */
-  color: white;
-  font-weight: bold;
-  animation: flash 2s infinite;
 }
 
 .instrument-button:hover {
-  background-color: #e0e0e0;
+  background-color: rgba(226, 173, 241, 0.927);
+  color: white;
 }
 .instrument-button.selected-instrument:hover {
-  background-color: #28a765;
+  background-color: #a362f9;
 }
 
-.instrument-dropdown {
+.instrument-container {
   position: absolute;
+  display: flex;
+  top: 100%;
+  flex-direction: row;
   margin-right: 0.5rem;
-  background-color: #fff;
-  border: 0.125rem solid #111827;
+  background-color: rgb(254, 254, 254);
+  border: 0.1rem solid rgba(93, 148, 125, 0.57);
+  filter: drop-shadow(0.5rem 0.5rem 0.55rem rgba(93, 148, 125, 0.57));
+  border-radius: 0.25rem;
+  animation: loaded 0.15s 1;
+  z-index: 6;
 }
+
+.instrument-container-children {
+  display: flex;
+}
+
+.toolbar {
+  display: flex;
+  margin: 0.5rem;
+  height: 2rem;
+  padding: 0rem;
+  border: 0px solid white;
+  border-radius: 0.5rem;
+  overflow: hidden;
+  box-shadow: 0rem 0rem 0.2rem 0.1rem rgba(93, 148, 125, 0.57);
+  z-index: 1;
+}
+
 @keyframes flash {
   0% {
     opacity: 0.2;
@@ -207,7 +239,7 @@ input[type="number"] {
 }
 @keyframes loaded {
   0% {
-    opacity: 0.2;
+    opacity: 0;
   }
   50% {
     opacity: 0.5;

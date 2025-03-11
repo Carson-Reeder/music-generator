@@ -31,11 +31,16 @@ export default function ShowInstruments({
   const {
     setIsInstrumentClicked,
     toolBarSelector,
+    setToolBarSelector,
     selectedInstrumentCategory,
     setSelectedInstrumentCategory,
     selectedInstrument,
     setSelectedInstrument,
   } = measureStore();
+
+  function closeToolbar() {
+    setToolBarSelector("");
+  }
 
   useEffect(() => {
     // Fetch instrument data on page load
@@ -58,9 +63,14 @@ export default function ShowInstruments({
   if (measureStore.getState().toolBarSelector != "instrument") return null;
 
   return (
-    <div className={`instrument-dropdown `}>
+    <div
+      className="instrument-container"
+      style={{
+        zIndex: 100 - compositionId,
+      }}
+    >
       {loading ? (
-        <div style={{ display: "flex", flexDirection: "column" }}>
+        <div className="instrument-container-children">
           <div className={`category-selection `}>
             <button className="category-button-loading selected">brass</button>
             <button className="category-button-loading">keyboards</button>
@@ -69,7 +79,7 @@ export default function ShowInstruments({
             <button className="category-button-loading">woodwinds</button>
           </div>
 
-          <div className="instrument-selection">
+          <div>
             <button className="instrument-button-loading selected-instrument">
               french-horn
             </button>
@@ -79,7 +89,7 @@ export default function ShowInstruments({
           </div>
         </div>
       ) : (
-        <div style={{ display: "flex", flexDirection: "row" }}>
+        <div className="instrument-container-children">
           <div className="category-selection">
             {categories2.map((category) => (
               <button
@@ -92,6 +102,14 @@ export default function ShowInstruments({
                 {category}
               </button>
             ))}
+            <button
+              className="category-button-close"
+              onClick={() => {
+                closeToolbar();
+              }}
+            >
+              Close
+            </button>
           </div>
 
           <div className="instrument-selection">
