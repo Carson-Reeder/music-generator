@@ -22,11 +22,15 @@ export default function ShowInstruments({
   const { setInstrument } = measureStore();
   const instruments = useInstrumentStore((state) => state.instruments);
   const { setInstruments } = useInstrumentStore.getState();
+  const { categories, setCategories, isLoading, setIsLoading } =
+    useInstrumentStore.getState();
   const [prevInstrument, setPrevInstrument] = useState<Instrument | null>(null);
   const [currentInstrument, setCurrentInstrument] = useState<Instrument | null>(
     null
   );
   const {
+    setIsInstrumentClicked,
+    toolBarSelector,
     selectedInstrumentCategory,
     setSelectedInstrumentCategory,
     selectedInstrument,
@@ -39,6 +43,7 @@ export default function ShowInstruments({
       .then((res) => res.json())
       .then((data) => {
         setInstruments(data);
+        console.log("Instruments loaded:", data);
 
         setLoading(false); // Set loading to false when data is fetched
       })
@@ -46,25 +51,22 @@ export default function ShowInstruments({
   }, []);
 
   // Get unique categories
-  const categories = Array.from(
+  const categories2 = Array.from(
     new Set(instruments.map((value: Instrument) => value.category))
   ) as string[];
 
-  if (arrangementStore.getState().toolBarSelector != "instrument") return null;
+  if (measureStore.getState().toolBarSelector != "instrument") return null;
+
   return (
-    <div className={`measure-display-parent `}>
+    <div className={`instrument-dropdown `}>
       {loading ? (
-        <div>
-          <div className="instrument-selection">
-            <div className={`category-selection `}>
-              <button className="category-button-loading selected">
-                brass
-              </button>
-              <button className="category-button-loading">keyboards</button>
-              <button className="category-button-loading">percussion</button>
-              <button className="category-button-loading">strings</button>
-              <button className="category-button-loading">woodwinds</button>
-            </div>
+        <div style={{ display: "flex", flexDirection: "column" }}>
+          <div className={`category-selection `}>
+            <button className="category-button-loading selected">brass</button>
+            <button className="category-button-loading">keyboards</button>
+            <button className="category-button-loading">percussion</button>
+            <button className="category-button-loading">strings</button>
+            <button className="category-button-loading">woodwinds</button>
           </div>
 
           <div className="instrument-selection">
@@ -77,9 +79,9 @@ export default function ShowInstruments({
           </div>
         </div>
       ) : (
-        <div className="instrument-selection">
+        <div style={{ display: "flex", flexDirection: "row" }}>
           <div className="category-selection">
-            {categories.map((category) => (
+            {categories2.map((category) => (
               <button
                 key={category}
                 className={`category-button ${

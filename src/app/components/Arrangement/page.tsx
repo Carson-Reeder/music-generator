@@ -42,7 +42,12 @@ export default function Arrangement() {
                 return (
                   <div key={id}>
                     {/* Measure Toolbar */}
-                    <div className="pl-2 pr-2">
+                    <div
+                      style={{
+                        position: "relative",
+                        zIndex: 9999,
+                      }}
+                    >
                       <MeasureToolbar
                         measureStore={store}
                         arrangementStore={arrangementStore}
@@ -78,7 +83,6 @@ export default function Arrangement() {
                       <div
                         style={{
                           width: "80%",
-                          position: "relative",
                           height: "7rem",
                           left: "0",
                           flexGrow: "2",
@@ -91,7 +95,7 @@ export default function Arrangement() {
                           marginBottom: "0.75rem",
                           //overflowX: "auto",
                           overflowY: "hidden",
-                          zIndex: 1,
+                          zIndex: 0,
                         }}
                         className=""
                       >

@@ -48,6 +48,8 @@ export type ChordType = {
 };
 
 export type MeasureStoreType = {
+  toolBarSelector: string;
+  setToolBarSelector: (toolBarSelector: string) => void;
   id: number;
   chords: ChordType[];
   setChords: (chords: ChordType[]) => void;
@@ -77,6 +79,9 @@ export type MeasureStoreType = {
 // create store instance
 export const createChordPlaybackStore = (id: number) => {
   return create<MeasureStoreType>((set) => ({
+    toolBarSelector: "",
+    setToolBarSelector: (toolBarSelector) => set({ toolBarSelector }),
+
     id,
     chords: initialChords,
     setChords: (chords) =>

@@ -85,7 +85,7 @@ input[type="number"] {
   padding: 0.125rem;
   background-color: rgba(57, 201, 133, 0.08);
   display: flex;
-  width: 100%;
+  flex-direction: column;
   gap: 0rem;
   margin-bottom: 0rem;
   border-bottom: 0.125rem solid rgba(42, 131, 94, 0.32);
@@ -95,6 +95,7 @@ input[type="number"] {
 .category-button {
   margin-right: 0.25rem;
   padding: 0rem 0.125rem;
+  width: 8rem;
   background-color: rgba(155, 231, 199, 0.92);
   cursor: pointer;
   border: 0.125rem solid rgba(42, 131, 94, 0.42);
@@ -138,13 +139,19 @@ input[type="number"] {
 
 .instrument-selection {
   padding: 0.125rem;
+
   display: flex;
+  flex-direction: column;
   flex-wrap: wrap;
   gap: 0.25rem;
 }
 
 .instrument-button {
   margin-right: 0.25rem;
+  width: 8rem;
+  justify-content: center;
+  display: flex;
+  flex-wrap: wrap;
   padding: 0rem 0.125rem;
   background-color: #fff;
   border-radius: 0.25rem;
@@ -179,6 +186,13 @@ input[type="number"] {
 }
 .instrument-button.selected-instrument:hover {
   background-color: #28a765;
+}
+
+.instrument-dropdown {
+  position: absolute;
+  margin-right: 0.5rem;
+  background-color: #fff;
+  border: 0.125rem solid #111827;
 }
 @keyframes flash {
   0% {

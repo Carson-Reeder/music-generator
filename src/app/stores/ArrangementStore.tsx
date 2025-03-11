@@ -3,9 +3,6 @@ import { createChordPlaybackStore } from "./MeasureStore";
 import * as Tone from "tone";
 
 export type ArrangementStoreType = {
-  toolBarSelector: string;
-  setToolBarSelector: (toolBarSelector: string) => void;
-
   numMeasures: number;
   setNumMeasures: (numMeasures: number) => void;
 
@@ -40,9 +37,6 @@ export type ArrangementStoreType = {
 
 export const createArrangementStore = () => {
   return create<ArrangementStoreType>((set) => ({
-    toolBarSelector: "instrument",
-    setToolBarSelector: (toolBarSelector) => set({ toolBarSelector }),
-
     numMeasures: 5,
     setNumMeasures: (numMeasures) =>
       set((state) => {

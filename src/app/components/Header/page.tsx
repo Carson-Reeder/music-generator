@@ -14,7 +14,6 @@ export default function Header() {
   const [loading, setLoading] = useState(false);
   const [threadId, setThreadId] = useState<string | null>(null);
   const [chordSelected, setChordSelected] = useState<number>(1);
-  const { setInstruments } = useInstrumentStore();
   const stores = arrangementStore.getState().stores;
 
   const handleChords = async () => {

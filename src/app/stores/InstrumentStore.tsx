@@ -7,13 +7,25 @@ export type Instrument = {
 };
 
 export type InstrumentStoreType = {
+  isLoading: boolean;
+  setIsLoading: (isLoading: boolean) => void;
   instruments: Instrument[];
   setInstruments: (instruments: Instrument[]) => void;
+  categories: string[];
+  setCategories: (categories: string[]) => void;
 };
 
 export const useInstrumentStore = create<InstrumentStoreType>((set: any) => ({
+  isLoading: true,
+  setIsLoading: (isLoading: boolean) => {
+    set({ isLoading }), console.log("isLoading set in store:", isLoading);
+  },
   instruments: [],
   setInstruments: (instruments: Instrument[]) => {
     set({ instruments }), console.log("Instruments set in store:", instruments);
+  },
+  categories: [],
+  setCategories: (categories: string[]) => {
+    set({ categories }), console.log("Categories set in store:", categories);
   },
 }));
