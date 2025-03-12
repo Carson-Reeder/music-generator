@@ -4,11 +4,12 @@ import { ArrangementStoreType } from "../../stores/ArrangementStore";
 import { playMeasure } from "../../utils/soundPlayer";
 import { useInstrumentStore } from "../../stores/InstrumentStore";
 import ShowInstruments from "../ShowInstruments/page";
+import ShowNotes from "../ShowNotes/page";
 
 type MeasureToolbarProps = {
   measureStore: UseBoundStore<StoreApi<MeasureStoreType>>;
   arrangementStore: UseBoundStore<StoreApi<ArrangementStoreType>>;
-  compositionId: number;
+  compositionId: string;
 };
 
 const toggleToolbar = (
@@ -86,6 +87,11 @@ export default function MeasureToolbar({
         </button>
       </div>
       <ShowInstruments
+        measureStore={measureStore}
+        arrangementStore={arrangementStore}
+        compositionId={compositionId}
+      />
+      <ShowNotes
         measureStore={measureStore}
         arrangementStore={arrangementStore}
         compositionId={compositionId}

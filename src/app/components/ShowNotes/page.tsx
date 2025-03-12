@@ -5,12 +5,17 @@ import { MeasureStoreType } from "../../stores/MeasureStore";
 import { useState } from "react";
 
 type ShowNotesProps = {
-  compositionId: number;
+  compositionId: string;
   measureStore: UseBoundStore<StoreApi<MeasureStoreType>>;
   arrangementStore: UseBoundStore<StoreApi<ArrangementStoreType>>;
 };
 
 import { ChordType } from "../../stores/MeasureStore";
+import { parse } from "path";
+
+function dropdownNotes(itr: number) {
+  console.log("itr", itr);
+}
 
 export default function ShowNotes({
   compositionId,
@@ -18,6 +23,7 @@ export default function ShowNotes({
   arrangementStore,
 }: ShowNotesProps) {
   const { chords, setChordNotes } = measureStore();
+  const [chordSelected, setChordSelected] = useState<number | null>(null);
   console.log("chords", chords);
   console.log("rerender");
 
@@ -44,18 +50,19 @@ export default function ShowNotes({
   const [selectedOctaves, setSelectedOctaves] = useState<{
     [key: string]: string | null;
   }>({});
-  const [activeInput, setActiveInput] = useState<{ id: string; itr: number }[]>(
-    []
-  );
+  const [activeInput, setActiveInput] = useState<
+    { id: string; itr: number }[] | null
+  >(null);
   const [activeNote, setActiveNote] = useState<string>("C4");
-  const [selectedNote, setSelectedNote] = useState<string>("4");
+  const [selectedNote, setSelectedNote] = useState<string | null>(null);
   const [selectedOctave, setSelectedOctave] = useState<string | null>(null);
 
   const handleNoteClick = (note: string) => {
+    if (chordSelected === null) return;
     console.log("note", note);
     console.log("activeInput", activeInput);
 
-    if (activeInput.length === 0) return;
+    if (!activeInput || activeInput.length === 0) return;
     console.log(activeNote);
     const parsedNote = parseNote(note);
     console.log("parsedNote", parsedNote);
@@ -74,6 +81,8 @@ export default function ShowNotes({
 
     // Call setChordNotes to update state
     setChordNotes(activeChord.id, updatedNotes);
+
+    setSelectedNote(fullNote);
   };
   const parsedNote = (note: string) => {
     return note.slice(0, -1); // Removes the last character (octave number)
@@ -84,71 +93,80 @@ export default function ShowNotes({
     return note.length > 1 && note[1] === "#" ? note.slice(0, 2) : note[0];
   };
 
-  const parseOctave = (note: string) => {
-    return note.at(-1); // Gets only the last character (octave number)
+  const parseOctave = (note: string | null) => {
+    return note?.at(-1) || "4"; // Gets only the last character (octave number), defaults to '4' if note is null
   };
 
-  // Function to determine background color for the **specific selected note**
-  const getNoteBackground = (note: string) => {
-    return activeNote && parseNote(note) === activeNote
-      ? "bg-yellow-300"
-      : "bg-white";
+  const handleChordSelected = (itr: number) => {
+    if (chordSelected === itr) {
+      setChordSelected(null);
+    } else {
+      setChordSelected(itr);
+      setSelectedNote(null);
+      setActiveInput(null);
+    }
   };
+
+  const isNoteSelected = (note: string) => {
+    if (chordSelected === null) return "";
+    if (selectedNote && parseNote(note) === parseNote(selectedNote)) {
+      return "selected";
+    }
+    return "";
+  };
+  const isChordSelected = (itr: number) => {
+    if (chordSelected === itr) {
+      return "selected";
+    }
+    return "";
+  };
+  if (measureStore.getState().toolBarSelector != "note") return null;
 
   return (
-    <div
-      className="measure-display-parent"
-      style={{ border: "1px solid green" }}
-    >
-      <div
-        style={{
-          overflow: "scroll",
-          display: "flex",
-          flexShrink: 0,
-          flexDirection: "row",
-          scrollbarWidth: "thin",
-          boxShadow: "0rem 0rem .25rem .2rem rgba(93, 148, 125, 0.57)",
-          height: `40%`,
-          flexWrap: "nowrap",
-        }}
-      >
-        {chords.map((chord) => (
-          <div className="measure-display-child pr-1" key={chord.id}>
-            {chord.notes.map((note, itr) => {
-              const noteKey = `${chord.id}-${note}`;
-              const finalValue =
-                selectedNotes[noteKey] || selectedOctaves[noteKey] || "";
-              const noteBackground = getNoteBackground(note);
+    <div className="note-container" style={{ border: "1px solid green" }}>
+      <div className="note-chords-container">
+        {chords.map((chord, itr) => (
+          <div key={chord.id}>
+            <button
+              className={`chord-button ${isChordSelected(itr)}`}
+              onClick={() => {
+                handleChordSelected(itr);
+              }}
+            >
+              Chord {itr}
+            </button>
+            {chordSelected === itr && (
+              <div className="note-chords">
+                {chord.notes.map((note, itr) => {
+                  const noteKey = `${chord.id}-${note}`;
+                  const finalValue =
+                    selectedNotes[noteKey] || selectedOctaves[noteKey] || "";
 
-              return (
-                <input
-                  key={`${chord.id}-${itr}`}
-                  className={`note-input `}
-                  value={finalValue}
-                  readOnly
-                  placeholder={note}
-                  onFocus={() => setActiveInput([{ id: chord.id, itr }])}
-                  onClick={() => setSelectedNote(note)}
-                />
-              );
-            })}
+                  return (
+                    <button
+                      key={`${chord.id}-${itr}`}
+                      className={`note-input `}
+                      value={finalValue}
+                      onFocus={() => setActiveInput([{ id: chord.id, itr }])}
+                      onClick={() => setSelectedNote(note)}
+                    >
+                      {" "}
+                      {note}{" "}
+                    </button>
+                  );
+                })}
+              </div>
+            )}
           </div>
         ))}
       </div>
 
       {/* Notes Section */}
-      <div
-        style={{
-          width: "100%",
-          height: `40%`,
-          border: "2px solid red",
-          display: "flex",
-        }}
-      >
+      <div className="pick-notes-container">
         {notes.map((note) => (
           <div
-            className={`note-container ${getNoteBackground(note)}`}
             key={note}
+            className={`pick-notes ${isNoteSelected(note)}`}
             onClick={() => {
               handleNoteClick(note);
             }}
@@ -159,53 +177,13 @@ export default function ShowNotes({
       </div>
 
       {/* Octaves Section */}
-      <div
-        style={{
-          width: "100%",
-          height: `20%`,
-          border: "2px solid red",
-          display: "flex",
-        }}
-      >
+      <div className="pick-octave-container">
         {octaves.map((octave) => (
-          <div className="note-container" key={octave} onClick={() => {}}>
+          <button className="pick-octave" key={octave} onClick={() => {}}>
             {octave}
-          </div>
+          </button>
         ))}
       </div>
-
-      <style jsx>{`
-        .measure-display-child {
-          display: flex;
-          max-width: 30%;
-          min-width: 20%;
-          height: 100%;
-        }
-        .note-container {
-          border: 1px solid blue;
-          height: 100%;
-          width: calc(100% / 12);
-          display: flex;
-          justify-content: center;
-          align-items: center;
-          cursor: pointer;
-        }
-        .note-input {
-          padding: 0.25rem;
-          min-width: 1rem;
-          max-width: 3rem;
-          text-align: center;
-          border-radius: 5px;
-          cursor: pointer;
-          z-index: 1;
-        }
-        .bg-yellow-300 {
-          background-color: yellow;
-        }
-        .bg-white {
-          background-color: white;
-        }
-      `}</style>
     </div>
   );
 }

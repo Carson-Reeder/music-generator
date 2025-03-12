@@ -48,7 +48,6 @@ input[type="number"] {
 
 .measure-label-parent {
   display: flex;
-  margin-top: 0.5rem;
   flex-wrap: wrap;
   justify-content: left;
   width: clamp(5rem, 10rem, 100%);
@@ -98,7 +97,7 @@ input[type="number"] {
   background-color: rgba(155, 231, 199, 0.92);
   cursor: pointer;
   border: 0.05rem solid rgba(73, 99, 90, 0.959);
-  border-offset: -0.125rem;
+
   border-radius: 5px;
   box-shadow: 0rem 0rem 0.25rem 0.1rem rgba(242, 245, 244, 0.659);
   transition: background 0.25s;
@@ -136,7 +135,6 @@ input[type="number"] {
   font-weight: bold;
   cursor: pointer;
   border: 0.125rem solid rgba(123, 139, 133, 0.42);
-  border-offset: -0.125rem;
   border-radius: 5px;
   transition: background 0.6s;
   animation: flash 2s infinite;
@@ -209,9 +207,93 @@ input[type="number"] {
   animation: loaded 0.15s 1;
   z-index: 6;
 }
+.note-container {
+  position: absolute;
+  display: flex;
+  top: 100%;
+  flex-direction: row;
+  background-color: rgba(219, 24, 14, 0.837);
+  border-radius: 0.25rem;
+  animation: loaded 0.15s 1;
+  border: 1rem solid rgba(93, 148, 125, 0.57);
+  z-index: 6;
+}
+
+.note-chords-container {
+  display: flex;
+  flex-direction: column;
+  width: 8rem;
+  border: 2px solid black;
+}
+
+.chord-button {
+  border: 2px solid black;
+  width: 100%;
+  height: 2rem;
+}
+
+.chord-button.selected {
+  background-color: #1357ea;
+  color: white;
+}
+
+.chord-button:hover {
+  background-color: #1357ea;
+  color: white;
+}
+
+.note-chords {
+  border: 5px solid blue;
+  background-color: #fff;
+}
+
+.note-input {
+  background-color: transparent;
+  width: 100%;
+}
 
 .instrument-container-children {
   display: flex;
+}
+
+.pick-notes-container {
+  display: flex;
+  flex-direction: column;
+  min-width: 4rem;
+  max-width: 5rem;
+  height: 20rem;
+  justify-content: center;
+}
+.pick-notes {
+  display: flex;
+  justify-content: center;
+  height: 100%;
+  width: 100%;
+  background-color: #1357ea;
+  border: 1px solid black;
+  color: white;
+  font-size: 0.875rem;
+  cursor: pointer;
+}
+
+.pick-notes.selected {
+  background-color: red;
+  color: white;
+  font-weight: bold;
+}
+
+.pick-octave-container {
+  display: flex;
+  flex-direction: column;
+  min-width: 4rem;
+  max-width: 5rem;
+  height: 20rem;
+  border: 2px solid black;
+}
+
+.pick-octave {
+  height: calc(100% / 8);
+  border: 1px solid yellow;
 }
 
 .toolbar {
