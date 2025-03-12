@@ -3,7 +3,7 @@ import { ArrangementStoreType } from "../../stores/ArrangementStore";
 
 type RemoveMeasureProps = {
   arrangementStore: UseBoundStore<StoreApi<ArrangementStoreType>>;
-  measureId: number;
+  measureId: string;
 };
 
 export default function RemoveMeasure({
@@ -12,14 +12,14 @@ export default function RemoveMeasure({
 }: RemoveMeasureProps) {
   const { removeStore, stores } = arrangementStore();
 
-  const removeComposition = (targetId: number) => {
+  const removeComposition = (targetId: string) => {
     removeStore(targetId);
   };
   return (
     <div>
       {stores.length !== 1 && (
         <button
-          className="mr-4 items-center p-1 rounded-sm"
+          className="mr-4 mb-4 mt-4 items-center p-1 rounded-sm"
           style={{
             backgroundColor: "rgba(203, 22, 100, 0.32)",
             position: "relative",

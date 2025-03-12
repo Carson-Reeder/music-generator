@@ -10,7 +10,7 @@ import PlaybackSlider from "./PlaybackSlider/PlaybackSlider";
 
 type MeasureProps = {
   measureStore: UseBoundStore<StoreApi<MeasureStoreType>>;
-  compositionId: number;
+  compositionId: string;
   arrangementStore: UseBoundStore<StoreApi<ArrangementStoreType>>;
 };
 

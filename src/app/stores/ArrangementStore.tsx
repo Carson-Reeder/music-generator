@@ -27,12 +27,12 @@ export type ArrangementStoreType = {
   currentPart: Tone.Part | null;
   setCurrentPart: (currentPart: Tone.Part | null) => void;
 
-  stores: { id: number; store: ReturnType<typeof createChordPlaybackStore> }[];
+  stores: { id: string; store: ReturnType<typeof createChordPlaybackStore> }[];
   setStores: (
-    stores: { id: number; store: ReturnType<typeof createChordPlaybackStore> }[]
+    stores: { id: string; store: ReturnType<typeof createChordPlaybackStore> }[]
   ) => void;
   createStore: () => void;
-  removeStore: (id: number) => void;
+  removeStore: (id: string) => void;
 };
 
 export const createArrangementStore = () => {
@@ -72,10 +72,10 @@ export const createArrangementStore = () => {
     currentPart: null,
     setCurrentPart: (currentPart) => set({ currentPart }),
 
-    stores: [{ id: 1, store: createChordPlaybackStore(1) }],
+    stores: [{ id: "1", store: createChordPlaybackStore("1") }],
     setStores: (
       stores: {
-        id: number;
+        id: string;
         store: ReturnType<typeof createChordPlaybackStore>;
       }[]
     ) => set({ stores }),
@@ -84,15 +84,17 @@ export const createArrangementStore = () => {
       set((state) => {
         const newId =
           state.stores.length > 0
-            ? Math.max(...state.stores.map((s) => s.id)) + 1
-            : 1;
+            ? String(
+                Math.max(...state.stores.map((s) => parseInt(s.id, 10))) + 1
+              )
+            : "1";
         console.log("newId", newId);
-        const newStore = createChordPlaybackStore(newId);
+        const newStore = createChordPlaybackStore(parseInt(newId, 10));
         console.log("newStore", newStore);
         return { stores: [...state.stores, { id: newId, store: newStore }] };
       });
     },
-    removeStore: (id: number) => {
+    removeStore: (id: string) => {
       // The removeStore function
       set((state) => ({
         stores: state.stores

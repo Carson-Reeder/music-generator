@@ -3,7 +3,7 @@ import { ArrangementStoreType } from "../../stores/ArrangementStore";
 
 type AddMeasureProps = {
   arrangementStore: UseBoundStore<StoreApi<ArrangementStoreType>>;
-  measureId: number;
+  measureId: string;
 };
 
 export default function AddMeasure({
@@ -19,7 +19,7 @@ export default function AddMeasure({
     <div style={{}}>
       {measureId === stores[stores.length - 1].id && (
         <button
-          className="ml-0 items-center p-1 pr-2 pl-2 rounded-sm"
+          className="ml-0 mt-4 items-center p-1 pr-2 pl-2 rounded-sm"
           style={{
             backgroundColor: "rgba(1, 255, 158, 0.12)",
             position: "relative",

@@ -10,7 +10,7 @@ import { relative } from "path";
 const sliderWidth = 0.3; // Width of the slider in rem
 
 type PlaybackSliderProps = {
-  compositionId: number;
+  compositionId: string;
   arrangementStore: UseBoundStore<StoreApi<ArrangementStoreType>>;
   measureStore: UseBoundStore<StoreApi<MeasureStoreType>>;
 };

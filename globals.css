@@ -39,7 +39,8 @@ input[type="number"] {
 }
 .measure-label-child {
   display: flex;
-  width: 45%;
+  margin-left: 0.5rem;
+  width: clamp(2rem, 5rem, 45%);
   height: 2.25rem; /* Stack button wrappers */
   justify-content: space-between; /* Ensures equal spacing */
   align-items: center;
@@ -47,12 +48,11 @@ input[type="number"] {
 
 .measure-label-parent {
   display: flex;
+  margin-top: 0.5rem;
   flex-wrap: wrap;
-  justify-content: space-between;
-  padding-left: 0.5rem;
-  width: 100%;
-  min-width: 10rem;
-  padding-bottom: 0.75rem;
+  justify-content: left;
+  width: clamp(5rem, 10rem, 100%);
+  padding-bottom: 0.5rem;
 }
 .measure-display-parent {
   gap: 0rem;
@@ -217,6 +217,7 @@ input[type="number"] {
 .toolbar {
   display: flex;
   margin: 0.5rem;
+  margin-bottom: 1rem;
   height: 2rem;
   padding: 0rem;
   border: 0px solid white;

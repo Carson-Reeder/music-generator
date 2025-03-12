@@ -52,10 +52,9 @@ export default function Arrangement() {
                       <div
                         style={{
                           height: "100%",
-                          flexShrink: "0",
-                          flexGrow: "0",
-                          minWidth: "9rem",
-                          maxWidth: "9rem",
+                          //flexShrink: "0",
+                          //flexGrow: "0",
+                          width: "100%",
                         }}
                         className="flex"
                       >

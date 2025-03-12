@@ -8,7 +8,7 @@ import { loadInstrument } from "../../utils/soundPlayer";
 import { Instrument } from "../../stores/InstrumentStore";
 
 type ShowInstrumentProps = {
-  compositionId: number;
+  compositionId: string;
   measureStore: UseBoundStore<StoreApi<MeasureStoreType>>;
   arrangementStore: UseBoundStore<StoreApi<ArrangementStoreType>>;
 };
@@ -66,7 +66,7 @@ export default function ShowInstruments({
     <div
       className="instrument-container"
       style={{
-        zIndex: 100 - compositionId,
+        zIndex: 100 - Number(compositionId),
       }}
     >
       {loading ? (

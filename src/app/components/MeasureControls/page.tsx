@@ -15,7 +15,7 @@ export default function MeasureControls({
   arrangementStore,
 }: MeasureControlsProps) {
   return (
-    <div className="measure-label-parent">
+    <div className="measure-label-parent mr-2">
       <div className="measure-label-child">
         <AddMeasureLength arrangementStore={arrangementStore} />
         <RemoveMeasureLength arrangementStore={arrangementStore} />

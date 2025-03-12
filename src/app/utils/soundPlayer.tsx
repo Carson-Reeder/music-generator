@@ -31,7 +31,7 @@ type playNotesProps = {
 type PlayMeasureProps = {
   measureStore: UseBoundStore<StoreApi<MeasureStoreType>>;
   arrangementStore: UseBoundStore<StoreApi<ArrangementStoreType>>;
-  compositionId: number;
+  compositionId: string;
   transportState: string | null;
   reason: string;
 };
@@ -233,7 +233,6 @@ export const playMeasure = async ({
       transport.cancel();
       Tone.getTransport().bpm.value = bpm;
       Tone.getTransport().loop = true;
-      console.log("numMeasures:", numMeasures);
       Tone.getTransport().loopEnd = `${numMeasures}m`;
 
       if (arrangementStore.getState().currentPart != null) {
