@@ -208,48 +208,121 @@ input[type="number"] {
   z-index: 6;
 }
 .note-container {
+  box-sizing: border-box;
+  margin-right: 1.5rem;
   position: absolute;
   display: flex;
+  flex-wrap: wrap;
   top: 100%;
+  filter: drop-shadow(0.5rem 0.5rem 0.55rem rgba(93, 148, 125, 0.57));
   flex-direction: row;
-  background-color: rgba(219, 24, 14, 0.837);
+  background-color: rgb(254, 254, 254);
   border-radius: 0.25rem;
   animation: loaded 0.15s 1;
-  border: 1rem solid rgba(93, 148, 125, 0.57);
+  border: 0.1rem solid rgba(93, 148, 125, 0.57);
   z-index: 6;
+  width: 90%;
+  max-width: 20rem;
 }
 
 .note-chords-container {
   display: flex;
   flex-direction: column;
-  width: 8rem;
-  border: 2px solid black;
+  width: calc(100% / 3);
+  max-width: 8rem;
 }
 
 .chord-button {
-  border: 2px solid black;
+  box-sizing: border-box;
   width: 100%;
   height: 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-bottom: 1px solid rgba(51, 54, 53, 0.949);
+  background-color: rgba(93, 148, 125, 0.77);
+}
+.open-chord {
+  background-color: rgba(93, 148, 125, 0.77);
+  left: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  width: 100%;
+  color: black;
+  cursor: pointer;
 }
 
-.chord-button.selected {
-  background-color: #1357ea;
+.open-chord-cancel {
+  background-color: rgba(52, 81, 65, 0.523);
+  left: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  width: 100%;
+  color: white;
+  cursor: pointer;
+}
+
+.open-chord-cancel:hover {
+  background-color: rgba(93, 148, 97, 0.923);
   color: white;
 }
 
-.chord-button:hover {
-  background-color: #1357ea;
+.open-chord:hover {
+  background-color: rgba(27, 156, 102, 0.77);
   color: white;
+}
+
+.open-chord.selected {
+  background-color: rgba(27, 156, 102, 0.77);
+  color: white;
+}
+
+.remove-chord {
+  left: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  width: 2rem;
+  background-color: rgba(51, 111, 94, 0.852);
+  color: white;
+  cursor: pointer;
+  border-right: 1px solid black;
+  border-top-right-radius: 0.125rem;
+  border-bottom-right-radius: 0.125rem;
+}
+
+.remove-chord.delete {
+  background-color: rgba(178, 84, 84, 0.823);
+  color: white;
+}
+
+.remove-chord:hover {
+  background-color: rgba(95, 150, 135, 0.852);
+  color: red;
+}
+
+.remove-chord.delete:hover {
+  background-color: rgba(178, 84, 84, 0.823);
+  color: red;
 }
 
 .note-chords {
-  border: 5px solid blue;
   background-color: #fff;
 }
 
 .note-input {
-  background-color: transparent;
+  background-color: rgba(93, 148, 125, 0.37);
   width: 100%;
+  border-bottom: 1px solid black;
+}
+
+.note-input:hover {
+  background-color: rgba(93, 148, 125, 0.77);
 }
 
 .instrument-container-children {
@@ -294,6 +367,12 @@ input[type="number"] {
 .pick-octave {
   height: calc(100% / 8);
   border: 1px solid yellow;
+  width: 100%;
+}
+.pick-octave.selected {
+  background-color: red;
+  color: white;
+  font-weight: bold;
 }
 
 .toolbar {

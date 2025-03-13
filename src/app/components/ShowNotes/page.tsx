@@ -10,9 +10,6 @@ type ShowNotesProps = {
   arrangementStore: UseBoundStore<StoreApi<ArrangementStoreType>>;
 };
 
-import { ChordType } from "../../stores/MeasureStore";
-import { parse } from "path";
-
 function dropdownNotes(itr: number) {
   console.log("itr", itr);
 }
@@ -22,7 +19,7 @@ export default function ShowNotes({
   measureStore,
   arrangementStore,
 }: ShowNotesProps) {
-  const { chords, setChordNotes } = measureStore();
+  const { chords, setChordNotes, removeChord } = measureStore();
   const [chordSelected, setChordSelected] = useState<number | null>(null);
   console.log("chords", chords);
   console.log("rerender");
@@ -56,6 +53,16 @@ export default function ShowNotes({
   const [activeNote, setActiveNote] = useState<string>("C4");
   const [selectedNote, setSelectedNote] = useState<string | null>(null);
   const [selectedOctave, setSelectedOctave] = useState<string | null>(null);
+  const [deleteClicked, setDeleteClicked] = useState<string | null>(null);
+
+  function handleDeleteClick(chordId: string) {
+    if (deleteClicked === chordId) {
+      removeChord(chordId);
+      setDeleteClicked(null);
+    } else {
+      setDeleteClicked(chordId);
+    }
+  }
 
   const handleNoteClick = (note: string) => {
     if (chordSelected === null) return;
@@ -63,13 +70,9 @@ export default function ShowNotes({
     console.log("activeInput", activeInput);
 
     if (!activeInput || activeInput.length === 0) return;
-    console.log(activeNote);
     const parsedNote = parseNote(note);
-    console.log("parsedNote", parsedNote);
     const parsedOctave = parseOctave(selectedNote);
-    console.log("parsedOctave", parsedOctave);
     const fullNote = `${parsedNote}${parsedOctave}`; // Combine note and octave
-    console.log("fullNote", fullNote);
 
     // Find the active chord
     const activeChord = chords.find((chord) => chord.id === activeInput[0].id);
@@ -84,11 +87,29 @@ export default function ShowNotes({
 
     setSelectedNote(fullNote);
   };
-  const parsedNote = (note: string) => {
-    return note.slice(0, -1); // Removes the last character (octave number)
+  const handleOctaveClick = (octave: string) => {
+    if (chordSelected === null) return;
+    if (!activeInput || activeInput.length === 0) return;
+    const parsedNote = parseNote(selectedNote);
+    const parsedOctave = parseOctave(octave);
+    const fullNote = `${parsedNote}${parsedOctave}`; // Combine note and octave
+    console.log("fullNoteOctave", fullNote);
+
+    // Find the active chord
+    const activeChord = chords.find((chord) => chord.id === activeInput[0].id);
+    if (!activeChord) return;
+
+    // Create a new notes array with the updated note
+    const updatedNotes = [...activeChord.notes];
+    updatedNotes[activeInput[0].itr] = fullNote; // Update with combined note + octave
+
+    // Call setChordNotes to update state
+    setChordNotes(activeChord.id, updatedNotes);
+
+    setSelectedNote(fullNote);
   };
   // Function to extract note name (handling sharps correctly)
-  const parseNote = (note: string) => {
+  const parseNote = (note: string | null) => {
     if (!note) return null;
     return note.length > 1 && note[1] === "#" ? note.slice(0, 2) : note[0];
   };
@@ -114,9 +135,23 @@ export default function ShowNotes({
     }
     return "";
   };
+
+  const isOctaveSelected = (octave: string) => {
+    if (chordSelected === null) return "";
+    if (selectedNote && parseOctave(selectedNote) === octave) {
+      return "selected";
+    }
+    return "";
+  };
   const isChordSelected = (itr: number) => {
     if (chordSelected === itr) {
       return "selected";
+    }
+    return "";
+  };
+  const isDeleteSelected = (chordId: string) => {
+    if (deleteClicked === chordId) {
+      return "delete";
     }
     return "";
   };
@@ -127,14 +162,36 @@ export default function ShowNotes({
       <div className="note-chords-container">
         {chords.map((chord, itr) => (
           <div key={chord.id}>
-            <button
-              className={`chord-button ${isChordSelected(itr)}`}
-              onClick={() => {
-                handleChordSelected(itr);
-              }}
-            >
-              Chord {itr}
-            </button>
+            <div className={`chord-button `}>
+              <button
+                className={`remove-chord ${isDeleteSelected(chord.id)}`}
+                onClick={() => {
+                  handleDeleteClick(chord.id);
+                }}
+              >
+                X
+              </button>
+              {deleteClicked !== chord.id ? (
+                <button
+                  className={`open-chord ${isChordSelected(itr)}`}
+                  onClick={() => {
+                    handleChordSelected(itr);
+                    setDeleteClicked(null);
+                  }}
+                >
+                  Chord {chord.id}
+                </button>
+              ) : (
+                <button
+                  className={`open-chord-cancel ${isChordSelected(itr)}`}
+                  onClick={() => {
+                    setDeleteClicked(null);
+                  }}
+                >
+                  Cancel
+                </button>
+              )}
+            </div>
             {chordSelected === itr && (
               <div className="note-chords">
                 {chord.notes.map((note, itr) => {
@@ -179,7 +236,13 @@ export default function ShowNotes({
       {/* Octaves Section */}
       <div className="pick-octave-container">
         {octaves.map((octave) => (
-          <button className="pick-octave" key={octave} onClick={() => {}}>
+          <button
+            className={`pick-octave ${isOctaveSelected(octave)}`}
+            key={octave}
+            onClick={() => {
+              handleOctaveClick(octave);
+            }}
+          >
             {octave}
           </button>
         ))}
