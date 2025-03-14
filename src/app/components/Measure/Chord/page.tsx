@@ -11,7 +11,7 @@ import { loadInstrument } from "../../../utils/soundPlayer";
 
 type ChordProps = {
   chord: any;
-  compositionId: number;
+  compositionId: string;
   measureStore: UseBoundStore<StoreApi<MeasureStoreType>>;
   arrangementStore: UseBoundStore<StoreApi<ArrangementStoreType>>;
 };

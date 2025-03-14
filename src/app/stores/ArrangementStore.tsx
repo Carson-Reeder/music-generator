@@ -89,7 +89,7 @@ export const createArrangementStore = () => {
               )
             : "1";
         console.log("newId", newId);
-        const newStore = createChordPlaybackStore(parseInt(newId, 10));
+        const newStore = createChordPlaybackStore(newId);
         console.log("newStore", newStore);
         return { stores: [...state.stores, { id: newId, store: newStore }] };
       });

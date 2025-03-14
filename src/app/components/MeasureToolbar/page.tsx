@@ -42,7 +42,7 @@ export default function MeasureToolbar({
           width: "clamp(4rem, calc(100% / 3), 7rem)",
         }}
         onClick={() => {
-          setToolBarSelector("note");
+          toggleToolbar("note", measureStore);
         }}
       >
         + Note

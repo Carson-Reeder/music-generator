@@ -155,6 +155,11 @@ export default function ShowNotes({
     }
     return "";
   };
+  const isNoteInputSelected = (chordId: string, inputItr: number) => {
+    if (!activeInput || activeInput.length === 0) return "";
+    const active = activeInput[0];
+    return active.id === chordId && active.itr === inputItr ? "selected" : "";
+  };
   if (measureStore.getState().toolBarSelector != "note") return null;
 
   return (
@@ -202,7 +207,10 @@ export default function ShowNotes({
                   return (
                     <button
                       key={`${chord.id}-${itr}`}
-                      className={`note-input `}
+                      className={`note-input ${isNoteInputSelected(
+                        chord.id,
+                        itr
+                      )}`}
                       value={finalValue}
                       onFocus={() => setActiveInput([{ id: chord.id, itr }])}
                       onClick={() => setSelectedNote(note)}

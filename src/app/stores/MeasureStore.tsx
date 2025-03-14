@@ -93,6 +93,19 @@ export const createChordPlaybackStore = (id: string) => {
       set((state) => ({
         chords: state.chords.filter((chord) => chord.id !== id),
       })),
+    addChord: () =>
+      set((state) => ({
+        chords: [
+          ...state.chords,
+          {
+            id: (state.chords.length + 1).toString(),
+            notes: ["C4", "C4", "C4"],
+            startPosition: 0,
+            length: 1,
+            chordTimingBeat: 0,
+          },
+        ],
+      })),
 
     bpm: 120,
     setBpm: (bpm: number) => set({ bpm }),
