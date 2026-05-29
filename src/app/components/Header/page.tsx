@@ -7,7 +7,8 @@ import { getChords } from "../../utils/fetchChords";
 import { arrangementStore } from "../../stores/ArrangementStore";
 
 export default function Header() {
-  const [scale, setScale] = useState("C major 4");
+  const [scale, setScale] = useState("C major");
+  const [chordCount, setChordCount] = useState<number>(4);
   const [responseText, setResponseText] = useState(
     "Chord 1: C4, E4, G4 (C major)\nChord 2: D4, F4, A4 (D minor)\nChord 3: G3, B3, D4, F4 (G7)\nChord 4: F4, A4, C5 (F major)"
   );
@@ -23,6 +24,7 @@ export default function Header() {
     // call api, passing in scale, threadId, and chords derived from current store
     const result = await getChords(
       scale,
+      chordCount,
       threadId,
       stores[chordSelected - 1].store.getState().chords
     );
@@ -55,18 +57,26 @@ export default function Header() {
           OpenAI Chord Generator
         </h1>
         {/* Chord Input */}
-        <div id="chord-input">
-          <textarea
-            className="m-3 pl-2 pt-1.5 h-10 rounded-md block w-full sm:w-1/2 bg-white-500 p-4"
+        <div id="chord-input" className="flex flex-col justify-center">
+          <input
+            className="m-3 mb-1 pl-2 h-10 rounded-md block bg-white-500 p-4"
             value={scale}
             onChange={(e) => setScale(e.target.value)}
-            placeholder="Enter the scale here"
-            rows={2}
-            cols={50}
+            placeholder="Enter scale (e.g. C major)"
             style={{
               backgroundColor: "rgba(191, 232, 217, 0.4)",
             }}
           />
+          <div className="mx-3 flex items-center">
+            <label className="text-sm mr-2 font-semibold">Chords:</label>
+            <input
+              type="number"
+              className="h-8 w-16 rounded-md pl-2"
+              value={chordCount}
+              onChange={(e) => setChordCount(e.target.valueAsNumber)}
+              style={{ backgroundColor: "rgba(191, 232, 217, 0.4)" }}
+            />
+          </div>
         </div>
         {/* Generate Chords */}
         <div>
