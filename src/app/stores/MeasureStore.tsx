@@ -54,8 +54,7 @@ export type MeasureStoreType = {
   chords: ChordType[];
   setChords: (chords: ChordType[]) => void;
   removeChord: (id: string) => void;
-  bpm: number;
-  setBpm: (bpm: number) => void;
+
   instrument: Instrument;
   setInstrument: (instrument: Instrument) => void;
   selectedInstrumentCategory: string;
@@ -107,8 +106,7 @@ export const createChordPlaybackStore = (id: string) => {
         ],
       })),
 
-    bpm: 120,
-    setBpm: (bpm: number) => set({ bpm }),
+
 
     instrument: initialInstrument,
     setInstrument: (instrument: Instrument) => {

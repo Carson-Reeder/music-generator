@@ -16,6 +16,8 @@ export default function Header() {
   const [threadId, setThreadId] = useState<string | null>(null);
   const [chordSelected, setChordSelected] = useState<number>(1);
   const stores = arrangementStore.getState().stores;
+  const bpm = arrangementStore((state) => state.bpm);
+  const setBpm = arrangementStore((state) => state.setBpm);
 
   const handleChords = async () => {
     setLoading(true);
@@ -25,6 +27,7 @@ export default function Header() {
     const result = await getChords(
       scale,
       chordCount,
+      bpm,
       threadId,
       stores[chordSelected - 1].store.getState().chords
     );
@@ -67,15 +70,27 @@ export default function Header() {
               backgroundColor: "rgba(191, 232, 217, 0.4)",
             }}
           />
-          <div className="mx-3 flex items-center">
-            <label className="text-sm mr-2 font-semibold">Chords:</label>
-            <input
-              type="number"
-              className="h-8 w-16 rounded-md pl-2"
-              value={chordCount}
-              onChange={(e) => setChordCount(e.target.valueAsNumber)}
-              style={{ backgroundColor: "rgba(191, 232, 217, 0.4)" }}
-            />
+          <div className="mx-3 flex items-center justify-between">
+            <div className="flex items-center">
+              <label className="text-sm mr-2 font-semibold">Chords:</label>
+              <input
+                type="number"
+                className="h-8 w-16 rounded-md pl-2"
+                value={chordCount}
+                onChange={(e) => setChordCount(e.target.valueAsNumber)}
+                style={{ backgroundColor: "rgba(191, 232, 217, 0.4)" }}
+              />
+            </div>
+            <div className="flex items-center ml-2">
+              <label className="text-sm mr-2 font-semibold">BPM:</label>
+              <input
+                type="number"
+                className="h-8 w-16 rounded-md pl-2"
+                value={bpm}
+                onChange={(e) => setBpm(e.target.valueAsNumber)}
+                style={{ backgroundColor: "rgba(191, 232, 217, 0.4)" }}
+              />
+            </div>
           </div>
         </div>
         {/* Generate Chords */}
