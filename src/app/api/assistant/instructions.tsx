@@ -49,10 +49,13 @@ export const getInputPrompt = (
   scale: string,
   contextTracks: any[],
   currentInstrument: string,
-  chordCount: number
+  chordCount: number,
+  bpm: number
 ) => {
+  const bpmContext = bpm ? `The arrangement BPM is currently set to ${bpm}. Tailor the rhythmic density and feel accordingly.\n` : '';
+
   if (contextTracks && contextTracks.length > 0) {
-    return `Scale: ${scale}\nCRITICAL CONTEXT: You are generating a Subordinate Track for the instrument: [${currentInstrument || "unknown"}] using a "Harmony-First / Top-Down" approach. The other tracks currently playing are:\n${JSON.stringify(contextTracks)}\n\nYou MUST generate exactly ${chordCount ?? 4} rhythmic hits/chords for this new track. Follow these strict rules to prevent dissonance:\n` +
+    return `Scale: ${scale}\n${bpmContext}CRITICAL CONTEXT: You are generating a Subordinate Track for the instrument: [${currentInstrument || "unknown"}] using a "Harmony-First / Top-Down" approach. The other tracks currently playing are:\n${JSON.stringify(contextTracks)}\n\nYou MUST generate exactly ${chordCount ?? 4} rhythmic hits/chords for this new track. Follow these strict rules to prevent dissonance:\n` +
       `1. Pure Function: Treat this new track as a function that reacts to the "Master Track" state at any given startPosition and beat. (Look for the track labeled "Master Track" in the JSON above).\n` +
       `2. Note Selection: Restrict your notes strictly to the active chord tones of the "Master Track" at that exact moment. You may use passing notes from the ${scale} scale for movement, but land on chord tones for stability.\n` +
       `3. Voice Leading: Move individual notes as little as possible between transitions (the 'Lazy' rule). Keep common tones; move by half or whole steps if forced.\n` +
@@ -60,6 +63,6 @@ export const getInputPrompt = (
       `5. Instrument Specifics: Tailor your phrasing and rhythm to fit the [${currentInstrument || "unknown"}] instrument. If acting as a bass, heavily weight the root note of the active master chord on downbeats.\n` +
       `Generate a cohesive, complementary part that locks in flawlessly with the provided Master Track.`;
   } else {
-    return `Scale: ${scale}\nCRITICAL CONTEXT: You are generating the Master Track (Chords) for the instrument: [${currentInstrument || "unknown"}]. Establish a strong, creative harmonic progression in the ${scale} scale. Generate exactly ${chordCount ?? 4} chords. Use varied progressions, inversions, and excellent voice leading (keep notes close, use common tones). Fill the available rhythmic space continuously: DO NOT leave empty gaps or rests between chords. The end time of one chord must exactly equal the start time of the next chord.`;
+    return `Scale: ${scale}\n${bpmContext}CRITICAL CONTEXT: You are generating the Master Track (Chords) for the instrument: [${currentInstrument || "unknown"}]. Establish a strong, creative harmonic progression in the ${scale} scale. Generate exactly ${chordCount ?? 4} chords. Use varied progressions, inversions, and excellent voice leading (keep notes close, use common tones). Fill the available rhythmic space continuously: DO NOT leave empty gaps or rests between chords. The end time of one chord must exactly equal the start time of the next chord.`;
   }
 };
