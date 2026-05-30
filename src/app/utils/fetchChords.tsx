@@ -1,4 +1,11 @@
-export const getChords = async (scale: string, threadId: any, chords: any) => {
+type Chord = {
+  id: string;
+  notes: string[];
+  startPosition: number;
+  length: number;
+};
+
+export const getChords = async (scale: string, chordCount: number, bpm: number, threadId: any, chords: any) => {
     
     if (!scale.trim()) return; // scale is empty
 
@@ -6,74 +13,34 @@ export const getChords = async (scale: string, threadId: any, chords: any) => {
         const response = await fetch("/api/assistant", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ scale, threadId }),
+            body: JSON.stringify({ scale, chordCount, bpm }),
         });
         const data = await response.json();
-        const parsedChords = parseChordsFromResponse(data.message);
-        const parsedId = data.threadId
-        const parsedMessage = data.message
 
-        const findLastChord = (existingChords: any[]) => {
-          if (existingChords.length === 0) return null;
-          
-          return existingChords.reduce((maxChord, currentChord) => {
-            return (currentChord.startPosition + (currentChord.chordTimingBeat / 4) > maxChord.startPosition + (maxChord.chordTimingBeat/4)) ? currentChord : maxChord;
-          });
-        };
-    
-        const lastChord = findLastChord(chords);
-        console.log('lastChord', lastChord);
+        // The API returns a structured JSON string via response.text
+        // Parse it directly — chords are already fully formed objects
+        const parsedChords: Chord[] = parseChordsFromResponse(data.message);
+        const parsedId = data.threadId || null;
 
-        // create Chords object
-        const transformedChords = parsedChords.map((notes: string[], index: number) => {
-          // If we have fewer existing chords than new chords, calculate new box start position
-          if (index >= chords.length) {
-            // If no existing chords, start at 0
-            const startPosition = lastChord 
-              ? (lastChord.startPosition)
-              : 0;
-            const chordTiming = lastChord
-              ? (lastChord.chordTimingBeat + (lastChord.length)*4)
-              : 0;
-            
-    
-            return {
-              id: `${index + 1}`,
-              notes,
-              startPosition: startPosition,
-              length: .25, // Default length, adjust as needed
-              chordTimingBeat: chordTiming, // Default timing, adjust as needed
-            };
-          }
-    
-          // For existing chords, use the original values
-          return {
-            id: `${index + 1}`,
-            notes,
-            startPosition: chords[index].startPosition,
-            length: chords[index].length,
-            chordTimingBeat: chords[index].chordTimingBeat,
-          };
-        });
-        return {transformedChords, parsedId, parsedMessage };
+        // Build a human-readable display string from the structured chords
+        const parsedMessage = parsedChords
+            .map((chord, index) => `Chord ${index + 1}: ${chord.notes.join(", ")}`)
+            .join("\n");
+
+        return { transformedChords: parsedChords, parsedId, parsedMessage };
     } catch (error) {
         console.error("Error fetching response:", error);
     }  
 }
 
-const parseChordsFromResponse = (response: string): string[][] => {
+const parseChordsFromResponse = (response: string): Chord[] => {
   try {
-    const chords = response
-      .split("\n")
-      .map((line) => {
-        const match = line.match(/Chord \d+: (.+)/);
-        return match ? match[1].split(", ").map((note) => note.trim()) : [];
-      })
-      .filter((chord) => chord.length > 0);
-
-    return chords;
+    // The Responses API returns the structured text directly as a string
+    const raw = typeof response === "string" ? response : JSON.stringify(response);
+    const data = JSON.parse(raw);
+    return data.chords || [];
   } catch (error) {
-    console.error("Error parsing chords, the assistant didn't respond in the correct format:", error);
-    return []; // Return an empty array on error
+    console.error("Error parsing chords, the assistant didn't respond in the correct format:", error, "Raw response:", response);
+    return [];
   }
 };

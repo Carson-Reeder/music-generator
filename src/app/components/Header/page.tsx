@@ -7,7 +7,8 @@ import { getChords } from "../../utils/fetchChords";
 import { arrangementStore } from "../../stores/ArrangementStore";
 
 export default function Header() {
-  const [scale, setScale] = useState("C major 4");
+  const [scale, setScale] = useState("C major");
+  const [chordCount, setChordCount] = useState<number>(4);
   const [responseText, setResponseText] = useState(
     "Chord 1: C4, E4, G4 (C major)\nChord 2: D4, F4, A4 (D minor)\nChord 3: G3, B3, D4, F4 (G7)\nChord 4: F4, A4, C5 (F major)"
   );
@@ -15,6 +16,10 @@ export default function Header() {
   const [threadId, setThreadId] = useState<string | null>(null);
   const [chordSelected, setChordSelected] = useState<number>(1);
   const stores = arrangementStore.getState().stores;
+  const bpm = arrangementStore((state) => state.bpm);
+  const setBpm = arrangementStore((state) => state.setBpm);
+  const snapDivision = arrangementStore((state) => state.snapDivision);
+  const setSnapDivision = arrangementStore((state) => state.setSnapDivision);
 
   const handleChords = async () => {
     setLoading(true);
@@ -23,6 +28,8 @@ export default function Header() {
     // call api, passing in scale, threadId, and chords derived from current store
     const result = await getChords(
       scale,
+      chordCount,
+      bpm,
       threadId,
       stores[chordSelected - 1].store.getState().chords
     );
@@ -55,18 +62,53 @@ export default function Header() {
           OpenAI Chord Generator
         </h1>
         {/* Chord Input */}
-        <div id="chord-input">
-          <textarea
-            className="m-3 pl-2 pt-1.5 h-10 rounded-md block w-full sm:w-1/2 bg-white-500 p-4"
+        <div id="chord-input" className="flex flex-col justify-center">
+          <input
+            className="m-3 mb-1 pl-2 h-10 rounded-md block bg-white-500 p-4"
             value={scale}
             onChange={(e) => setScale(e.target.value)}
-            placeholder="Enter the scale here"
-            rows={2}
-            cols={50}
+            placeholder="Enter scale (e.g. C major)"
             style={{
               backgroundColor: "rgba(191, 232, 217, 0.4)",
             }}
           />
+          <div className="mx-3 flex items-center justify-between">
+            <div className="flex items-center">
+              <label className="text-sm mr-2 font-semibold">Chords:</label>
+              <input
+                type="number"
+                className="h-8 w-16 rounded-md pl-2"
+                value={chordCount}
+                onChange={(e) => setChordCount(e.target.valueAsNumber)}
+                style={{ backgroundColor: "rgba(191, 232, 217, 0.4)" }}
+              />
+            </div>
+            <div className="flex items-center ml-2">
+              <label className="text-sm mr-2 font-semibold">BPM:</label>
+              <input
+                type="number"
+                className="h-8 w-16 rounded-md pl-2"
+                value={bpm}
+                onChange={(e) => setBpm(e.target.valueAsNumber)}
+                style={{ backgroundColor: "rgba(191, 232, 217, 0.4)" }}
+              />
+            </div>
+            <div className="flex items-center ml-2">
+              <label className="text-sm mr-2 font-semibold">Snap:</label>
+              <select
+                className="h-8 rounded-md pl-1"
+                value={snapDivision}
+                onChange={(e) => setSnapDivision(Number(e.target.value))}
+                style={{ backgroundColor: "rgba(191, 232, 217, 0.4)" }}
+              >
+                <option value={1}>1 (whole)</option>
+                <option value={2}>1/2</option>
+                <option value={4}>1/4</option>
+                <option value={8}>1/8</option>
+                <option value={16}>1/16</option>
+              </select>
+            </div>
+          </div>
         </div>
         {/* Generate Chords */}
         <div>

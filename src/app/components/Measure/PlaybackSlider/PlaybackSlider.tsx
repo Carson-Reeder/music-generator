@@ -20,9 +20,9 @@ export default function PlaybackSlider({
   arrangementStore,
   measureStore,
 }: PlaybackSliderProps) {
-  const { chords, setChordTiming, setChordLength, setChordStartPosition } =
+  const { chords, setChordLength, setChordStartPosition } =
     measureStore();
-  const { widthMeasure, numMeasures } = arrangementStore();
+  const { widthMeasure, numMeasures, snapDivision } = arrangementStore();
   const [sliderPosition, setSliderPosition] = useState(0);
   const beatsPerMeasure = 4;
   const totalBeats = numMeasures * beatsPerMeasure;
@@ -30,31 +30,16 @@ export default function PlaybackSlider({
     px / parseFloat(getComputedStyle(document.documentElement).fontSize);
   const remToPx = (rem: number) =>
     rem * parseFloat(getComputedStyle(document.documentElement).fontSize);
-  // Convert chord position in parent element to chord indexBeat and indexMeasure
+  // Convert chord position in parent element to a unified decimal startPosition
   const relativeXtoChordPosition = (id: string, relativeX: number) => {
     const relativeXRem = pxToRem(relativeX); // Convert px to rem
-    // Calculate indexMeasure and indexBeat
-    // indexBeat is from 0-4 with 0.5 increments
-    // indexMeasure is from 0-numMeasures with 1.0 increments
-    let indexMeasure = Math.floor(relativeXRem / widthMeasure);
-    let indexBeat =
-      Math.round(((relativeXRem % widthMeasure) / widthMeasure) * 8) / 2;
-    // If indexBeat is 4, that is equal to increase of indexMeasure by 1
-    if (indexBeat >= 4) {
-      indexBeat = indexBeat - 4;
-      indexMeasure += 1;
-    } else if (indexBeat < 0) {
-      indexBeat = 0;
-    }
-    if (indexMeasure < 0) {
-      indexMeasure = 0;
-    }
-    // Set new chord positions
-    Tone.getTransport().position = `${indexMeasure}:${indexBeat}:0`;
-    console.log("indexMeasure", indexMeasure);
-    console.log("indexBeat", indexBeat);
-    //setChordStartPosition(id, indexMeasure);
-    //setChordTiming(id, indexBeat);
+    // Calculate unified position snapped to snapDivision
+    const rawPosition = relativeXRem / widthMeasure;
+    const snappedPosition = Math.max(0, Math.round(rawPosition * snapDivision) / snapDivision);
+    // Update transport position
+    const measure = Math.floor(snappedPosition);
+    const beat = Math.round((snappedPosition - measure) * 4);
+    Tone.getTransport().position = `${measure}:${beat}:0`;
   };
   useEffect(() => {
     const transport = Tone.getTransport();
@@ -93,9 +78,9 @@ export default function PlaybackSlider({
               const snappedX = Math.max(
                 parentRect.left, // Prevent moving too far left
                 Math.round(
-                  (x - parentRect.left) / (remToPx(widthMeasure) / 8)
+                  (x - parentRect.left) / (remToPx(widthMeasure) / snapDivision)
                 ) *
-                  (remToPx(widthMeasure) / 8) +
+                  (remToPx(widthMeasure) / snapDivision) +
                   parentRect.left
               );
               return {

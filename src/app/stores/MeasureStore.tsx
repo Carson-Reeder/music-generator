@@ -8,28 +8,24 @@ const initialChords: ChordType[] = [
     notes: ["C4", "E4", "G4"],
     startPosition: 0,
     length: 1,
-    chordTimingBeat: 0,
   },
   {
     id: "2",
     notes: ["D4", "F4", "A4"],
     startPosition: 1,
     length: 1,
-    chordTimingBeat: 0,
   },
   {
     id: "3",
     notes: ["G3", "B3", "D4"],
     startPosition: 2,
     length: 0.75,
-    chordTimingBeat: 0,
   },
   {
     id: "4",
     notes: ["F4", "A4", "C5"],
-    startPosition: 2,
+    startPosition: 2.75,
     length: 1,
-    chordTimingBeat: 3,
   },
 ];
 const initialInstrument: Instrument = {
@@ -44,7 +40,6 @@ export type ChordType = {
   notes: string[];
   startPosition: number;
   length: number;
-  chordTimingBeat: number;
 };
 
 export type MeasureStoreType = {
@@ -54,8 +49,7 @@ export type MeasureStoreType = {
   chords: ChordType[];
   setChords: (chords: ChordType[]) => void;
   removeChord: (id: string) => void;
-  bpm: number;
-  setBpm: (bpm: number) => void;
+
   instrument: Instrument;
   setInstrument: (instrument: Instrument) => void;
   selectedInstrumentCategory: string;
@@ -72,7 +66,6 @@ export type MeasureStoreType = {
   setCurrentPart: (currentPart: any) => void;
 
   setChordNotes: (id: string, notes: string[]) => void;
-  setChordTiming: (id: string, chordTimingBeat: number) => void;
   setChordLength: (id: string, length: number) => void;
   setChordStartPosition: (id: string, startPosition: number) => void;
 };
@@ -102,13 +95,11 @@ export const createChordPlaybackStore = (id: string) => {
             notes: ["C4", "C4", "C4"],
             startPosition: 0,
             length: 1,
-            chordTimingBeat: 0,
           },
         ],
       })),
 
-    bpm: 120,
-    setBpm: (bpm: number) => set({ bpm }),
+
 
     instrument: initialInstrument,
     setInstrument: (instrument: Instrument) => {
@@ -147,15 +138,7 @@ export const createChordPlaybackStore = (id: string) => {
           chords: updatedChords,
         };
       }),
-    setChordTiming: (id: string, chordTimingBeat: number) =>
-      set((state) => {
-        const updatedChords = state.chords.map((chord) =>
-          chord.id === id ? { ...chord, chordTimingBeat } : chord
-        );
-        return {
-          chords: updatedChords,
-        };
-      }),
+
     setChordLength: (id: string, length: number) =>
       set((state) => {
         const updatedChords = state.chords.map((chord) =>

@@ -1,13 +1,21 @@
 import { NextResponse } from "next/server";
 import OpenAI from "openai";
+import { chordProgressionSchema, getInstructions, getInputPrompt } from "./instructions";
 
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY as string;
-const ASSISTANT_ID = process.env.ASSISTANT_ID as string;
 const openai = new OpenAI({ apiKey: OPENAI_API_KEY });
 
 export async function POST(request: Request) {
   try {
-    const { scale, threadId } = await request.json();
+    const { 
+      scale, 
+      previousResponseId, 
+      numMeasures, 
+      contextTracks, 
+      currentInstrument, 
+      chordCount,
+      bpm
+    } = await request.json();
 
     if (!scale) {
       return NextResponse.json(
@@ -16,53 +24,25 @@ export async function POST(request: Request) {
       );
     }
 
-    let thread;
-    if (threadId) {
-      console.log("Reusing existing thread");
-      thread = { id: threadId };
-      await openai.beta.threads.messages.create(thread.id, {
-        role: "user",
-        content: `Generate a chord progression in the ${scale} scale.`,
-      });
-    } else {
-      console.log("Creating a new thread...");
-      thread = await openai.beta.threads.create({
-        messages: [
-          {
-            role: "user",
-            content: `Generate a chord progression in the ${scale} scale.`,
-          },
-        ],
-      });
-      console.log("Thread created:", thread.id);
-    }
-    console.log("Running assistant...");
-    const run = await openai.beta.threads.runs.createAndPoll(thread.id, {
-      assistant_id: ASSISTANT_ID,
+    console.log("Requesting completion...");
+    // @ts-ignore - Using the custom responses API endpoint structure requested
+    const response = await openai.responses.create({
+      model: "gpt-4o-2024-08-06",
+      ...(previousResponseId ? { previous_response_id: previousResponseId } : {}),
+      instructions: getInstructions(numMeasures),
+      input: getInputPrompt(scale, contextTracks, currentInstrument, chordCount, bpm),
+      text: {
+        format: chordProgressionSchema,
+      },
     });
 
-    if (run.status === "completed") {
-      console.log("Run completed successfully");
-      const messages = await openai.beta.threads.messages.list(thread.id);
-      const assistantMessageObject = messages
-        .getPaginatedItems()
-        .find((msg) => msg.role === "assistant")?.content;
+    // The Responses API returns the generated text in output_text
+    const assistantMessage = (response as any).output_text ?? JSON.stringify(response);
+    console.log("Response received:", assistantMessage);
 
-      // Extract the "value" field from the response
-      const assistantMessage = Array.isArray(assistantMessageObject)
-        ? assistantMessageObject.map((item) => item.text?.value).join("\n")
-        : "No response from assistant";
-
-      return NextResponse.json({
-        message: assistantMessage,
-        threadId: thread.id,
-      });
-    } else {
-      return NextResponse.json(
-        { error: "Run did not complete successfully" },
-        { status: 500 }
-      );
-    }
+    return NextResponse.json({
+      message: assistantMessage,
+    });
   } catch (error) {
     console.error("API error:", error);
     return NextResponse.json(
