@@ -8,10 +8,16 @@ import { useInstrumentStore } from "../stores/InstrumentStore";
 import { useEffect } from "react";
 import { ChordType } from "../stores/MeasureStore";
 // Store all instruments in a cache to avoid reloading them
-let loadedInstruments: { [id: string]: Tone.Sampler } = {};
+let loadedInstruments: Record<string, Tone.Sampler> = {};
+
+// Create a global limiter to prevent master output from ever clipping/distorting.
+// We apply a soft threshold at -0.1db so it gracefully limits peaks.
+const masterLimiter = new Tone.Limiter(-0.1).toDestination();
+
 let currentMeasureStore: UseBoundStore<StoreApi<MeasureStoreType>> | null =
   null;
 let currentPart: Tone.Part | null = null;
+let allParts: Tone.Part[] = []; // Track all parts created during playAllMeasures to prevent leaks
 
 type ProgressionType = {
   time: string;
@@ -77,7 +83,9 @@ const createPart = async ({ measureStore, progression }: CreatePartType) => {
   await Tone.loaded();
   const part = new Tone.Part((time, chord) => {
     chord.notes.forEach((note: any) => {
-      sampler.triggerAttackRelease(note, chord.duration, time);
+      // Trigger notes with a reduced velocity (0.3 instead of 1.0)
+      // to give the mix headroom when multiple chords/instruments play simultaneously
+      sampler.triggerAttackRelease(note, chord.duration, time, 0.3);
     });
   }, progression).start(0);
   currentPart = part;
@@ -91,6 +99,11 @@ const handleAllPlaying = async (
 ) => {
   const transport = Tone.getTransport();
   const { setAllPlaying, stores } = arrangementStore.getState();
+  
+  // Dispose all global parts when stopping
+  allParts.forEach((part) => part.dispose());
+  allParts = [];
+
   transport.stop();
   transport.cancel();
   transport.position = "0:0:0";
@@ -117,8 +130,6 @@ export const loadInstrument = async ({ measureStore }: loadInstrumentProps) => {
 
   // If we don't have the sampler cached, create it.
   if (!loadedInstruments[instrument.id]) {
-    const compressor = new Tone.Compressor(-40, 4).toDestination();
-
     var sampler = new Tone.Sampler({
       urls: {
         ...selectedInstrument.knownNotes.reduce(
@@ -134,9 +145,14 @@ export const loadInstrument = async ({ measureStore }: loadInstrumentProps) => {
         console.error("Sampler error:", error);
       },
       onload: () => {},
-      attack: 0.5,
+      attack: 0.05,
     });
-    sampler.connect(compressor);
+    
+    // Connect directly to the global master limiter
+    sampler.connect(masterLimiter);
+    // Lower inherent sampler volume slightly to give mixing headroom
+    sampler.volume.value = -4; 
+
     loadedInstruments[instrument.id] = sampler;
     await Tone.loaded();
   } else {
@@ -155,8 +171,9 @@ export const playNotes = async ({ notes, measureStore }: playNotesProps) => {
   if (!notes) console.error("No notes to play");
   if (Tone.context.state !== "running") await Tone.start();
 
+  const time = Tone.now();
   notes.forEach((note) => {
-    sampler.triggerAttackRelease(note, "4n", Tone.now() * 1.0);
+    sampler.triggerAttackRelease(note, Tone.Time("4n").toSeconds(), time, 0.3);
   });
 };
 
@@ -214,6 +231,10 @@ export const playMeasure = async ({
           return;
         // (NEW PART) If the transport is stopped, set everything up again
         case "stopped":
+          // Clean up any leaked parts from playAllMeasures
+          allParts.forEach((part) => part.dispose());
+          allParts = [];
+
           Tone.getTransport().cancel();
           Tone.getTransport().bpm.value = bpm;
           Tone.getTransport().loop = true;
@@ -236,6 +257,10 @@ export const playMeasure = async ({
       }
     case "measureUpdate":
       console.log("measureUpdate");
+      // Clean up any leaked parts from playAllMeasures
+      allParts.forEach((part) => part.dispose());
+      allParts = [];
+
       progression = await createProgression(chords);
       //transport.pause();
       transport.cancel();
@@ -275,12 +300,14 @@ export const playAllMeasures = async (
   Tone.getTransport().cancel();
   Tone.getTransport().stop();
 
+  // Dispose old parts to prevent stacking/clipping
+  allParts.forEach((part) => part.dispose());
+  allParts = [];
+
   // Load all instruments before playing
   await Promise.all(
     stores.map((measure) => loadInstrument({ measureStore: measure.store }))
   );
-
-  let parts: Tone.Part[] = [];
 
   // Iterate over each measure to create its own Tone.Part
   for (const measure of stores) {
@@ -300,11 +327,12 @@ export const playAllMeasures = async (
     // Create and store a Tone.Part for this measure
     const part = new Tone.Part((time, chord) => {
       chord.notes.forEach((note: string) => {
-        sampler.triggerAttackRelease(note, chord.duration, time);
+        // Trigger with lower velocity to prevent clipping
+        sampler.triggerAttackRelease(note, chord.duration, time, 0.5);
       });
     }, progression).start();
 
-    parts.push(part);
+    allParts.push(part);
   }
 
   // Start playback with slight delay to ensure timing consistency
