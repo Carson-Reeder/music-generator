@@ -25,6 +25,7 @@ export async function POST(request: Request) {
     }
 
     console.log("Requesting completion...");
+    console.log("numMeasures:", numMeasures);
     // @ts-ignore - Using the custom responses API endpoint structure requested
     const response = await openai.responses.create({
       model: "gpt-4o-2024-08-06",

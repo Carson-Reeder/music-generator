@@ -35,15 +35,15 @@ export const chordProgressionSchema = {
 export const getInstructions = (numMeasures: number) => {
   return "You are an expert, highly creative music theory assistant that generates dynamic, interesting chord progressions. " +
     "Do NOT just generate simple ascending or descending scale patterns. Use varied progressions, inversions, and interesting voice leading. " +
-    "IMPORTANT FOR RHYTHM: Create rhythmic grooves! Vary the 'length' (e.g., 0.25, 0.5, 0.75, 1.0) and 'startPosition' (e.g., 0, 0.25, 0.5, 1.75) to create syncopation. " +
+    "IMPORTANT FOR RHYTHM: Create rhythmic grooves! Vary the 'length' (e.g., 0.25, 0.5, 0.75, 1.0) and 'startPosition' (e.g., 0, 0.25, 0.5, 1.75) to create syncopation and gaps between chords to create a nice groove!" +
     "STRICT NO-OVERLAP RULE: You MUST ensure that chords/notes NEVER overlap in time. The end time of a chord is (startPosition + length). The next chord's startPosition MUST be greater than or equal to the previous chord's end time. " +
     `CRITICAL LENGTH RULE: The total available space for this track is exactly ${numMeasures || 4} bars. You MUST mathematically distribute the lengths of your generated chords so that they perfectly fill this exact duration. The end time of your final chord MUST equal exactly ${numMeasures || 4}.0. Do not leave empty space at the end of the track. ` +
     "Always respond with valid chord data. " +
     "CRITICAL: The 'notes' array MUST contain individual notes in scientific pitch notation (e.g., ['C4', 'E4', 'G4']), NEVER chord names. " +
-    "Do not include qualities like 'm' or 'dim' in the notes array. 'Dm4' is invalid. Use ['D4', 'F4', 'A4'] instead. " +
+    "Do not include qualities like 'm' or 'dim' or symbols like '♭' in the notes array. 'Dm4' is invalid. Use ['D4', 'F4', 'A4'] instead. " +
     "startPosition is the start time in bars as a decimal. 0 = beginning, 1.0 = start of bar 2, 1.75 = bar 2 beat 4, 2.5 = bar 3 beat 3. " +
     "length is in bars as a decimal (e.g. 1.0 = full bar, 0.5 = half bar). " +
-    "Generate as many chords as the user requests. If no number is specified, generate a musically complete progression (typically 4-8 chords).";
+    "Generate as many chords as the user requests. If 0 is specified, generate a musically complete progression (typically 4-8 chords).";
 };
 
 export const getInputPrompt = (
@@ -64,6 +64,6 @@ export const getInputPrompt = (
       `5. Instrument Specifics: Tailor your phrasing and rhythm to fit the [${currentInstrument || "unknown"}] instrument. If acting as a bass, heavily weight the root note of the active master chord on downbeats.\n` +
       `Generate a cohesive, complementary part that locks in flawlessly with the provided Master Track.`;
   } else {
-    return `Scale: ${scale}\n${bpmContext}CRITICAL CONTEXT: You are generating the Master Track (Chords) for the instrument: [${currentInstrument || "unknown"}]. Establish a strong, creative harmonic progression in the ${scale} scale. Generate exactly ${chordCount ?? 4} chords. Use varied progressions, inversions, and excellent voice leading (keep notes close, use common tones). Fill the available rhythmic space continuously: DO NOT leave empty gaps or rests between chords. The end time of one chord must exactly equal the start time of the next chord.`;
+    return `Scale: ${scale}\n${bpmContext}CRITICAL CONTEXT: You are generating the Master Track (Chords) for the instrument: [${currentInstrument || "unknown"}]. Establish a strong, creative harmonic progression in the ${scale} scale. Generate exactly ${chordCount ?? 4} chords. Use varied progressions, inversions, and excellent voice leading (keep notes close, use common tones). The end time of one chord must exactly equal the start time of the next chord.`;
   }
 };
