@@ -20,6 +20,7 @@ export default function Header() {
   const setBpm = arrangementStore((state) => state.setBpm);
   const snapDivision = arrangementStore((state) => state.snapDivision);
   const setSnapDivision = arrangementStore((state) => state.setSnapDivision);
+  const numMeasures = arrangementStore((state) => state.numMeasures);
 
   const handleChords = async () => {
     setLoading(true);
@@ -31,7 +32,8 @@ export default function Header() {
       chordCount,
       bpm,
       threadId,
-      stores[chordSelected - 1].store.getState().chords
+      stores[chordSelected - 1].store.getState().chords,
+      numMeasures
     );
     if (result) {
       const { transformedChords, parsedId, parsedMessage } = result;
