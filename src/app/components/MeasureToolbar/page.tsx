@@ -1,3 +1,4 @@
+"use client";
 import { UseBoundStore, StoreApi } from "zustand";
 import { MeasureStoreType } from "../../stores/MeasureStore";
 import { ArrangementStoreType } from "../../stores/ArrangementStore";

@@ -18,6 +18,8 @@ export default function Header() {
   const stores = arrangementStore.getState().stores;
   const bpm = arrangementStore((state) => state.bpm);
   const setBpm = arrangementStore((state) => state.setBpm);
+  const snapDivision = arrangementStore((state) => state.snapDivision);
+  const setSnapDivision = arrangementStore((state) => state.setSnapDivision);
 
   const handleChords = async () => {
     setLoading(true);
@@ -90,6 +92,21 @@ export default function Header() {
                 onChange={(e) => setBpm(e.target.valueAsNumber)}
                 style={{ backgroundColor: "rgba(191, 232, 217, 0.4)" }}
               />
+            </div>
+            <div className="flex items-center ml-2">
+              <label className="text-sm mr-2 font-semibold">Snap:</label>
+              <select
+                className="h-8 rounded-md pl-1"
+                value={snapDivision}
+                onChange={(e) => setSnapDivision(Number(e.target.value))}
+                style={{ backgroundColor: "rgba(191, 232, 217, 0.4)" }}
+              >
+                <option value={1}>1 (whole)</option>
+                <option value={2}>1/2</option>
+                <option value={4}>1/4</option>
+                <option value={8}>1/8</option>
+                <option value={16}>1/16</option>
+              </select>
             </div>
           </div>
         </div>

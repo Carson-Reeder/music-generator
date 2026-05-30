@@ -40,19 +40,27 @@ type CreatePartType = {
   measureStore: UseBoundStore<StoreApi<MeasureStoreType>>;
   progression: ProgressionType;
 };
+// Convert a decimal startPosition (e.g. 1.75) to Tone.js time format "bars:quarters:sixteenths"
+// 1.75 → bar 1, quarter 3, sixteenth 0 → "1:3:0"
+// 0.125 → bar 0, quarter 0, sixteenth 2 → "0:0:2"
+const toToneTime = (position: number): string => {
+  const bars = Math.floor(position);
+  const remainder = position - bars;
+  const quarterBeats = remainder * 4;
+  const quarters = Math.floor(quarterBeats);
+  const sixteenths = Math.round((quarterBeats - quarters) * 4);
+  return `${bars}:${quarters}:${sixteenths}`;
+};
+
 // This function will create an object that contains each note and their timings, this
 // object is used by Tonejs and passed into Tone.Part
 // Called when: measureStore.getState().chords changes, the user clicks the play/pause
 // button
 const createProgression = async (chords: ChordType[]) => {
-  const chordsArray = chords.map((c) => c.notes);
-  const chordLength = chords.map((c) => c.length);
-  const chordTimingBeat = chords.map((c) => c.chordTimingBeat);
-  const chordStartPosition = chords.map((c) => c.startPosition);
-  return chordsArray.map((chord: any, index: any) => ({
-    time: `${chordStartPosition[index]}:${chordTimingBeat[index]}`,
-    notes: chord,
-    duration: Tone.Time("1m").toSeconds() * chordLength[index],
+  return chords.map((chord) => ({
+    time: toToneTime(chord.startPosition),
+    notes: chord.notes,
+    duration: Tone.Time("1m").toSeconds() * chord.length,
   }));
 };
 // This function will create a Tone.Part and dispose of the old part

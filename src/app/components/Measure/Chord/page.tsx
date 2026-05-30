@@ -28,7 +28,6 @@ export default function Chord({
   const clickThreshold = 200;
   const {
     chords,
-    setChordTiming,
     setChordLength,
     setChordStartPosition,
     measureProgress,
@@ -47,6 +46,7 @@ export default function Chord({
     setLoopLength,
     bpm,
     setBpm,
+    snapDivision,
     allPlaying,
   } = arrangementStore();
 
@@ -78,23 +78,13 @@ export default function Chord({
     px / parseFloat(getComputedStyle(document.documentElement).fontSize);
   const remToPx = (rem: number) =>
     rem * parseFloat(getComputedStyle(document.documentElement).fontSize);
-  // Convert chord position in parent element to chord indexBeat and indexMeasure
+  // Convert chord position in parent element to a unified decimal startPosition
   const relativeXtoChordPosition = (id: string, relativeX: number) => {
     const relativeXRem = pxToRem(relativeX); // Convert px to rem
-    // Calculate indexMeasure and indexBeat
-    // indexBeat is from 0-4 with 0.5 increments
-    // indexMeasure is from 0-numMeasures with 1.0 increments
-    let indexMeasure = Math.floor(relativeXRem / widthMeasure);
-    let indexBeat =
-      Math.round(((relativeXRem % widthMeasure) / widthMeasure) * 8) / 2;
-    // If indexBeat is 4, that is equal to increase of indexMeasure by 1
-    if (indexBeat >= 4) {
-      indexBeat = indexBeat - 4;
-      indexMeasure += 1;
-    }
-    // Set new chord positions
-    setChordStartPosition(id, indexMeasure);
-    setChordTiming(id, indexBeat);
+    // Snap to snapDivision increments (e.g. 8 = 1/8th of a measure)
+    const rawPosition = relativeXRem / widthMeasure;
+    const snappedPosition = Math.round(rawPosition * snapDivision) / snapDivision;
+    setChordStartPosition(id, snappedPosition);
   };
 
   // Used for showing selected chord
@@ -112,32 +102,23 @@ export default function Chord({
     chords.forEach((chord) => {
       // 1. Handle start position exceeding numMeasures
       if (chord.startPosition >= numMeasures) {
-        setChordStartPosition(chord.id, numMeasures - 1);
+        setChordStartPosition(chord.id, numMeasures - (1 / snapDivision));
       }
 
-      // 2. Calculate end beat of the chord (relative to the start of the piece)
-      const chordStartBeat = chord.startPosition * 4 + chord.chordTimingBeat;
-      const chordEndBeat = chordStartBeat + chord.length * 4; // Length is in percentage of measure (4 beats)
+      // 2. Calculate the end position of the chord
+      const chordEnd = chord.startPosition + chord.length;
 
-      // 3. Calculate the end beat of the last measure
-      const lastMeasureEndBeat = numMeasures * 4;
-
-      // 4. Check if the chord extends beyond the last measure
-      if (chordEndBeat > lastMeasureEndBeat) {
-        // Calculate the overlap
-        const overlapBeats = chordEndBeat - lastMeasureEndBeat;
-
-        // Calculate the new length (percentage of a measure)
-        const newLength = (chord.length * 4 - overlapBeats) / 4;
-        if (newLength < 0.125) {
-          setChordLength(chord.id, 0.125);
+      // 3. Check if the chord extends beyond the last measure
+      if (chordEnd > numMeasures) {
+        const newLength = numMeasures - chord.startPosition;
+        if (newLength < (1 / snapDivision)) {
+          setChordLength(chord.id, 1 / snapDivision);
           return;
-        } // Prevent negative lengths
-
+        }
         setChordLength(chord.id, newLength);
       }
     });
-  }, [numMeasures, chords, setChordLength, setChordStartPosition]); // Important: Add chords to the dependency array
+  }, [numMeasures, chords, setChordLength, setChordStartPosition, snapDivision]);
 
   // Deselect chord if mouseUp occurs outside of the measure container
   useEffect(() => {
@@ -176,12 +157,12 @@ export default function Chord({
                 if (!parent) return { x: 0, y: 0 };
                 const parentRect = parent.getBoundingClientRect();
                 return {
-                  // Snap to 1/8th of a measure
+                  // Snap to snapDivision increments of a measure
                   x:
                     Math.round(
-                      (x - parentRect.left) / (remToPx(widthMeasure) / 8)
+                      (x - parentRect.left) / (remToPx(widthMeasure) / snapDivision)
                     ) *
-                      (remToPx(widthMeasure) / 8) +
+                      (remToPx(widthMeasure) / snapDivision) +
                     parentRect.left,
                   y,
                 };
@@ -224,14 +205,14 @@ export default function Chord({
             const chord = chords.find((chord) => chord.id === id);
             if (!chord) return;
             const remWidth = pxToRem(event.rect.width);
-            const newLength = Math.round((remWidth / widthMeasure) * 8) / 8;
-            if (newLength < 0.125) return; // Prevent negative lengths
+            const newLength = Math.round((remWidth / widthMeasure) * snapDivision) / snapDivision;
+            if (newLength < (1 / snapDivision)) return; // Prevent too-small lengths
             if (chord.length === newLength) return; // Prevent unnecessary updates
             setChordLength(id, newLength);
           },
         },
       });
-  }, [chords, widthMeasure, compositionId]);
+  }, [chords, widthMeasure, compositionId, snapDivision]);
   // Boilerplate interact.js function for dragging chords
   function dragMoveListener(event: any) {
     var target = event.target;
@@ -253,10 +234,7 @@ export default function Chord({
       style={{
         top: "0rem",
         position: "absolute",
-        left: `${
-          chord.startPosition * widthMeasure +
-          (chord.chordTimingBeat / 4) * widthMeasure
-        }rem`,
+        left: `${chord.startPosition * widthMeasure}rem`,
         width: `${chord.length * widthMeasure}rem`,
         height: "100%",
         border: "0.15rem solid rgba(1, 106, 66, 0.64)",

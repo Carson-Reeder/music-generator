@@ -21,6 +21,9 @@ export type ArrangementStoreType = {
   bpm: number;
   setBpm: (bpm: number) => void;
 
+  snapDivision: number;
+  setSnapDivision: (snapDivision: number) => void;
+
   allPlaying: boolean;
   setAllPlaying: (allPlaying: boolean) => void;
 
@@ -65,6 +68,9 @@ export const createArrangementStore = () => {
 
     bpm: 120,
     setBpm: (bpm) => set({ bpm }),
+
+    snapDivision: 8,
+    setSnapDivision: (snapDivision) => set({ snapDivision }),
 
     allPlaying: false,
     setAllPlaying: (allPlaying) => set({ allPlaying }),

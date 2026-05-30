@@ -24,16 +24,20 @@ type PlayNotesProgressionProps = {
   compositionId: number;
 };
 
+// Convert a decimal startPosition (e.g. 1.75) to Tone.js time format "measure:beat"
+const toToneTime = (position: number): string => {
+  const measure = Math.floor(position);
+  const beat = Math.round((position - measure) * 4);
+  return `${measure}:${beat}`;
+};
+
 const createProgression = async (
-  chordNotes: string[][],
-  chordLength: number[],
-  chordTimingBeat: number[],
-  chordStartPosition: number[]
+  chords: { notes: string[]; length: number; startPosition: number }[]
 ) => {
-  return chordNotes.map((chord: any, index: any) => ({
-    time: `${chordStartPosition[index]}:${chordTimingBeat[index]}`,
-    notes: chord,
-    duration: Tone.Time("1m").toSeconds() * chordLength[index],
+  return chords.map((chord) => ({
+    time: toToneTime(chord.startPosition),
+    notes: chord.notes,
+    duration: Tone.Time("1m").toSeconds() * chord.length,
   }));
 };
 
@@ -174,12 +178,7 @@ export const playNotesProgression = async ({
   //Tone.getTransport().loopStart = "0m";
 
   // Create progression so that a single array can be passed into Tone.Part
-  const progression = await createProgression(
-    chords.map((c) => c.notes), // Contains notes
-    chords.map((c) => c.length), // Contains note lengths
-    chords.map((c) => c.chordTimingBeat), // Contains note timings
-    chords.map((c) => c.startPosition) // Contains note start positions
-  );
+  const progression = await createProgression(chords);
 
   console.log("Progression:", progression);
 
@@ -243,12 +242,7 @@ export const playAllMeasures = async (
     }
 
     // Build progression for this measure
-    const progression = await createProgression(
-      chords.map((c) => c.notes),
-      chords.map((c) => c.length),
-      chords.map((c) => c.chordTimingBeat),
-      chords.map((c) => c.startPosition)
-    );
+    const progression = await createProgression(chords);
 
     // Create and store a Tone.Part for this measure
     const part = new Tone.Part((time, chord) => {

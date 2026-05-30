@@ -3,7 +3,6 @@ type Chord = {
   notes: string[];
   startPosition: number;
   length: number;
-  chordTimingBeat: number;
 };
 
 export const getChords = async (scale: string, chordCount: number, bpm: number, threadId: any, chords: any) => {
