@@ -14,7 +14,8 @@ export async function POST(request: Request) {
       contextTracks, 
       currentInstrument, 
       chordCount,
-      bpm
+      bpm,
+      trackType
     } = await request.json();
 
     if (!scale) {
@@ -31,7 +32,7 @@ export async function POST(request: Request) {
       model: "gpt-4o-2024-08-06",
       ...(previousResponseId ? { previous_response_id: previousResponseId } : {}),
       instructions: getInstructions(numMeasures),
-      input: getInputPrompt(scale, contextTracks, currentInstrument, chordCount, bpm),
+      input: getInputPrompt(scale, contextTracks, currentInstrument, chordCount, bpm, trackType),
       text: {
         format: chordProgressionSchema,
       },

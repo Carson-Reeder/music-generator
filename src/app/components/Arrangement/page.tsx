@@ -58,7 +58,7 @@ export default function Arrangement() {
                         }}
                         className="flex"
                       >
-                        <MeasureLabel index={index} />
+                        <MeasureLabel index={index} measureStore={store} />
                         {index === 0 ? (
                           <MeasureControls
                             arrangementStore={arrangementStore}

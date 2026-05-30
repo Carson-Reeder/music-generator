@@ -26,11 +26,14 @@ export default function Header() {
     setLoading(true);
     setResponseText(`Chords are being generated...\n\n${responseText}`);
 
+    const trackType = stores[chordSelected - 1].store.getState().trackType;
+
     // call api, passing in scale, threadId, and chords derived from current store
     const result = await getChords(
       scale,
       chordCount,
       bpm,
+      trackType,
       threadId,
       stores[chordSelected - 1].store.getState().chords,
       numMeasures

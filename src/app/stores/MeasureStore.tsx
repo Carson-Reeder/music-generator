@@ -1,6 +1,15 @@
 import { create } from "zustand";
 import { Instrument } from "./InstrumentStore";
 
+export const TRACK_TYPES = [
+  "Master Chord Progression",
+  "Secondary Chord Progression",
+  "Arpeggio",
+  "Bassline",
+  "Melody",
+  "Rhythmic Hits",
+];
+
 // define default chords for array
 const initialChords: ChordType[] = [
   {
@@ -65,6 +74,9 @@ export type MeasureStoreType = {
   currentPart: any;
   setCurrentPart: (currentPart: any) => void;
 
+  trackType: string;
+  setTrackType: (trackType: string) => void;
+
   setChordNotes: (id: string, notes: string[]) => void;
   setChordLength: (id: string, length: number) => void;
   setChordStartPosition: (id: string, startPosition: number) => void;
@@ -124,6 +136,9 @@ export const createChordPlaybackStore = (id: string) => {
 
     currentPart: null,
     setCurrentPart: (currentPart: any) => set({ currentPart }),
+
+    trackType: TRACK_TYPES[0],
+    setTrackType: (trackType: string) => set({ trackType }),
 
     isInstrumentClicked: true,
     setIsInstrumentClicked: (isInstrumentClicked: boolean) =>

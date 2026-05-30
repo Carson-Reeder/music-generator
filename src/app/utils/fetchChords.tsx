@@ -5,7 +5,7 @@ type Chord = {
   length: number;
 };
 
-export const getChords = async (scale: string, chordCount: number, bpm: number, threadId: any, chords: any, numMeasures: number) => {
+export const getChords = async (scale: string, chordCount: number, bpm: number, trackType: string, threadId: any, chords: any, numMeasures: number) => {
     
     if (!scale.trim()) return; // scale is empty
 
@@ -13,7 +13,7 @@ export const getChords = async (scale: string, chordCount: number, bpm: number, 
         const response = await fetch("/api/assistant", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ scale, chordCount, bpm, numMeasures }),
+            body: JSON.stringify({ scale, chordCount, bpm, trackType, numMeasures }),
         });
         const data = await response.json();
 
