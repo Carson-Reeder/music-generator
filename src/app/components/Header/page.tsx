@@ -3,7 +3,7 @@ import { UseBoundStore, StoreApi } from "zustand";
 import { useState, useEffect } from "react";
 import { useInstrumentStore } from "../../stores/InstrumentStore";
 import { ArrangementStoreType } from "../../stores/ArrangementStore";
-import { getChords } from "../../utils/fetchChords";
+import { generateArrangement } from "../../utils/fetchChords";
 import { arrangementStore } from "../../stores/ArrangementStore";
 
 export default function Header() {
@@ -22,32 +22,81 @@ export default function Header() {
   const setSnapDivision = arrangementStore((state) => state.setSnapDivision);
   const numMeasures = arrangementStore((state) => state.numMeasures);
 
-  const handleChords = async () => {
+  const handleGenerateSelected = async () => {
     setLoading(true);
-    setResponseText(`Chords are being generated...\n\n${responseText}`);
+    setResponseText(`Generating selected track...`);
 
-    const trackType = stores[chordSelected - 1].store.getState().trackType;
+    const currentStore = stores[chordSelected - 1].store.getState();
+    const tracksToGenerate = [{
+      trackIndex: chordSelected - 1,
+      trackType: currentStore.trackType,
+      instrument: currentStore.instrument.name,
+      chordCount: chordCount
+    }];
 
-    // call api, passing in scale, threadId, and chords derived from current store
-    const result = await getChords(
-      scale,
-      chordCount,
-      bpm,
-      trackType,
-      threadId,
-      stores[chordSelected - 1].store.getState().chords,
-      numMeasures
-    );
+    // Pass ALL tracks as context (including their full chord data)
+    // so the AI can see the complete song state
+    const contextTracks = stores
+      .filter((_, index) => index !== chordSelected - 1)
+      .map((storeObj, index) => {
+        const state = storeObj.store.getState();
+        return {
+          trackIndex: index >= chordSelected - 1 ? index + 1 : index,
+          trackType: state.trackType,
+          instrument: state.instrument.name,
+          chords: state.chords
+        };
+      });
+
+    const result = await generateArrangement(scale, bpm, tracksToGenerate, contextTracks, threadId, numMeasures);
     if (result) {
-      const { transformedChords, parsedId, parsedMessage } = result;
-
-      // Update chords in the first composition
-      stores[chordSelected - 1].store.setState({ chords: transformedChords });
-      console.log("stores", stores);
+      const { parsedArrangement, parsedId, parsedMessage } = result;
+      if (parsedArrangement && parsedArrangement.tracks) {
+        parsedArrangement.tracks.forEach((t: any) => {
+          if (stores[t.trackIndex]) {
+            stores[t.trackIndex].store.setState({ chords: t.chords });
+          }
+        });
+      }
       setThreadId(parsedId);
       setResponseText(parsedMessage);
-      setLoading(false);
     }
+    setLoading(false);
+  };
+
+  const handleGenerateAll = async () => {
+    setLoading(true);
+    setResponseText(`Generating Full Arrangement (this may take 10-15 seconds)...`);
+
+    const tracksToGenerate = stores.map((storeObj, index) => {
+      const state = storeObj.store.getState();
+      return {
+        trackIndex: index,
+        trackType: state.trackType,
+        instrument: state.instrument.name,
+        chordCount: chordCount
+      };
+    });
+
+    // Even for "generate all", pass the current song state as context
+    // so the AI can see what instruments/types are set up and what
+    // the existing arrangement looks like before it overwrites
+    const contextTracks: any[] = [];
+
+    const result = await generateArrangement(scale, bpm, tracksToGenerate, contextTracks, threadId, numMeasures);
+    if (result) {
+      const { parsedArrangement, parsedId, parsedMessage } = result;
+      if (parsedArrangement && parsedArrangement.tracks) {
+        parsedArrangement.tracks.forEach((t: any) => {
+          if (stores[t.trackIndex]) {
+            stores[t.trackIndex].store.setState({ chords: t.chords });
+          }
+        });
+      }
+      setThreadId(parsedId);
+      setResponseText(parsedMessage);
+    }
+    setLoading(false);
   };
 
   return (
@@ -115,14 +164,21 @@ export default function Header() {
             </div>
           </div>
         </div>
-        {/* Generate Chords */}
-        <div>
+        {/* Generate Actions */}
+        <div className="flex flex-col m-2 gap-2">
           <button
-            className="border border-black rounded-md m-3 mt-0 max-w-md sm:w-1/2 bg-green-500 p-4"
-            onClick={handleChords}
+            className="border border-black rounded-md w-full bg-blue-400 p-2 text-sm font-semibold hover:bg-blue-300"
+            onClick={handleGenerateAll}
             disabled={loading}
           >
-            {loading ? "Generating Chords..." : "Generate Chords"}
+            {loading ? "Generating..." : "Generate Full Arrangement"}
+          </button>
+          <button
+            className="border border-black rounded-md w-full bg-green-500 p-2 text-sm font-semibold hover:bg-green-400"
+            onClick={handleGenerateSelected}
+            disabled={loading}
+          >
+            {loading ? "Generating..." : "Generate Selected Track"}
           </button>
         </div>
         {/* Chord Selection (chord to generate) */}

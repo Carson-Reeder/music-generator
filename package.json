@@ -17,6 +17,7 @@
     "react-dom": "^18.2.0",
     "react-redux": "^9.1.2",
     "react-scroll-sync": "^0.11.2",
+    "tonal": "^6.4.3",
     "tone": "^15.1.16",
     "zustand": "^5.0.1"
   },

@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import OpenAI from "openai";
-import { chordProgressionSchema, getInstructions, getInputPrompt } from "./instructions";
+import { arrangementSchema, getInstructions, getInputPrompt } from "./instructions";
 
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY as string;
 const openai = new OpenAI({ apiKey: OPENAI_API_KEY });
@@ -12,10 +12,8 @@ export async function POST(request: Request) {
       previousResponseId, 
       numMeasures, 
       contextTracks, 
-      currentInstrument, 
-      chordCount,
-      bpm,
-      trackType
+      tracksToGenerate,
+      bpm
     } = await request.json();
 
     if (!scale) {
@@ -32,9 +30,9 @@ export async function POST(request: Request) {
       model: "gpt-4o-2024-08-06",
       ...(previousResponseId ? { previous_response_id: previousResponseId } : {}),
       instructions: getInstructions(numMeasures),
-      input: getInputPrompt(scale, contextTracks, currentInstrument, chordCount, bpm, trackType),
+      input: getInputPrompt(scale, contextTracks, tracksToGenerate, bpm),
       text: {
-        format: chordProgressionSchema,
+        format: arrangementSchema,
       },
     });
 
